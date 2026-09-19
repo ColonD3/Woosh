@@ -20,6 +20,9 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - iron tool = 3 iron ingot + 3 stone: mines iron faster, can get sand, scoops mud way faster
 - cooker: cook iron ore -> iron ingot
 
+- DONE Sept 19: iron ore veins (dark rock + orange crystals) in mountains + under cliff arches, stone tool mines slow, iron tool fast; cooker (Q craft, G place, F cook: ore + wood -> iron, shift+F cook all); iron tool (3 iron + 3 rock); sand needs iron tool; bombs radius 6, stick where they land, blast boulders + ore for loot
+- hotbar now only shows what you have
+
 ## 4. Building v2
 - place rocks/wood on top of / on any face of other placed stuff (face snapping)
 - roofs: procedurally generated good-looking roof for your wall perimeter, built all at once when you have enough roof items
