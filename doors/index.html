@@ -193,7 +193,9 @@ const tg=new THREE.PlaneGeometry(S,S,N-1,N-1);tg.rotateX(-Math.PI/2);
   const wR=st,wW=smooth(16.5,18.5,h+n*2)*(1-smooth(1.1,1.6,sl)*.6),wS=1-smooth(.6,1.4,h);lw.set([Math.max(0,1-wR-wW-wS),wR*(1-wS),wS,wW*(1-wS)],k*4)}
  tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.setAttribute('lw',new THREE.BufferAttribute(lw,4));tg.computeVertexNormals();}
 const terrMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:0});
-const TU={dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
+const sty=(n,m,srgb)=>tex('stylized/'+n+'/'+m+'.jpg',srgb);
+const TU={pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:sty('ground_06','color',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
+ qG:{value:sty('moss_ground_02','normal')},qR:{value:sty('cliff_rocks_02','normal')},qS:{value:sty('sand_01','normal')},qW:{value:sty('snow_01','normal')},dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
  nG:{value:tex('leafy_grass_nor_gl.jpg')},nR:{value:tex('rock_face_nor_gl.jpg')},nS:{value:tex('coast_sand_01_nor_gl.jpg')},nW:{value:tex('snow_02_nor_gl.jpg')},avg:{value:new THREE.Vector4(.2458,.0953,.1815,.3868)}};
 const terrain=new THREE.Mesh(tg,terrMat);terrain.receiveShadow=true;scene.add(terrain);
 const water=new Water(new THREE.PlaneGeometry(3000,3000),{textureWidth:TOUCH?256:512,textureHeight:TOUCH?256:512,waterNormals:tex('waternormals.jpg'),
@@ -209,11 +211,11 @@ bg.setAttribute('position',new THREE.Float32BufferAttribute([-.5,0,0, .5,0,0, -.
 {const o=new Float32Array(COUNT*4);for(let i=0;i<COUNT;i++){o[i*4]=(Math.random()*2-1)*R;o[i*4+1]=(Math.random()*2-1)*R;o[i*4+2]=Math.random()*6.283;o[i*4+3]=Math.random()}
  bg.setAttribute('offset',new THREE.InstancedBufferAttribute(o,4));bg.instanceCount=COUNT;}
 const shadeTex=new THREE.DataTexture(new Uint8Array(240*240*4).fill(255),240,240,THREE.RGBAFormat);shadeTex.magFilter=shadeTex.minFilter=THREE.LinearFilter;
-const grassU={hMap:{value:hTex},S:{value:S},N:{value:N},R:{value:R},time:{value:0},pPos:{value:new THREE.Vector3()},camPos:{value:new THREE.Vector3()},
+const grassU={pG1:TU.pG1,pG2:TU.pG2,hMap:{value:hTex},S:{value:S},N:{value:N},R:{value:R},time:{value:0},pPos:{value:new THREE.Vector3()},camPos:{value:new THREE.Vector3()},
   fogC:{value:FOG},fogN:{value:40},fogF:{value:260},sunDir:{value:sunDir},shade:{value:shadeTex}};
 const grass=new THREE.Mesh(bg,new THREE.ShaderMaterial({uniforms:grassU,side:THREE.DoubleSide,
 vertexShader:`
-uniform sampler2D hMap,terr,shade;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
+uniform sampler2D hMap,terr,shade,pG1,pG2;varying vec3 vGC;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
 varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 float tH(vec2 ij){return texture2D(hMap,(ij+.5)/N).r;}
 float hgt(vec2 xz){vec2 g=clamp((xz+S*.5)/S*(N-1.),0.,N-1.001);vec2 b=floor(g),f=g-b;
@@ -226,7 +228,7 @@ void main(){
  float mask=smoothstep(.7,1.4,h)*(1.-smoothstep(9.,11.5,h))*(1.-smoothstep(.42,.62,sl));
  float pd=length(w-pPos.xz);mask*=1.-smoothstep(R*.72,R,pd);
  float clump=vn(w*.18);vClump=clump;
- float tall=(.34+offset.w*.26)*mask*(.8+.4*vn(w*.07+3.));
+ float tall=(.2+offset.w*.17)*mask*(.8+.4*vn(w*.07+3.));
  float c=cos(offset.z),s=sin(offset.z);
  vec3 p=position;float y=p.y;float wid=(.1+.06*hash(offset.xy))*(1.-.1*y);
  vec3 lp=vec3(p.x*wid*c,y*tall,p.x*wid*s);
@@ -238,21 +240,22 @@ void main(){
  bend+=normalize(dv+1e-4)*near*1.3;
  float k=y*y;lp.xz+=bend*k*tall;lp.y-=length(bend)*k*tall*.4;
  vec3 wp=vec3(w.x,h,w.y)+lp;
+ {float mm=smoothstep(.35,.65,vn(w*.012)*.55+vn(w*.0256+7.)*.3+vn(w*.0564+3.)*.15);vGC=pow(mix(textureLod(pG1,w*.16,3.).rgb,textureLod(pG2,w*.13,3.).rgb,mm),vec3(1./2.2));}
  vT=texture2D(terr,(w+S*.5)/S);vSh=texture2D(shade,(w+S*.5)/S).r;vY=y;vVar=offset.w;vDist=distance(wp,camPos);
  vec3 vd=normalize(wp-camPos);vGlow=pow(max(dot(vd,sunDir),0.),4.);
  gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
-fragmentShader:`uniform vec3 fogC;uniform float fogN,fogF;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
+fragmentShader:`uniform vec3 fogC;uniform float fogN,fogF;varying vec3 vGC;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 void main(){
  vec3 base=vec3(.19,.47,.12);
  vec3 tipA=vec3(.38,.8,.2),tipB=vec3(.58,.88,.26),tipC=vec3(.24,.66,.16);
  vec3 tip=mix(mix(tipC,tipA,smoothstep(.2,.6,vClump)),tipB,smoothstep(.6,.95,vClump)*.8+vVar*vVar*.2);
- vec3 c=mix(base,tip,pow(vY,1.1))*(.85+.3*vVar);
+ vec3 g=vGC*1.08;vec3 c=mix(g*.9,mix(g*1.25+vec3(.03,.04,0.),tip,.25),pow(vY,1.2))*(.9+.2*vVar);
  c+=vec3(.12,.16,.04)*vGust*vY*.5;
  c=mix(c,vT.rgb*(.4+.55*vY),vT.a*.62);
  c=pow(c,vec3(2.2));
  float sh=mix(.45,1.,vSh);c*=sh*(.8+.2*vY);
  c+=vec3(1.,.8,.35)*vGlow*pow(vY,2.)*.35*sh;
- c*=2.3;
+ c*=1.9;
  c=mix(c,fogC,smoothstep(fogN,fogF,vDist));
  gl_FragColor=vec4(c,1.);}`}));
 grass.frustumCulled=false;grass.layers.set(1);scene.add(grass);
@@ -434,15 +437,25 @@ function unrle(r){let k=0;for(let i=0;i<r.length;i+=2){owner.fill(r[i],k,k+r[i+1
 const terrFX={tTime:{value:0},capP:{value:new THREE.Vector3(0,0,-99)},capC:{value:new THREE.Color()}};
 terrain.material.onBeforeCompile=sh=>{Object.assign(sh.uniforms,TU,terrFX);sh.uniforms.terr={value:terrTex};sh.uniforms.tS={value:S};
  sh.vertexShader='attribute vec4 lw;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvLW=lw;vWP=(modelMatrix*vec4(transformed,1.)).xyz;vWN=normalize(mat3(modelMatrix)*objectNormal);');
- sh.fragmentShader=`uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW;uniform vec4 avg;uniform float tS,tTime;uniform vec3 capP,capC;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;
+ sh.fragmentShader=`uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;uniform vec4 avg;uniform float tS,tTime;uniform vec3 capP,capC;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;
  float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
+ float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+ float vn2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
+ float fb2(vec2 p){return vn2(p)*.55+vn2(p*2.13+7.)*.3+vn2(p*4.7+3.)*.15;}
+ // anti-tiling: blend the texture with a rotated, rescaled copy of itself using a big noise mask, so no repeat grid shows
+ vec3 nt(sampler2D t,vec2 uv){float n=smoothstep(.3,.7,vn2(uv*.11));vec2 r=mat2(.8,-.6,.6,.8)*uv*.73+vec2(.37,.11);return mix(texture2D(t,uv).rgb,texture2D(t,r).rgb,n);}
+ vec3 ntn(sampler2D t,vec2 uv){float n=smoothstep(.3,.7,vn2(uv*.11));vec2 r=mat2(.8,-.6,.6,.8)*uv*.73+vec2(.37,.11);vec3 a=texture2D(t,uv).xyz*2.-1.,b=texture2D(t,r).xyz*2.-1.;b.xy=mat2(.8,.6,-.6,.8)*b.xy;return mix(a,b,n);}
+ vec3 triN(sampler2D t,vec3 p,vec3 n,float sc){vec3 b=pow(abs(n),vec3(4.));b/=b.x+b.y+b.z;return nt(t,p.zy*sc)*b.x+nt(t,p.xz*sc)*b.y+nt(t,p.xy*sc)*b.z;}
  vec3 tri(sampler2D t,vec3 p,vec3 n,float sc){vec3 b=pow(abs(n),vec3(4.));b/=b.x+b.y+b.z;return texture2D(t,p.zy*sc).rgb*b.x+texture2D(t,p.xz*sc).rgb*b.y+texture2D(t,p.xy*sc).rgb*b.z;}
  `+sh.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
  {vec2 uv=vWP.xz;vec4 w=vLW/max(vLW.x+vLW.y+vLW.z+vLW.w,1e-3);
-  float dg=lum(texture2D(dG,uv*.3).rgb)*.5+lum(texture2D(dG,uv*.071).rgb)*.5;
-  vec3 rockC=tri(dR,vWP,vWN,.09);float dr=lum(rockC);float ds=lum(texture2D(dS,uv*.25).rgb);float dw=lum(texture2D(dW,uv*.2).rgb);
-  float det=w.x*dg/avg.x+w.y*dr/avg.y+w.z*ds/avg.z+w.w*dw/avg.w;
-  diffuseColor.rgb*=mix(1.,clamp(det,.5,1.6),.35);diffuseColor.rgb=mix(diffuseColor.rgb,rockC*vec3(2.1,1.95,1.75),w.y*.85);
+  float m1=fb2(uv*.012),m2=fb2(uv*.035+11.),m3=fb2(uv*.09+5.);
+  vec3 gA=nt(pG1,uv*.16),gB=nt(pG2,uv*.13);vec3 gC=mix(gA,gB,smoothstep(.35,.65,m1));
+  gC=mix(gC,nt(pD,uv*.14),smoothstep(.62,.8,m2)*.75);
+  vec3 rockC=triN(pR,vWP,vWN,.07);vec3 sC=nt(pS,uv*.12),wC=nt(pW,uv*.1);
+  vec3 col=gC*w.x+rockC*w.y+sC*w.z+wC*w.w;
+  col*=mix(.82,1.12,m3)*mix(vec3(.96,1.,.9),vec3(1.05,1.,.94),m1);
+  diffuseColor.rgb=col*vec3(1.14,1.1,.9);
   vec2 u=(vWP.xz+tS*.5)/tS;vec4 t=texture2D(terr,u);float o=.8/240.;
   float m=min(min(texture2D(terr,u+vec2(o,0.)).a,texture2D(terr,u-vec2(o,0.)).a),min(texture2D(terr,u+vec2(0.,o)).a,texture2D(terr,u-vec2(0.,o)).a));
   float edge=clamp((t.a-m)*3.2,0.,1.);vec3 tc=pow(t.rgb,vec3(2.2));
@@ -455,8 +468,8 @@ terrain.material.onBeforeCompile=sh=>{Object.assign(sh.uniforms,TU,terrFX);sh.un
  .replace('void main() {','void main() {\n vec3 terrEm=vec3(0.);')
  .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
  {vec2 uv=vWP.xz;vec4 w=vLW/max(vLW.x+vLW.y+vLW.z+vLW.w,1e-3);
-  vec3 tn=(texture2D(nG,uv*.3).xyz*2.-1.)*w.x+(texture2D(nR,uv*.12).xyz*2.-1.)*w.y+(texture2D(nS,uv*.25).xyz*2.-1.)*w.z+(texture2D(nW,uv*.2).xyz*2.-1.)*w.w;
-  tn.xy*=.45;vec3 N=normalize(vWN);vec3 T=normalize(vec3(1.,0.,0.)-N*N.x);vec3 B=normalize(cross(T,N));
+  vec3 tn=ntn(qG,uv*.16)*w.x+ntn(qR,uv*.07)*w.y+ntn(qS,uv*.12)*w.z+ntn(qW,uv*.1)*w.w;
+  tn.xy*=.6;vec3 N=normalize(vWN);vec3 T=normalize(vec3(1.,0.,0.)-N*N.x);vec3 B=normalize(cross(T,N));
   vec3 nw=normalize(T*tn.x+B*-tn.y+N*max(tn.z,.2));normal=normalize((viewMatrix*vec4(nw,0.)).xyz);}`)};
 grassU.terr={value:terrTex};
 
