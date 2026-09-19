@@ -85,7 +85,7 @@
 </style>
 </head><body>
 <div class="title">woosh</div>
-<div class="hud" id="hud"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>V</b> first person · <b>M</b> sound · <b>P</b> fps<br><kbd>click</kbd> chop · <kbd>1-6</kbd> hotbar · <kbd>R</kbd> use · <kbd>C</kbd> craft bomb · &#9881; all controls<br>click + move mouse to look · <b>Esc</b> frees the mouse</div>
+<div class="hud" id="hud"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>V</b> first person · <b>M</b> sound · <b>P</b> fps<br><kbd>click</kbd> chop · <kbd>1-8</kbd> hotbar · <kbd>R</kbd> use · <kbd>C</kbd> craft bomb · &#9881; all controls<br>click + move mouse to look · <b>Esc</b> frees the mouse</div>
 <button id="jump" hidden>jump</button>
 <div id="menu"><div class="card"><h1>woosh</h1>
  <label for="nm">name</label><input id="nm" maxlength="12" value="tiger">
@@ -98,7 +98,7 @@
  <p id="st"></p></div></div>
 <div id="hostmode" hidden><div><b>hosting mode</b><p id="hmtxt">the world keeps running · keep this tab open</p><button id="hmBack">back to the game</button></div></div><div id="net" hidden></div><div id="mine">0.0%</div><div id="board"></div><div id="dead" hidden></div><div id="fill" hidden><span id="filltxt"></span><div class="bar"><i id="fillbar"></i></div></div>
 <div id="end" hidden><div class="card"><h1 id="endh">island filled!</h1><ol id="endlist"></ol><button id="again">play again</button><p id="endwait" class="mdesc" hidden>waiting for the host to start a new round</p></div></div><div id="toast" hidden></div><div id="fps" hidden></div><div id="inv"></div><div id="craft"></div><div id="prompt" hidden></div><div id="hint" hidden></div><div id="buildhud" hidden></div><div id="craftmenu" class="card" hidden><b>door crafting</b><div id="craftlist"></div><div class="row"><button id="bookB" class="g">recipe book</button><button id="craftX">close</button></div></div><div id="xhair" hidden></div>
-<button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><button id="sndB">sound: on</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>C</kbd> craft bomb · <kbd>X</kbd> craft door (6 wood)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house<br><kbd>V</kbd> first person · <kbd>M</kbd> sound · <kbd>P</kbd> fps</p></div>
+<button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><button id="sndB">sound: on</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>C</kbd> craft bomb · <kbd>X</kbd> craft door (6 wood)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house · then craft a roof (wood + mud)<br>pickaxe: mine boulders, dig mud on river banks + sand on beaches<br><kbd>V</kbd> first person · <kbd>M</kbd> sound · <kbd>P</kbd> fps</p></div>
 <div id="stick" hidden><div id="knob"></div></div>
 <script type="importmap">{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}</script>
 <script src="lib/peerjs.min.js"></script>
@@ -465,7 +465,7 @@ function updParticles(dt,t){for(let i=0;i<PMAX;i++){const q=pv[i];if(q.kind===0)
 // ---------- input ----------
 let mouseHeld=false;let SENS=1;try{SENS=+localStorage.getItem('pm_sens')||1}catch(e){}
 const keys={};let yaw=Math.PI,pitch=.32,moved=false,vYaw=Math.PI,vPitch=.32;
-addEventListener('keydown',e=>{if(e.target.tagName!=='INPUT'&&!e.repeat&&started){if(e.code==='KeyC')craftBomb();if(e.code==='KeyR')useItem();if(/^Digit[1-6]$/.test(e.code))selectSlot(+e.code.slice(5)-1);if(e.code==='Enter'&&fenceMode)confirmFences();if(e.code==='Escape'&&fenceMode)toggleFenceMode(false)}
+addEventListener('keydown',e=>{if(e.target.tagName!=='INPUT'&&!e.repeat&&started){if(e.code==='KeyC')craftBomb();if(e.code==='KeyR')useItem();if(/^Digit[1-8]$/.test(e.code))selectSlot(+e.code.slice(5)-1);if(e.code==='Enter'&&fenceMode)confirmFences();if(e.code==='Escape'&&fenceMode)toggleFenceMode(false)}
  if(e.code==='KeyV'&&!e.repeat)firstPerson=!firstPerson;if(e.code==='KeyP'&&!e.repeat&&e.target.tagName!=='INPUT')document.getElementById('fps').hidden^=1;if(e.target.tagName==='INPUT')return;keys[e.code]=true;if(e.code==='Space')e.preventDefault()});addEventListener('keyup',e=>keys[e.code]=false);
 const cv=renderer.domElement;
 cv.addEventListener('click',()=>{if(!document.getElementById('menu').hidden)return;if(!TOUCH&&cv.requestPointerLock){const r=cv.requestPointerLock({unadjustedMovement:true});if(r&&r.catch)r.catch(()=>cv.requestPointerLock())}});
@@ -734,19 +734,21 @@ addEventListener('pointerdown',()=>{sfx.init();sfx.ctx?.resume()},{once:false});
 // ---------- items, crafting, fences, rocks & bombs ----------
 const DIFF={peaceful:{chop:1.3,rocks:0,powder:0,stun:0,throwOK:false,bombR:0},classic:{chop:2,rocks:55,powder:24,stun:1,throwOK:true,bombR:4.5},hard:{chop:3,rocks:34,powder:13,stun:1.5,throwOK:true,bombR:5.5}};
 const cfg=()=>DIFF[MODE]||DIFF.classic;
-const inv={rock:0,wood:0,powder:0,bomb:0,fence:0,door:0,pick:0};
+const inv={rock:0,wood:0,powder:0,bomb:0,fence:0,door:0,pick:0,mud:0,sand:0};
 const ICON={rock:'<svg viewBox="0 0 24 24"><path d="M4 16.5l2.6-7.5 6.8-3.4 6.2 5.6-1.6 7.8H6.8z" fill="#a8adab" stroke="#5f6664" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 9.5l4.3-2" stroke="#d6d9d7" stroke-width="1.4" stroke-linecap="round"/></svg>',
  wood:'<svg viewBox="0 0 24 24"><rect x="2.5" y="8" width="16" height="8.5" rx="4.2" fill="#a86d3e" stroke="#6e4222" stroke-width="1.4"/><circle cx="18.2" cy="12.25" r="4.2" fill="#e8b981" stroke="#6e4222" stroke-width="1.4"/><circle cx="18.2" cy="12.25" r="1.6" fill="none" stroke="#b9824b" stroke-width="1.1"/></svg>',
  powder:'<svg viewBox="0 0 24 24"><path d="M8.5 5.5h7l-1.2 3.2c3.6 1.8 5.2 4.6 5.2 7.6A4 4 0 0 1 15.5 20.5h-7a4 4 0 0 1-4-4.2c0-3 1.6-5.8 5.2-7.6z" fill="#3a3945" stroke="#1d1c24" stroke-width="1.3"/><path d="M8.5 5.5h7" stroke="#c9a26b" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1" fill="#f6d36b"/><circle cx="14" cy="16.5" r=".8" fill="#f6d36b"/></svg>',
  bomb:'<svg viewBox="0 0 24 24"><circle cx="10.5" cy="14" r="7" fill="#2c2b35" stroke="#15141b" stroke-width="1.3"/><circle cx="8" cy="11.5" r="1.8" fill="#595869"/><path d="M15 9l3-3.5" stroke="#c9a26b" stroke-width="1.8" stroke-linecap="round"/><circle cx="19" cy="4.6" r="2.2" fill="#ffb23a"/><circle cx="19" cy="4.6" r="1" fill="#fff2c4"/></svg>',
+ mud:'<svg viewBox="0 0 24 24"><path d="M3.5 17c0-4 3.6-7.5 8.5-7.5s8.5 3.5 8.5 7.5c0 1.6-3.8 3-8.5 3s-8.5-1.4-8.5-3z" fill="#7a5536" stroke="#4a321e" stroke-width="1.3"/><path d="M8 13.5c1.5-1.2 3-1.6 5-1.3" stroke="#9c7250" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>',
+ sand:'<svg viewBox="0 0 24 24"><path d="M3 18.5c1.8-5 5-8.5 9-8.5s7.2 3.5 9 8.5z" fill="#ecd495" stroke="#b39352" stroke-width="1.3" stroke-linejoin="round"/><circle cx="10" cy="15" r=".7" fill="#b39352"/><circle cx="14" cy="16.3" r=".6" fill="#b39352"/></svg>',
  pick:'<svg viewBox="0 0 24 24"><path d="M4 20L14 10" stroke="#8a5a32" stroke-width="2.6" stroke-linecap="round"/><path d="M8.5 5.5c4-2.4 8.6-1.6 11.2 1.3-2.2-.9-4.6-.9-6.7.2l-2.4-2.4z" fill="#a9aeb0" stroke="#5f6664" stroke-width="1.2" stroke-linejoin="round"/></svg>',
  door:'<svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="1.5" fill="#c08650" stroke="#6e4222" stroke-width="1.4"/><path d="M9 3v18M14 3v18" stroke="#9a6436" stroke-width="1.1"/><circle cx="16.3" cy="12.5" r="1.2" fill="#3b3129"/></svg>',
  fence:'<svg viewBox="0 0 24 24"><path d="M4 21V7l2-2.5L8 7v14M16 21V7l2-2.5L20 7v14" fill="#c08650" stroke="#7a4e27" stroke-width="1.3" stroke-linejoin="round"/><rect x="2.5" y="9.5" width="19" height="2.8" rx="1" fill="#d99c5e" stroke="#7a4e27" stroke-width="1.1"/><rect x="2.5" y="15" width="19" height="2.8" rx="1" fill="#d99c5e" stroke="#7a4e27" stroke-width="1.1"/></svg>'};
-const INV_NAMES={rock:'rocks',wood:'wood',powder:'gunpowder',bomb:'bombs',fence:'fences',door:'doors',pick:'pickaxe'};
+const INV_NAMES={rock:'rocks',wood:'wood',powder:'gunpowder',bomb:'bombs',fence:'fences',door:'doors',pick:'pickaxe',mud:'mud',sand:'sand'};
 let fenceHintShown=false;
-const HOTBAR=['rock','bomb','wood','powder','door','pick'];let sel=0;
+const HOTBAR=['rock','bomb','wood','powder','door','pick','mud','sand'];let sel=0;
 function renderInv(pop){const el=document.getElementById('inv');el.innerHTML='';
- HOTBAR.forEach((k,i)=>{const d=document.createElement('div');d.className='slot'+(i===sel?' sel':'')+(inv[k]?'':' empty')+(pop===k?' pop':'')+(k==='wood'||k==='powder'?' pass':'');d.title=INV_NAMES[k];d.innerHTML=`<i>${i+1}</i>`+ICON[k]+(inv[k]?`<b>${inv[k]}</b>`:'');el.appendChild(d)})
+ HOTBAR.forEach((k,i)=>{const d=document.createElement('div');d.className='slot'+(i===sel?' sel':'')+(inv[k]?'':' empty')+(pop===k?' pop':'')+(k==='wood'||k==='powder'||k==='mud'||k==='sand'?' pass':'');d.title=INV_NAMES[k];d.innerHTML=`<i>${i+1}</i>`+ICON[k]+(inv[k]?`<b>${inv[k]}</b>`:'');el.appendChild(d)})
  const cr=document.getElementById('craft');cr.innerHTML='';
  const add=(txt,key,fn)=>{const b=document.createElement('button');b.innerHTML=txt+` <kbd>${key}</kbd>`;b.onclick=fn;cr.appendChild(b)};
  if(inv.rock&&inv.powder&&cfg().throwOK)add(ICON.bomb+'craft bomb','C',craftBomb);
@@ -901,6 +903,8 @@ function handleAct(pid,m){const p=game.P.get(pid);if(!p||!p.alive)return;const x
   removeItemVis(m.id);bcast({t:'it-',id:m.id});give(pid,it.k,1)}
  else if(m.a==='chop'){const t=trees[m.i];if(!t||t.down||Math.hypot(t.x-xz[0],t.z-xz[1])>4)return;t.regrow=performance.now()+60000;treeState(m.i,false);bcast({t:'tree',i:m.i,up:0});give(pid,'wood',4)}
  else if(m.a==='throw'){if(!cfg().throwOK)return;const pm={t:'proj',id:projId++,k:m.k==='bomb'?'bomb':'rock',o:pid,x:m.x,y:m.y,z:m.z,vx:m.vx,vy:m.vy,vz:m.vz};addProj(pm);bcast(pm)}
+ else if(m.a==='roof'){const d=B.doors.get(m.id);if(!d||!d.house||d.roof)return;d.roof=true;detectHouses();bcast({t:'roof',id:m.id});sfx.play('plank',.6,.8)}
+ else if(m.a==='dig'){const k=m.k==='sand'?'sand':'mud';if(groundKind(xz[0],xz[1])!==k)return;give(pid,k,1)}
  else if(m.a==='mine'){const b=boulders[m.i];if(!b||b.hp<=0||Math.hypot(b.x-xz[0],b.z-xz[1])>(b.surf?b.surf.r:1)+3)return;b.hp--;setBoulder(b);give(pid,'rock',2);bcast({t:'mine',i:m.i,hp:b.hp});if(b.hp<=0){puff(b.x,b.y+1,b.z,30,4,[.7,.68,.64])}}
  else if(m.a==='unbuild'){const M=m.k==='door'?B.doors:m.k==='wall'?B.walls:B.rocks;const o=M.get(m.id);if(!o)return;const back=m.k==='rock'?['rock',1]:m.k==='wall'?['rock',wallCost(Math.hypot(o.bx-o.ax,o.bz-o.az))]:['door',1];removeBuild(m.k,m.id);bcast({t:'unbuild',k:m.k,id:m.id});give(pid,back[0],back[1])}
  else if(m.a==='build'){if(m.k==='rock'){const b={k:'rock',id:B.nid++,x:+m.x,z:+m.z,ry:+m.ry,s:Math.min(1.2,+m.s),m:m.m|0};addBuild(b);bcast({t:'build',b});return}const b=m.k==='door'?{k:'door',id:B.nid++,x:+m.x,z:+m.z,ry:+m.ry,o:p.idx}:{k:'wall',id:B.nid++,ax:+m.ax,az:+m.az,bx:+m.bx,bz:+m.bz};if(m.k==='wall'&&Math.hypot(b.bx-b.ax,b.bz-b.az)>40)return;addBuild(b);bcast({t:'build',b})}
@@ -915,6 +919,7 @@ function clientMsg(d){if(d.t==='give')gain(d.k,d.n);else if(d.t==='world')applyW
  else if(d.t==='tree')treeState(d.i,!!d.up);else if(d.t==='proj')addProj(d);else if(d.t==='pend')endProj(d.id);else if(d.t==='boom'){boomFX(d);for(const [id,p] of projs)if(p.k==='bomb'&&Math.hypot(p.p.x-d.x,p.p.z-d.z)<1.5)endProj(id)}
  else if(d.t==='build')addBuild(d.b);
  else if(d.t==='unbuild')removeBuild(d.k,d.id);
+ else if(d.t==='roof'){const o=B.doors.get(d.id);if(o){o.roof=true;detectHouses()}}
  else if(d.t==='mine'){const b=boulders[d.i];if(b){b.hp=d.hp;setBoulder(b)}}
  else if(d.t==='fences'){unrleTo(fence,d.g);rebuildFences()}else if(d.t==='hit')applyHit(d.dx,d.dz,d.s);else return false;return true}
 
@@ -937,12 +942,14 @@ function updMine(dt,t){const pr=document.getElementById('prompt');const pick=HOT
  hiBuilt=null;if(pick&&document.pointerLockElement){const a=aimPoint();if(Math.hypot(a.x-pos.x,a.z-pos.z)<REACH)hiBuilt=nearestBuilt(a,1.1)}
  if(hiBuilt){const o=hiBuilt.o;if(!hiMesh){hiMesh=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),hiMat);scene.add(hiMesh)}hiMesh.visible=true;const cx=hiBuilt.k==='wall'?(o.ax+o.bx)/2:o.x,cz=hiBuilt.k==='wall'?(o.az+o.bz)/2:o.z;
   hiMesh.position.set(cx,hAt(cx,cz)+(hiBuilt.k==='rock'?.4*o.s:1.3),cz);hiMesh.scale.setScalar(hiBuilt.k==='rock'?o.s*.9:hiBuilt.k==='wall'?Math.hypot(o.bx-o.ax,o.bz-o.az)*.55:1.3);hiMesh.scale.y=hiBuilt.k==='rock'?o.s*.7:1.5}else if(hiMesh)hiMesh.visible=false;
- const bi=pick&&!hiBuilt?nearestBoulder():-1;
- if(!pick||(bi<0&&!hiBuilt)){mineT=0;if(pr.innerHTML.includes('to mine'))pr.hidden=true;return}
+ const bi=pick&&!hiBuilt?nearestBoulder():-1;const gk=pick&&!hiBuilt&&bi<0?groundKind(pos.x,pos.z):null;
+ if(gk){if(mouseHeld){mineT+=dt/.7;mineSnd-=dt;if(mineSnd<=0){mineSnd=.3;sfx.play('step_carpet_'+Math.floor(Math.random()*5),.6,.7);puff(pos.x,pos.y+.2,pos.z,6,2,gk==='mud'?[.45,.32,.2]:[.93,.84,.6])}if(mineT>=1){mineT=0;act({a:'dig',k:gk})}}else mineT=Math.max(0,mineT-dt);pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(mineT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to dig ${gk} (to mine)`.replace(' (to mine)','');return}
+ if(!pick||(bi<0&&!hiBuilt)){mineT=0;if(pr.innerHTML.includes('to mine')||pr.innerHTML.includes('to dig'))pr.hidden=true;return}
  const what=hiBuilt?(hiBuilt.k==='rock'?'your rock':hiBuilt.k==='wall'?'this wall':'this door'):'the boulder';
  if(mouseHeld){mineT+=dt/(hiBuilt?.5:.85);mineSnd-=dt;if(mineSnd<=0){mineSnd=.28;sfx.play('chop_'+Math.floor(Math.random()*3),.45,.62);const p=hiBuilt?hiBuilt.o:boulders[bi];const px=hiBuilt?.k==='wall'?(p.ax+p.bx)/2:p.x,pz=hiBuilt?.k==='wall'?(p.az+p.bz)/2:p.z;puff(pos.x+(px-pos.x)*.5,pos.y+.8,pos.z+(pz-pos.z)*.5,6,2.4,[.72,.7,.66]);shake=.05}
   if(mineT>=1){mineT=0;if(hiBuilt)act({a:'unbuild',id:hiBuilt.o.id,k:hiBuilt.k});else act({a:'mine',i:bi})}}else mineT=Math.max(0,mineT-dt);
  pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(mineT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to mine ${what}`}
+function groundKind(x,z){const i=Math.round((x+S/2)/STEP),j=Math.round((z+S/2)/STEP);const k=j*N+i;if(k>=0&&k<N*N&&WAY[k*2+1]>.3)return'mud';const h=hAt(x,z);if(h<1.15&&h>-.4)return'sand';return null}
 function boulderList(){return boulders.map((p,i)=>p.hp<p.hp0?[i,p.hp]:null).filter(Boolean)}
 function applyBoulders(l){for(const[i,hp]of l||[]){const p=boulders[i];if(p){p.hp=hp;setBoulder(p)}}}
 
@@ -962,21 +969,31 @@ function makeDoor(d){const g=new THREE.Group();const y=hAt(d.x,d.z)-.1;g.positio
  const hinge=new THREE.Group();hinge.position.set(-DOOR_W/2+.12,0,0);g.add(hinge);const lg=new THREE.BoxGeometry(DOOR_W-.24,2.36,.12);boxUV(lg,1.3,2.4,.12);const leaf=new THREE.Mesh(lg,plankMat);leaf.position.set((DOOR_W-.24)/2,1.2,0);leaf.castShadow=leaf.receiveShadow=true;hinge.add(leaf);
  const knob=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),new THREE.MeshStandardMaterial({color:'#3b3129',roughness:.4,metalness:.6}));knob.position.set(DOOR_W-.5,1.15,.1);hinge.add(knob);
  d.hinge=hinge;d.ang=0;d.y=y;return g}
-function addBuild(m,quiet){if(m.k==='door'){if(B.doors.has(m.id))return;const d={id:m.id,x:m.x,z:m.z,ry:m.ry,o:m.o,house:false};d.g=makeDoor(d);scene.add(d.g);B.doors.set(m.id,d)}
+function addBuild(m,quiet){if(m.k==='door'){if(B.doors.has(m.id))return;const d={id:m.id,x:m.x,z:m.z,ry:m.ry,o:m.o,house:false,roof:!!m.roof};d.g=makeDoor(d);scene.add(d.g);B.doors.set(m.id,d)}
  else if(m.k==='rock'){if(B.rocks.has(m.id))return;const r={id:m.id,x:m.x,z:m.z,ry:m.ry,s:m.s,m:m.m};r.g=makeRock(r);scene.add(r.g);B.rocks.set(m.id,r);rockSurf.push(r.surf={x:r.x,z:r.z,base:hAt(r.x,r.z)-.1,top:hAt(r.x,r.z)+r.s*.85,r:r.s*.55})}
  else if(m.k==='wall'){if(B.walls.has(m.id))return;const w={id:m.id,ax:m.ax,az:m.az,bx:m.bx,bz:m.bz};w.g=makeWall(w);scene.add(w.g);B.walls.set(m.id,w)}
  B.nid=Math.max(B.nid,m.id+1);if(!quiet){sfx.play('plank',.5,.9);puff(m.k==='door'?m.x:(m.ax+m.bx)/2,hAt(m.x??m.ax,m.z??m.az)+.3,m.k==='door'?m.z:(m.az+m.bz)/2,14,2,[.85,.8,.7])}detectHouses()}
-function buildsList(){return[...[...B.doors.values()].map(d=>({k:'door',id:d.id,x:d.x,z:d.z,ry:d.ry,o:d.o})),...[...B.walls.values()].map(w=>({k:'wall',id:w.id,ax:w.ax,az:w.az,bx:w.bx,bz:w.bz})),...[...B.rocks.values()].map(r=>({k:'rock',id:r.id,x:r.x,z:r.z,ry:r.ry,s:r.s,m:r.m}))]}
-function removeBuild(k,id){const M=k==='door'?B.doors:k==='wall'?B.walls:B.rocks;const o=M.get(id);if(!o)return;scene.remove(o.g);M.delete(id);if(o.surf){const i=rockSurf.indexOf(o.surf);if(i>=0)rockSurf.splice(i,1)}sfx.play('pick',.5,.7);detectHouses()}
-function clearBuilds(){for(const r of B.rocks.values()){scene.remove(r.g);const i=rockSurf.indexOf(r.surf);if(i>=0)rockSurf.splice(i,1)}B.rocks.clear();for(const d of B.doors.values())scene.remove(d.g);for(const w of B.walls.values())scene.remove(w.g);B.doors.clear();B.walls.clear()}
+function buildsList(){return[...[...B.doors.values()].map(d=>({k:'door',id:d.id,x:d.x,z:d.z,ry:d.ry,o:d.o,roof:d.roof?1:0})),...[...B.walls.values()].map(w=>({k:'wall',id:w.id,ax:w.ax,az:w.az,bx:w.bx,bz:w.bz})),...[...B.rocks.values()].map(r=>({k:'rock',id:r.id,x:r.x,z:r.z,ry:r.ry,s:r.s,m:r.m}))]}
+function removeBuild(k,id){const M=k==='door'?B.doors:k==='wall'?B.walls:B.rocks;const o=M.get(id);if(!o)return;scene.remove(o.g);if(o.roofMesh)scene.remove(o.roofMesh);M.delete(id);if(o.surf){const i=rockSurf.indexOf(o.surf);if(i>=0)rockSurf.splice(i,1)}sfx.play('pick',.5,.7);detectHouses()}
+function clearBuildsRoofs(){for(const d of B.doors.values())if(d.roofMesh)scene.remove(d.roofMesh)}
+function clearBuilds(){clearBuildsRoofs();for(const r of B.rocks.values()){scene.remove(r.g);const i=rockSurf.indexOf(r.surf);if(i>=0)rockSurf.splice(i,1)}B.rocks.clear();for(const d of B.doors.values())scene.remove(d.g);for(const w of B.walls.values())scene.remove(w.g);B.doors.clear();B.walls.clear()}
 // a door becomes a house when walls connect one side of it all the way round to the other
 function detectHouses(){const pts=[],key=(x,z)=>{for(let i=0;i<pts.length;i++)if(Math.hypot(pts[i][0]-x,pts[i][1]-z)<.45)return i;pts.push([x,z]);return pts.length-1};const adj=new Map();const link=(a,b)=>{(adj.get(a)||adj.set(a,[]).get(a)).push(b);(adj.get(b)||adj.set(b,[]).get(b)).push(a)};
  for(const w of B.walls.values())link(key(w.ax,w.az),key(w.bx,w.bz));const doorEnds=[...B.doors.values()].map(d=>{const[j1,j2]=jambs(d);return[d,key(...j1),key(...j2)]});
  for(const d of B.doors.values())if(false)link();
  // doors also act as links for OTHER doors' loops
  for(const[d,a,b]of doorEnds){const was=d.house;const seen=new Set([a]),q=[a];let ok=false;const extra=new Map();for(const[d2,a2,b2]of doorEnds)if(d2!==d){(extra.get(a2)||extra.set(a2,[]).get(a2)).push(b2);(extra.get(b2)||extra.set(b2,[]).get(b2)).push(a2)}
-  while(q.length){const n=q.shift();if(n===b){ok=true;break}for(const m of[...(adj.get(n)||[]),...(extra.get(n)||[])])if(!seen.has(m)){seen.add(m);q.push(m)}}
-  d.house=ok;if(ok&&!was&&started){ui.toast('its a house!! the door works now');sfx.play('capture',.5,1.2);puff(d.x,hAt(d.x,d.z)+1.5,d.z,40,4,[1,.9,.5])}}}
+  const par=new Map();while(q.length){const n=q.shift();if(n===b){ok=true;break}for(const m of[...(adj.get(n)||[]),...(extra.get(n)||[])])if(!seen.has(m)){seen.add(m);par.set(m,n);q.push(m)}}
+  if(ok){const L=[];let n=b;while(n!==undefined){L.push(pts[n]);if(n===a)break;n=par.get(n)}d.loop=L.reverse()}else d.loop=null;
+  d.house=ok;if(ok&&!was&&started){ui.toast('its a house!! the door works now');sfx.play('capture',.5,1.2);puff(d.x,hAt(d.x,d.z)+1.5,d.z,40,4,[1,.9,.5])}}
+ for(const d of B.doors.values()){if(d.roofMesh&&(!d.house||!d.roof)){scene.remove(d.roofMesh);d.roofMesh=null}if(d.house&&d.roof&&!d.roofMesh){d.roofMesh=makeRoof(d);scene.add(d.roofMesh)}}}
+const roofMat=new THREE.MeshStandardMaterial({map:sty('hay_roof_01','color',1),normalMap:sty('hay_roof_01','normal'),roughness:.95,side:THREE.DoubleSide,color:'#f4e3c0'});
+function roofArea(d){const P=d.loop||[];let a=0;for(let i=0;i<P.length;i++){const p=P[i],q=P[(i+1)%P.length];a+=p[0]*q[1]-q[0]*p[1]}return Math.abs(a/2)}
+function roofCost(d){const A=roofArea(d);return{wood:Math.max(2,Math.ceil(A/6)),mud:Math.max(2,Math.ceil(A/8))}}
+function makeRoof(d){const P=d.loop;let cx=0,cz=0;for(const p of P){cx+=p[0];cz+=p[1]}cx/=P.length;cz/=P.length;let top=-1e9,rad=0;for(const p of P){top=Math.max(top,hAt(p[0],p[1]));rad=Math.max(rad,Math.hypot(p[0]-cx,p[1]-cz))}const y0=top+WALL_H-.25,ay=y0+Math.max(1.4,rad*.62);
+ const E=P.map(p=>{const dx=p[0]-cx,dz=p[1]-cz,l=Math.hypot(dx,dz)||1;return[p[0]+dx/l*.6,y0-.35,p[1]+dz/l*.6]});const pos=[],uv=[];for(let i=0;i<E.length;i++){const a=E[i],b=E[(i+1)%E.length];const L=Math.hypot(b[0]-a[0],b[2]-a[2]),sl=Math.hypot(ay-a[1],rad);pos.push(...a,...b,cx,ay,cz);uv.push(0,0,L/2.2,0,L/4.4,sl/2.2)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();const n=g.attributes.normal;for(let i=0;i<n.count;i++)if(n.getY(i)<0)n.setXYZ(i,-n.getX(i),-n.getY(i),-n.getZ(i));
+ const m=new THREE.Mesh(g,roofMat);m.castShadow=m.receiveShadow=true;return m}
 function snapPt(x,z){let best=null,bd=1.1;for(const d of B.doors.values())for(const j of jambs(d)){const dd=Math.hypot(j[0]-x,j[1]-z);if(dd<bd){bd=dd;best=j}}
  for(const w of B.walls.values())for(const j of[[w.ax,w.az],[w.bx,w.bz]]){const dd=Math.hypot(j[0]-x,j[1]-z);if(dd<bd){bd=dd;best=j}}return best?{x:best[0],z:best[1],snap:true}:{x,z,snap:false}}
 function buildAim(){const p=aimPoint();const dx=p.x-pos.x,dz=p.z-pos.z,d=Math.hypot(dx,dz);if(d>REACH){p.x=pos.x+dx/d*REACH;p.z=pos.z+dz/d*REACH}return p}
@@ -1017,13 +1034,14 @@ const RECIPES=[
  {k:'pick',n:'stone pickaxe',need:{wood:3,rock:3},get:1,info:'mine boulders piece by piece (2 rocks a hit), and mine your own builds back'},
  {k:'window',n:'window',need:{sand:4},soon:true,info:'sand from beaches (coming soon)'},
  {k:'irondoor',n:'iron door',need:{iron:6},soon:true,info:'starts a factory (coming soon)'}];
-const WHERE={wood:'hold click on trees',rock:'roll over rocks on the ground',powder:'roll over gunpowder bags',sand:'beaches (soon)',iron:'caves (soon)'};
+const WHERE={wood:'hold click on trees',rock:'roll over rocks, or mine boulders with a pickaxe',powder:'roll over gunpowder bags',mud:'dig with a pickaxe on river banks',sand:'dig with a pickaxe on beaches',iron:'caves (soon)'};
 const has=n=>Object.entries(n).every(([k,v])=>(inv[k]||0)>=v);
 function openCraft(on){const m=document.getElementById('craftmenu');m.hidden=!on;if(on){document.exitPointerLock?.();renderCraft();sfx.play('plank',.4,1.4)}}
-function renderCraft(book){const m=document.getElementById('craftlist');m.innerHTML='';const list=book?RECIPES:RECIPES.filter(r=>!r.soon&&has(r.need));
+function renderCraft(book){const m=document.getElementById('craftlist');m.innerHTML='';const list=book?[...RECIPES]:RECIPES.filter(r=>!r.soon&&has(r.need));const hd=nearDoor();
+ if(hd&&hd.house&&!hd.roof){const need=roofCost(hd);if(book||has(need))list.unshift({k:'roof',n:'roof for this house',need,get:0,door:hd,info:'hay roof over the whole house'})}
  if(!list.length)m.innerHTML='<p class="mdesc">nothing you can make yet. check the recipe book</p>';
  for(const r of list){const b=document.createElement('button');b.className='rc'+(has(r.need)&&!r.soon?'':' off');const need=Object.entries(r.need).map(([k,v])=>`${v} ${INV_NAMES[k]||k}`).join(' + ');
-  b.innerHTML=(ICON[r.k]||'')+`<span><b>${r.n}</b><small>${need}${book?' · '+r.info:''}</small></span>`;b.onclick=()=>{if(r.soon||!has(r.need)){sfx.play('nope',.3);return}for(const[k,v]of Object.entries(r.need))inv[k]-=v;inv[r.k]=(inv[r.k]||0)+r.get;renderInv(r.k);sfx.play('craft',.55,1.1);puff(pos.x,pos.y+1.2,pos.z,16,3,[1,.95,.7]);renderCraft(book)};m.appendChild(b)}
+  b.innerHTML=(ICON[r.k]||'')+`<span><b>${r.n}</b><small>${need}${book?' · '+r.info:''}</small></span>`;b.onclick=()=>{if(r.soon||!has(r.need)){sfx.play('nope',.3);return}for(const[k,v]of Object.entries(r.need))inv[k]-=v;if(r.door){act({a:'roof',id:r.door.id});renderInv();sfx.play('craft',.55,.9);renderCraft(book);return}inv[r.k]=(inv[r.k]||0)+r.get;renderInv(r.k);sfx.play('craft',.55,1.1);puff(pos.x,pos.y+1.2,pos.z,16,3,[1,.95,.7]);renderCraft(book)};m.appendChild(b)}
  if(book){const w=document.createElement('p');w.className='mdesc';w.innerHTML='<b>where stuff comes from</b><br>'+Object.entries(WHERE).map(([k,v])=>`${INV_NAMES[k]||k}: ${v}`).join('<br>');m.appendChild(w)}}
 function craftDoor(){if(inv.wood<6){ui.toast('a door needs 6 wood');sfx.play('nope',.3);return}inv.wood-=6;inv.door++;renderInv('door');sfx.play('craft',.5);showHint('door crafted! pick it (5), press G, click to place. then wall it in with rocks')}
 document.getElementById('craftX').onclick=()=>openCraft(false);document.getElementById('bookB').onclick=e=>{const b=e.target.dataset.on!=='1';e.target.dataset.on=b?'1':'0';e.target.textContent=b?'back':'recipe book';renderCraft(b)};

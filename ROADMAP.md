@@ -160,3 +160,4 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - new island landform generator (not the crater ring), more rivers
 - wooshi arm-slap animation when placing
 - UI redesign (needs a style reference from Toby)
+- perf pass (Sept 19): terrain skips texture layers that aren't there, shadow map 2048 (VSM blur was huge at 4096), AO at half res, dynamic resolution (pixel ratio .7-1.5 aiming for 60fps, ?fixres to turn off)
