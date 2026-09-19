@@ -49,3 +49,13 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - expand factory walls with lots of concrete (costs more than building a new factory)
 - sheep -> carpets: decorate houses + sleep on them to skip the night
 - hearts/food/farming, waypoints, minimap, swimming, ctrl-sprint, destructible terrain everywhere
+
+## DONE Sept 19 (factory wave)
+- concrete (2 sand + 2 mud -> 2), concrete walls (G with concrete selected)
+- iron door (4 iron): wall it in with CONCRETE = FACTORY (rock walls = still just a house)
+- chest (5 wood): R while placing switches INPUT/OUTPUT (blue/orange band); attaches when touching factory walls; F opens it (click to put all / take all)
+- factory v1 automation: input chest (ore + wood) -> cooker touching the walls -> iron into the output chest, every ~3s
+- rebar (3 iron -> 4); factory roof = rebar + concrete (metal roof); house roof = branches + mud
+- branches: hold click on bushes (regrow 40s)
+- set spawn at your house door (Q or F)
+- NEXT: node automation editor, gunpowder source, planters, keybinds
