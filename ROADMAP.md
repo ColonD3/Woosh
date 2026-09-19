@@ -83,3 +83,12 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - shows up once you finish your first factory, dragging a little cart with big wooden wheels
 - sells things, including the GOLD DOOR: a premium iron door that unlocks more options
 - keybinds (Sept 19): hotbar 1-5/scroll, R = use item, hold click = chop, fences: slot 3 > R > click. The door game will be a separate fork (own folder + link), paper meadow stays as is.
+
+## Worlds update (Sept 19)
+- "host new world" makes a saved world with a fixed code; "my worlds" list in the menu: play / download / delete (tap ✕ twice)
+- autosaves every 5s + when the tab hides/closes (browser storage); saves your land, your fences, chopped trees, inventory, position, mode
+- crash → reopen → play: same code, it retries grabbing the code for ~a minute while the old one expires
+- load world file: drop in a downloaded .woosh.json (send worlds to tad)
+- joined codes are remembered as chips under the join box
+- hosting mode (gear menu): stops drawing, mutes, keeps the world running off a worker clock so a hidden tab keeps hosting
+- test: leave a hosting tab hidden 20 min with tad playing
