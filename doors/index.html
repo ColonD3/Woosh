@@ -268,34 +268,52 @@ for(let t=0;t<3000&&trees.length<150;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2
 const dummy=new THREE.Object3D();
 // ---------- nature kit (Quaternius, CC0) ----------
 const gltfL=new GLTFLoader();const swayU={value:0};const boulders=[];
-function prepMat(m,tall){m=m.clone();m.roughness=.9;m.metalness=0;const leafy=/Lea|Flower|Mush/.test(m.name);
+function prepMat(m,tall){m=m.clone();m.roughness=.9;m.metalness=0;const leafy=/Lea|leaf|branch|grass|Flower|Mush/i.test(m.name);
  if(leafy){m.side=THREE.DoubleSide;if(m.alphaTest<.3)m.alphaTest=.5;m.envMapIntensity=.4;m.onBeforeCompile=sh=>{sh.defines=sh.defines||{};sh.defines.TALL=tall?1:0;sh.uniforms.time=swayU;sh.fragmentShader='varying float vH;\n'+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=mix(TALL==1?.5:1.,1.15,vH);');
   sh.vertexShader='uniform float time;varying float vH;\n'+sh.vertexShader.replace('#include <begin_vertex>',
   '#include <begin_vertex>\nvec3 ip=instanceMatrix[3].xyz;float hh=max(transformed.y,0.);float sw=(sin(time*1.4+ip.x*.3+ip.z*.2)*.035+sin(time*2.6+ip.z+transformed.x*1.5)*.015)*hh;transformed.x+=sw;transformed.z+=sw*.6;vH=clamp((position.y-2.)/6.,0.,1.)*.8+.2*clamp(normal.y*.5+.5,0.,1.);')}}
  m.userData.leafy=leafy;m.customProgramCacheKey=()=>'k'+(tall?1:0)+leafy;return m}
-async function kit(n){const g=await gltfL.loadAsync('models/'+n+'.gltf');g.scene.updateMatrixWorld(true);const parts=[];
+const packCache={};const PACK_TINT={rocks70:[1.6,1.48,1.3],rockscliffs:[1.08,1.02,.92]};
+function packObjs(f){return packCache[f]||(packCache[f]=gltfL.loadAsync('models/packs/'+f+'.glb').then(g=>{g.scene.updateMatrixWorld(true);
+ const find=o=>{if(o.children.length>2)return o;for(const c of o.children){const r=find(c);if(r)return r}return null};const hub=find(g.scene)||g.scene;
+ return hub.children.map(ch=>{const parts=[];ch.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);const mat=o.material.clone();if(PACK_TINT[f])mat.color.setRGB(...PACK_TINT[f]);parts.push({geo,mat,leafy:/leaf|branch|grass/i.test(mat.name)})});
+  const b=new THREE.Box3();for(const q of parts){q.geo.computeBoundingBox();b.union(q.geo.boundingBox)}const c=b.getCenter(new THREE.Vector3()),sz=b.getSize(new THREE.Vector3()),k=1/Math.max(sz.y,1e-3);
+  for(const q of parts){q.geo.translate(-c.x,-b.min.y,-c.z);q.geo.scale(k,k,k);
+   // foliage: point normals out from the trunk + up, so leaf cards shade like one soft round canopy instead of dark flat cards
+   if(q.leafy){const P=q.geo.attributes.position,Nn=q.geo.attributes.normal;for(let i=0;i<P.count;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i);const v=new THREE.Vector3(x,Math.max(0,y-.45)*.8+.35,z).normalize();Nn.setXYZ(i,v.x,v.y,v.z)}Nn.needsUpdate=true}}
+  return parts})}))}
+async function kit(n){if(n.startsWith('pack:')){const[f,i]=n.slice(5).split('#');const objs=await packObjs(f);return objs[+i].map(q=>({geo:q.geo,mat:prepMat(q.mat,false),noRecv:q.leafy}))}const g=await gltfL.loadAsync('models/'+n+'.gltf');g.scene.updateMatrixWorld(true);const parts=[];
  g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);parts.push({geo,mat:prepMat(o.material,/Tree|Pine/.test(n))})});return parts}
 async function place(names,list,{tint,shadow=true,recv=true,layer}={}){const models=await Promise.all(names.map(kit));
  models.forEach((parts,mi)=>{const sub=list.filter(p=>p.m%names.length===mi);if(!sub.length)return;
   for(const part of parts){const im=new THREE.InstancedMesh(part.geo,part.mat,sub.length);
    sub.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(p.rx||0,p.ry,p.rz||0);dummy.scale.setScalar(p.s);dummy.updateMatrix();im.setMatrixAt(i,dummy.matrix);(p.refs||(p.refs=[])).push([im,i]);
     if(tint&&part.mat.userData.leafy)im.setColorAt(i,p.c||L('#ffffff'))});
-   im.castShadow=shadow;im.receiveShadow=recv;if(layer)im.layers.set(layer);im.frustumCulled=false;scene.add(im)}})}
+   im.castShadow=shadow;im.receiveShadow=recv&&!part.noRecv;if(layer)im.layers.set(layer);im.frustumCulled=false;scene.add(im)}})}
 const pick=a=>a[Math.floor(rnd()*a.length)];
 const GREENS=['#4f9a35','#5fae3a','#3f8a2f','#72b940'].map(L),AUTUMN=['#e8541f','#d63c1f','#f08a1f','#e3661a','#c9361c'].map(L);
 function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length<n;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2-1)*EDGE*.9,h=hAt(x,z);if(test(x,z,h))out.push({x,z,y:h,ry:rnd()*6.283})}return out}
-{const common=[],twisted=[],pine=[];
+{const common=[],twisted=[],pine=[],broad=[];
  for(const t of trees){const p={x:t.x,z:t.z,y:t.h-.15,ry:rnd()*6.283};t.p=p;
-  if(t.h>7||rnd()<.12){p.m=Math.floor(rnd()*3);p.s=.7+rnd()*.3;p.c=L(pick(['#4f9f4a','#5aa84e','#3f8f45']));pine.push(p);t.r=.45}
+  if(t.h>6.5||rnd()<.3){p.m=Math.floor(rnd()*3);p.s=7+rnd()*4.5;p.c=L(pick(['#ffffff','#eef4dc','#f6f1d6']));pine.push(p);t.r=.45}
+  else if(rnd()<.22){p.m=0;p.s=4.5+rnd()*2;p.c=L(pick(['#ffffff','#f3f0d2']));broad.push(p);t.r=.5}
   else if(rnd()<.16){p.m=Math.floor(rnd()*3);p.s=.36+rnd()*.12;p.c=pick(AUTUMN);twisted.push(p);t.r=.6}
   else{p.m=Math.floor(rnd()*5);p.s=.68+rnd()*.3;p.c=rnd()<.45?pick(AUTUMN):pick(GREENS);common.push(p);t.r=.4}}
  place(['CommonTree_1','CommonTree_2','CommonTree_3','CommonTree_4','CommonTree_5'],common,{tint:1});
  place(['TwistedTree_1','TwistedTree_2','TwistedTree_3'],twisted,{tint:1});
- place(['Pine_1','Pine_2','Pine_3'],pine,{tint:1});
+ place(['pack:trees#2','pack:trees#3','pack:trees#4'],pine,{tint:1});place(['pack:trees#5'],broad,{tint:1});
  const grassy=(x,z,h)=>h>1.4&&h<9&&slopeAt(x,z)<.42&&Math.hypot(x,z)>6;
  const rocks=scatter(55,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
- rocks.forEach(p=>{p.m=Math.floor(rnd()*3);p.s=rnd()<.35?1+rnd()*.8:.45+rnd()*.4;p.y-=.25*p.s;p.rx=(rnd()-.5)*.2;p.rz=(rnd()-.5)*.2;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+1.9*p.s,r:1.3*p.s})});
- place(['Rock_Medium_1','Rock_Medium_2','Rock_Medium_3'],rocks);
+ const BIG=[[42,1.52/1.31],[44,1.46/1.09],[45,1.6/1.13],[47,1.5/1.75],[51,1.49/1.65],[52,1.58/1.38],[55,1.75/1.75],[58,2.66/1.34],[64,2.64/2.23],[66,2.02/1.92],[68,2.65/1.49],[69,3.88/2.1]];
+ rocks.forEach(p=>{p.m=Math.floor(rnd()*BIG.length);const H=rnd()<.35?1.6+rnd()*1.4:.6+rnd()*.7;p.s=H;p.y-=.18*H;p.rx=(rnd()-.5)*.15;p.rz=(rnd()-.5)*.15;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H,r:BIG[p.m][1]*H*.5})});
+ place(BIG.map(b=>'pack:rocks70#'+b[0]),rocks);
+ // landmark boulders + cliff spires on slopes and ridges
+ const LM=[[0,.9],[1,1.2],[4,.95],[5,2.2],[6,1.25]];const marks=scatter(14,(x,z,h)=>h>3&&h<15&&slopeAt(x,z)>.25&&Math.hypot(x,z)>14&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<5));
+ marks.forEach(p=>{p.m=Math.floor(rnd()*LM.length);const H=[7,5,4,3,4][p.m]*(.7+rnd()*.6);p.s=H;p.y-=.25*H;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:LM[p.m][1]*H*.42})});
+ place(LM.map(l=>'pack:rockscliffs#'+l[0]),marks);
+ // grass tufts hugging rocks and tree roots (like the reference shots)
+ const tufts=[];for(const r of [...rocks,...marks,...trees.map(t=>({x:t.x,z:t.z,s:1.2}))]){const n=2+Math.floor(rnd()*4);for(let i=0;i<n;i++){const a=rnd()*6.283,d=(.55+rnd()*.5)*Math.max(1,(r.s||1)*.6),x=r.x+Math.cos(a)*d,z=r.z+Math.sin(a)*d,h=hAt(x,z);if(h<1)continue;tufts.push({x,z,y:h-.02,ry:rnd()*6.283,m:Math.floor(rnd()*3),s:.35+rnd()*.35,c:L(pick(['#ffffff','#e9eec8','#f4e7b8']))})}}
+ place(['pack:trees#7','pack:trees#9','pack:trees#10'],tufts,{shadow:false,layer:1,tint:1});
  const bushes=scatter(45,(x,z,h)=>grassy(x,z,h)&&fbm(x*.05+20,z*.05,2)>.52);bushes.forEach(p=>{p.m=rnd()<.3?1:0;p.s=.7+rnd()*.4;p.c=pick(GREENS)});
  place(['Bush_Common','Bush_Common_Flowers'],bushes,{tint:1});
  const fl=[];for(let k=0;k<160;k++){const c=scatter(1,grassy)[0];if(!c)continue;const m=Math.floor(rnd()*2);const cnt=2+Math.floor(rnd()*5);for(let i=0;i<cnt;i++){const a=rnd()*6.283,r=rnd()*2.2,x=c.x+Math.cos(a)*r,z=c.z+Math.sin(a)*r;fl.push({x,z,y:hAt(x,z)-.03,ry:rnd()*6.283,m,s:.3+rnd()*.15})}}
@@ -304,8 +322,8 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  place(['Fern_1','Plant_1','Plant_7','Clover_1'],small,{shadow:false,layer:1});
  const mush=[];for(const t of trees)if(rnd()<.35){const a=rnd()*6.283,r=.8+rnd()*1.2,x=t.x+Math.cos(a)*r,z=t.z+Math.sin(a)*r;mush.push({x,z,y:hAt(x,z),ry:rnd()*6.283,m:0,s:.9+rnd()*.6})}
  place(['Mushroom_Common'],mush,{shadow:false,layer:1});
- const peb=scatter(240,(x,z,h)=>h>.5&&h<12);peb.forEach(p=>{p.m=Math.floor(rnd()*3);p.s=1.5+rnd()*3;p.y-=.05});
- place(['Pebble_Round_1','Pebble_Round_3','Pebble_Square_2'],peb,{shadow:false});}
+ const peb=scatter(240,(x,z,h)=>h>.5&&h<12);peb.forEach(p=>{p.m=Math.floor(rnd()*8);p.s=.1+rnd()*.22;p.y-=.03});
+ place([0,1,2,3,5,7,8,12].map(i=>'pack:rocks70#'+i),peb,{shadow:false});}
 {const d=shadeTex.image.data;const off=[-sunDir.x/sunDir.y*3.5,-sunDir.z/sunDir.y*3.5];
  for(const t of trees){const cx=(t.x+off[0]+S/2),cz=(t.z+off[1]+S/2),r=3.2;for(let j=Math.floor(cz-r);j<=cz+r;j++)for(let i=Math.floor(cx-r);i<=cx+r;i++){if(i<0||j<0||i>=240||j>=240)continue;
   const dd=Math.hypot(i+.5-cx,j+.5-cz)/r;if(dd<1){const k=(j*240+i)*4;d[k]=Math.min(d[k],Math.round(255*smooth(.35,1,dd)))}}}shadeTex.needsUpdate=true}

@@ -132,3 +132,4 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - packs optimized to models/packs/{rocks70,rockscliffs,trees}.glb (130MB -> 6MB); credits in CREDITS.md
 - ground pass (Sept 19): painted textures (moss_ground_02 + grass_03 blended by big noise, ground_06 dirt patches, cliff_rocks_02 triplanar, sand_01, snow_01) with anti-tiling (rotated second sample, noise-blended) + macro light/dark + warm/cool patches; grass is shorter and takes its color from the ground under it
 - NEXT: swap in packs (rocks70 scattered, rockscliffs as landmarks, pines from trees.glb), then procedural terrain gen v2
+- terrain v2 (Sept 19): hydraulic erosion (60k droplets), rivers carved downhill to the sea with flowing ribbon water, dirt paths from spawn to 4 spots (flattened, no grass, trees/rocks avoid them). base island shape (crater ring) still the old one -> next: new landform generator
