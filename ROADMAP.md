@@ -133,3 +133,12 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - ground pass (Sept 19): painted textures (moss_ground_02 + grass_03 blended by big noise, ground_06 dirt patches, cliff_rocks_02 triplanar, sand_01, snow_01) with anti-tiling (rotated second sample, noise-blended) + macro light/dark + warm/cool patches; grass is shorter and takes its color from the ground under it
 - NEXT: swap in packs (rocks70 scattered, rockscliffs as landmarks, pines from trees.glb), then procedural terrain gen v2
 - terrain v2 (Sept 19): hydraulic erosion (60k droplets), rivers carved downhill to the sea with flowing ribbon water, dirt paths from spawn to 4 spots (flattened, no grass, trees/rocks avoid them). base island shape (crater ring) still the old one -> next: new landform generator
+
+## Houses v1 (Sept 19) — DONE
+- X: craft a wooden door from 6 wood (the only craft that doesn't need a door)
+- slot 5 door + G (or R): place it where you aim (reach 9m), faces away from you
+- G build mode: click start, click end = stone wall (1 rock per 1.5m), snaps to door sides + wall ends, chains from the last end, right-click stops the chain
+- door + walls closing a loop from one side of the door to the other = HOUSE -> door swings open when anyone walks up, closes behind
+- F near a door = door crafting menu (only shows what you can afford) + recipe book (everything + where materials come from)
+- walls + closed doors are solid; synced over multiplayer; saved in worlds
+- still to do from the vision: arm slap animation, roof (wood+mud), windows (sand), tools, mud, place loose rocks/wood anywhere, mining placed stuff
