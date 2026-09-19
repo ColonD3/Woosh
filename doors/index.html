@@ -792,7 +792,7 @@ function addItemVis(it){const g=new THREE.Group();const m=new THREE.Mesh(itemGeo
  const ring=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:it.k==='powder'?'#ffcf6a':'#ffffff',transparent:true,opacity:.55,depthWrite:false}));ring.position.y=-.2;g.add(ring);
  g.position.set(it.x,surfAt(it.x,it.z)+.3,it.z);g.userData={m,ring,ph:Math.random()*6};scene.add(g);it.vis=g;items.set(it.id,it)}
 function removeItemVis(id){const it=items.get(id);if(!it)return;scene.remove(it.vis);items.delete(id)}
-function spawnItem(k,x,z){if(x===undefined){for(let t=0;t<60;t++){const a=Math.random()*6.283,r=Math.sqrt(Math.random())*(LIM-4);x=Math.cos(a)*r;z=Math.sin(a)*r;const h=hAt(x,z);
+function spawnItem(k,x,z){if(x===undefined){for(let t=0;t<60;t++){x=(Math.random()-.5)*S;z=(Math.random()-.5)*S;const h=hAt(x,z);
    if(h<.7||slopeAt(x,z)>.6)continue;if(k==='powder'&&h>1.6&&Math.random()<.7)continue;break}}
  const it={id:itemId++,k,x:+x.toFixed(2),z:+z.toFixed(2)};addItemVis(it);bcast({t:'it+',i:{id:it.id,k,x:it.x,z:it.z}})}
 let itemTimer=0;
@@ -1084,7 +1084,7 @@ function frame(){syncBend();const dt=Math.min(clock.getDelta(),DTMAX),t=clock.el
  vel.y-=28*dt;vel.y=Math.max(vel.y,-40);
  {const ox=pos.x,oz=pos.z;pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)){pos.x=ox;vel.x*=-.3}pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)){pos.z=oz;vel.z*=-.3}}pushOut(pos);pos.y+=vel.y*dt;
  for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
- const rr=Math.hypot(pos.x,pos.z),lim=EDGE*.93;if(rr>lim){pos.x*=lim/rr;pos.z*=lim/rr}
+
  const g=surfAt(pos.x,pos.z);
  if(pos.y<=g){if(!onGround&&vel.y<-6){sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
   if(onGround&&g-pos.y>.2){pos.y+=Math.min(g-pos.y,7*dt);vel.x*=.9;vel.z*=.9}else pos.y=g;vel.y=0;onGround=true}
@@ -1162,7 +1162,7 @@ const W={cur:null,n:0,lastSave:0,
   const now=performance.now();for(const i of d.down||[]){const t=trees[i];if(t&&!t.down){t.down=true;t.regrow=now+60000;setTreeMatrix(t,.001,0)}}
   clearBuilds();for(const b of d.builds||[])addBuild(b,1);applyBoulders(d.bould);
   if(d.inv)for(const k in inv)inv[k]=d.inv[k]|0;renderInv();
-  if(d.pos){const[x,z]=d.pos;if(Math.abs(x)<LIM&&Math.abs(z)<LIM){p.x=x;p.z=z;onSpawn(x,z)}}
+  if(d.pos){const[x,z]=d.pos;{p.x=wrapC(x);p.z=wrapC(z);onSpawn(p.x,p.z)}}
   game.dirty=true;paintGrid();updScores();this.save();this.hostUI();ui.toast('world loaded · autosaves every 5s')},
  del(id){const w=this.list().find(w=>w.id===id);if(!w||!confirmDel(w))return;this.setList(this.list().filter(w=>w.id!==id));try{localStorage.removeItem('wdoors_w_'+id)}catch(e){}this.render()},
  download(id){const d=id?this.ls('wdoors_w_'+id):(this.save(),this.data());if(!d)return;const b=new Blob([JSON.stringify(d)],{type:'application/json'});
