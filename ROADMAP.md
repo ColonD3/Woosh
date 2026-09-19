@@ -168,3 +168,7 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - terrain noise must tile seamlessly so there's no seam at the wrap
 - DONE: world curve shader on everything (terrain, grass, trees, water, builds; not shadows) + "world curve" slider in settings (per player, saved)
 - NEXT: chunked terrain streaming -> wrap (positions, multiplayer, builds) -> size picker in the world menu
+- DONE (Sept 19): the world WRAPS. terrain noise is periodic so there's no seam; walk off any edge and you come in the other side (you, remote players, builds, trees, rocks all draw at their nearest copy around you); terrain + rivers drawn as 3x3 copies
+- DONE: world size picker in the menu: small (240m) / medium (360) / large (480) / mega (720) globe. saves remember their size, joining a host auto-switches to the host's size
+- new landform: continents + lakes instead of the crater ring, mountains kept away from spawn so you start in a green valley; no more distant fake mountain ring
+- NOT yet: generating chunks as you explore (whole world still generates at load; mega takes a few secs)
