@@ -148,3 +148,15 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - hold click near a big boulder = mine it piece by piece: 2 rocks a hit, it visibly shrinks, gone after 3-8 hits (saved, synced)
 - build mode (G) with the rock slot: click to place a rock anywhere in reach, every one a random painted shape + size
 - pickaxe aimed at your placed rocks / walls / doors = mine them back (you get the materials back); highlight shows what you're aiming at
+
+## Roofs + mud + sand (Sept 19) — DONE
+- pickaxe digs mud on river banks, sand on beaches (hold click)
+- at a house's door (F): "roof for this house" = hay roof over the whole wall loop, cost scales with floor area (wood + mud)
+- roofs saved + synced; knocking a wall out removes the roof
+
+## NEXT (big ones left)
+- windows (sand) slotting into walls, concrete (sand+mud), iron door -> factories, chests/cooker mounting on walls, node automation editor
+- caves + bomb-destructible terrain + iron ore
+- new island landform generator (not the crater ring), more rivers
+- wooshi arm-slap animation when placing
+- UI redesign (needs a style reference from Toby)
