@@ -12,6 +12,7 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 ## 2. Crafting + keybinds
 - one CRAFT key -> radial menu of everything craftable around the cursor, click to craft, cursor goes back into the game after (or Esc)
 - kill the scattered craft keys (C, X); door stays a crafting station for door-only recipes if needed
+- DONE Sept 19: Q radial craft menu (door, bomb, stone tool, roof when at a house door); C/X gone; pickaxe renamed "stone tool"; settings opens on top of pause
 - keybinds menu in settings (rebind everything, combos like alt+T)
 
 ## 3. Tools (no pickaxes/specialized tools yet: just TOOLS and WEAPONS)
