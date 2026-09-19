@@ -142,3 +142,9 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - F near a door = door crafting menu (only shows what you can afford) + recipe book (everything + where materials come from)
 - walls + closed doors are solid; synced over multiplayer; saved in worlds
 - still to do from the vision: arm slap animation, roof (wood+mud), windows (sand), tools, mud, place loose rocks/wood anywhere, mining placed stuff
+
+## Pickaxe + build mode rocks (Sept 19) — DONE
+- stone pickaxe at the door (3 wood + 3 rocks), slot 6
+- hold click near a big boulder = mine it piece by piece: 2 rocks a hit, it visibly shrinks, gone after 3-8 hits (saved, synced)
+- build mode (G) with the rock slot: click to place a rock anywhere in reach, every one a random painted shape + size
+- pickaxe aimed at your placed rocks / walls / doors = mine them back (you get the materials back); highlight shows what you're aiming at
