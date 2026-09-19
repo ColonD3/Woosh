@@ -1053,7 +1053,7 @@ const RECIPES=[
  {k:'irondoor',n:'iron door',need:{iron:6},soon:true,info:'starts a factory (coming soon)'}];
 const WHERE={wood:'hold click on trees',rock:'roll over rocks, or mine boulders with a pickaxe',powder:'roll over gunpowder bags',mud:'dig with a pickaxe on river banks',sand:'dig with a pickaxe on beaches',iron:'caves (soon)'};
 const has=n=>Object.entries(n).every(([k,v])=>(inv[k]||0)>=v);
-function openCraft(on){const m=document.getElementById('craftmenu');m.hidden=!on;if(on){document.exitPointerLock?.();renderCraft();sfx.play('plank',.4,1.4)}}
+function openCraft(on){const m=document.getElementById('craftmenu');m.hidden=!on;{const bb=document.getElementById('bookB');bb.dataset.on='0';bb.textContent='recipe book'}if(on){document.exitPointerLock?.();renderCraft();sfx.play('plank',.4,1.4)}}
 function renderCraft(book){const m=document.getElementById('craftlist');m.innerHTML='';const list=book?[...RECIPES]:RECIPES.filter(r=>!r.soon&&has(r.need));const hd=nearDoor();
  if(hd&&hd.house&&!hd.roof){const need=roofCost(hd);if(book||has(need))list.unshift({k:'roof',n:'roof for this house',need,get:0,door:hd,info:'hay roof over the whole house'})}
  if(!list.length)m.innerHTML='<p class="mdesc">nothing you can make yet. check the recipe book</p>';
