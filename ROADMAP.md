@@ -92,3 +92,16 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - joined codes are remembered as chips under the join box
 - hosting mode (gear menu): stops drawing, mutes, keeps the world running off a worker clock so a hidden tab keeps hosting
 - test: leave a hosting tab hidden 20 min with tad playing
+
+## Lighting target (reference shot Toby loved, Sept 19)
+- low warm sun -> long soft shadows; shadows are tinted cool lavender/blue, never grey/black
+- strong bright sky fill so shade still reads colorful
+- contact AO where things meet the ground (crates, rocks, walls sit IN the world)
+- slightly soft/toony shading, saturated but not blown out; bloom only on glowy stuff
+
+## Doors fork started (Sept 19) — lives at /doors/ (colond3.github.io/Woosh/doors/)
+- stripped paper.io: no land/trails/capture/leaderboard/fill/modes/bots; fences removed from hotbar (return as pens)
+- own saves (wdoors_*) + own peer codes, so it never collides with woosh
+- graphics pass 1: GTAO ambient occlusion (reconstructed from depth, off on phones, ?ao=0 to disable), VSM soft shadows 4096,
+  shadow camera snapped to texels (no shimmer when moving), lavender sky fill, warmer lower sun (28°), softer bloom, milky grade
+- next graphics: leaf shadow flicker from wind (freeze/soften leaf casters), contact shadows, TAA, grass look
