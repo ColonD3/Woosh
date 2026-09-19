@@ -172,3 +172,19 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - DONE: world size picker in the menu: small (240m) / medium (360) / large (480) / mega (720) globe. saves remember their size, joining a host auto-switches to the host's size
 - new landform: continents + lakes instead of the crater ring, mountains kept away from spawn so you start in a green valley; no more distant fake mountain ring
 - NOT yet: generating chunks as you explore (whole world still generates at load; mega takes a few secs)
+
+## Toby's next wave (Sept 19)
+### Terrain + mining
+- terrain FULLY destructible by bombs, in a really cool looking way
+- caves that make mining (with bombs) easier; ores (iron) exposed by blasting
+- a good AUTOMATED way to get gunpowder (it's a core part of mining)
+### Survival
+- health system with hearts
+- food refills hearts; food comes from plants (wheat -> craft bread)
+- farming: plant wheat in mud next to rivers, OR in a craftable planter placed next to your factory to automate wheat farming
+### Social
+- chat: T opens it, type, Enter sends
+### Menus + flow
+- every menu opens and closes with Esc; once you're back in the game, Esc again = pause menu: leave world (-> title screen) or settings
+- a really nice, aesthetic TITLE SCREEN: Worlds -> world menu (new world, load, join your worlds); inside a world you can get an invite code, THAT'S when it becomes a server and friends can join
+- FIXED: door crafting menu reopening in "back" (recipe book) state after closing with Esc
