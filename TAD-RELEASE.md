@@ -7,6 +7,8 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - worlds are private until you grab an INVITE CODE from the pause menu -> then it's a server and friends can join
 - chat: T to type, Enter to send
 
+### status: title screen, worlds/join pages, private worlds + invite code, pause menu (Esc), chat (T) DONE Sept 19
+
 ## 2. Crafting + keybinds
 - one CRAFT key -> radial menu of everything craftable around the cursor, click to craft, cursor goes back into the game after (or Esc)
 - kill the scattered craft keys (C, X); door stays a crafting station for door-only recipes if needed

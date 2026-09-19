@@ -19,7 +19,18 @@
     background:rgba(255,248,235,.7);font:600 15px Fredoka,system-ui,sans-serif;color:#23321f}
   #stick{position:fixed;width:110px;height:110px;border-radius:50%;background:rgba(255,248,235,.25);border:2px solid rgba(255,248,235,.6);pointer-events:none}
   #knob{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,248,235,.85)}
-  #menu{position:fixed;inset:0;display:grid;place-items:center;background:rgba(40,60,50,.35);backdrop-filter:blur(3px);z-index:5;padding:16px;box-sizing:border-box}
+  #menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at 50% 40%,rgba(255,240,215,.05),rgba(30,45,40,.45));z-index:5;padding:16px;box-sizing:border-box}
+  .ttl{text-align:center;pointer-events:none;animation:bob 5s ease-in-out infinite}.logo{margin:0;font:600 clamp(64px,13vw,132px)/.9 Fredoka,ui-rounded,system-ui,sans-serif;color:#fffaf0;letter-spacing:.02em;text-shadow:0 6px 0 #e0784a,0 14px 30px rgba(40,30,20,.35)}
+  .tag{margin:8px 0 0;font:500 17px Fredoka,system-ui,sans-serif;color:#fffaf0;opacity:.9;text-shadow:0 2px 10px rgba(30,40,30,.5)}
+  body:not(.playing) #inv,body:not(.playing) .hud,body:not(.playing) .title,body:not(.playing) #craft{display:none!important}
+  @keyframes bob{50%{transform:translateY(-8px)}}
+  .tscreen{backdrop-filter:blur(8px);background:rgba(255,248,235,.9)!important}.pg{display:flex;flex-direction:column;gap:9px}.pg[hidden]{display:none!important}.pt{font-size:19px}
+  .card button.big{font-size:20px;padding:14px}.card button.alt{background:#3aa7ff}.neww{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:14px;background:#f3e7cf}
+  #pause{position:fixed;inset:0;z-index:8;display:grid;place-items:center;background:rgba(25,35,30,.45);backdrop-filter:blur(4px)}#pause h1{margin:0 0 4px}
+  #pCode{text-align:center;font:600 30px Fredoka,system-ui,sans-serif;letter-spacing:.18em;background:#f3e7cf;border-radius:12px;padding:10px}#pCode small{display:block;font:500 12px Fredoka,system-ui,sans-serif;letter-spacing:0;opacity:.65}
+  #chatlog{position:fixed;left:16px;bottom:calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;max-width:min(420px,calc(100vw - 32px));pointer-events:none;z-index:4}
+  #chatlog div{font:500 15px Fredoka,system-ui,sans-serif;color:#fffaf0;background:rgba(30,40,35,.55);padding:5px 10px;border-radius:10px;transition:opacity 1s}#chatlog b{color:#ffd28a}
+  #chatin{position:fixed;left:16px;bottom:calc(112px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 32px));font:500 16px Fredoka,system-ui,sans-serif;padding:9px 12px;border-radius:12px;border:2px solid #fffaf0;background:rgba(30,40,35,.75);color:#fffaf0;z-index:6;box-sizing:border-box;outline:none}
   .card{background:#fff8eb;border-radius:20px;padding:22px;width:min(320px,100%);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;font-family:Fredoka,ui-rounded,system-ui,sans-serif;color:#23321f;box-shadow:0 10px 40px rgba(20,30,20,.3)}
   .card h1{margin:0 0 4px;font-size:28px;font-weight:600}
   .card label{font-size:13px;opacity:.7}
@@ -88,16 +99,17 @@
 <div class="title">woosh</div>
 <div class="hud" id="hud"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>V</b> first person · <b>M</b> sound · <b>P</b> fps<br><kbd>click</kbd> chop · <kbd>1-8</kbd> hotbar · <kbd>R</kbd> use · <kbd>C</kbd> craft bomb · &#9881; all controls<br>click + move mouse to look · <b>Esc</b> frees the mouse</div>
 <button id="jump" hidden>jump</button>
-<div id="menu"><div class="card"><h1>woosh</h1>
- <label for="nm">name</label><input id="nm" maxlength="12" value="tiger">
- <div class="modes" id="modes" role="radiogroup" aria-label="mode"><i class="thumb" id="mthumb"></i><button data-m="peaceful" role="radio">peaceful</button><button data-m="classic" role="radio">classic</button><button data-m="hard" role="radio">hard</button></div>
- <p id="mdesc" class="mdesc">touch someone's trail and they die. biggest land wins.</p>
- <div class="sens"><label for="sensR">look speed</label><input type="range" id="sensR" min=".2" max="3" step=".05"><b id="sensV"></b></div>
- <div class="sens"><label for="wsize">world size</label><select id="wsize"><option value="s">small globe</option><option value="m">medium globe</option><option value="l">large globe</option><option value="x">mega globe</option></select></div>
- <button id="solo">play solo</button><button id="host">host new world</button>
- <div id="worlds"></div><button class="ghost" id="loadW">load world file</button><input type="file" id="wfile" accept=".json,.woosh" hidden>
- <div class="row"><input id="code" maxlength="6" placeholder="code" autocomplete="off"><button id="join">join</button></div><div id="recent"></div>
- <p id="st"></p></div></div>
+<div id="menu"><div class="ttl"><h1 class="logo">woosh</h1><p class="tag">a tiny globe to build on</p></div>
+<div class="card tscreen">
+ <div class="pg" id="pg-home"><label for="nm">your name</label><input id="nm" maxlength="12" value="tiger">
+  <button class="big" data-go="worlds">worlds</button><button class="big alt" data-go="join">join a friend</button><button class="g" data-go="opts">settings</button></div>
+ <div class="pg" id="pg-worlds" hidden><b class="pt">your worlds</b><div id="worlds"></div>
+  <div class="neww"><div class="sens"><label for="wsize">world size</label><select id="wsize"><option value="s">small globe</option><option value="m">medium globe</option><option value="l">large globe</option><option value="x">mega globe</option></select></div><button id="host">+ new world</button></div><button class="ghost" id="loadW">load world file</button><input type="file" id="wfile" accept=".json,.woosh" hidden><button class="g back">back</button></div>
+ <div class="pg" id="pg-join" hidden><b class="pt">join a friend</b><p class="mdesc">ask them for the invite code from their pause menu (Esc)</p><div class="row"><input id="code" maxlength="6" placeholder="code" autocomplete="off"><button id="join">join</button></div><div id="recent"></div><button class="g back">back</button></div>
+ <div class="pg" id="pg-opts" hidden><b class="pt">settings</b><div class="sens"><label for="sensR">look speed</label><input type="range" id="sensR" min=".2" max="3" step=".05"><b id="sensV"></b></div><button class="g back">back</button></div>
+ <p id="st"></p><div hidden><div class="modes" id="modes" role="radiogroup" aria-label="mode"><i class="thumb" id="mthumb"></i><button data-m="peaceful" role="radio">peaceful</button><button data-m="classic" role="radio">classic</button><button data-m="hard" role="radio">hard</button></div><p id="mdesc"></p><button id="solo">solo</button></div></div></div>
+<div id="pause" hidden><div class="card"><h1>paused</h1><button id="pResume">resume</button><button id="pInvite" class="alt">invite friends</button><div id="pCode" hidden></div><button id="pSet" class="g">settings</button><button id="pLeave" class="g">save + leave world</button></div></div>
+<div id="chatlog"></div><input id="chatin" hidden maxlength="140" placeholder="say something · enter to send · esc to cancel" autocomplete="off">
 <div id="hostmode" hidden><div><b>hosting mode</b><p id="hmtxt">the world keeps running · keep this tab open</p><button id="hmBack">back to the game</button></div></div><div id="net" hidden></div><div id="mine">0.0%</div><div id="board"></div><div id="dead" hidden></div><div id="fill" hidden><span id="filltxt"></span><div class="bar"><i id="fillbar"></i></div></div>
 <div id="end" hidden><div class="card"><h1 id="endh">island filled!</h1><ol id="endlist"></ol><button id="again">play again</button><p id="endwait" class="mdesc" hidden>waiting for the host to start a new round</p></div></div><div id="toast" hidden></div><div id="fps" hidden></div><div id="inv"></div><div id="craft"></div><div id="prompt" hidden></div><div id="hint" hidden></div><div id="buildhud" hidden></div><div id="craftmenu" class="card" hidden><b>door crafting</b><div id="craftlist"></div><div class="row"><button id="bookB" class="g">recipe book</button><button id="craftX">close</button></div></div><div id="xhair" hidden></div>
 <button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><div class="sens"><label for="bendR">world curve</label><input type="range" id="bendR" min="0" max="1" step=".01"><b id="bendV"></b></div><button id="sndB">sound: on</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>C</kbd> craft bomb · <kbd>X</kbd> craft door (6 wood)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house · then craft a roof (wood + mud)<br>pickaxe: mine boulders, dig mud on river banks + sand on beaches<br><kbd>V</kbd> first person · <kbd>M</kbd> sound · <kbd>P</kbd> fps</p></div>
@@ -659,6 +671,8 @@ const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:
   const snap={};for(const p of game.P.values()){const e=this.entry(p);if(!e)continue;snap[p.id]=e;if(p.id!==this.myId)upsertRemote(p.id,e)}
   if(this.mode==='host'){const m={t:'snap',p:snap};for(const c of this.conns.values())if(c.open)c.send(m)}},
  host(code){this.mode='host';game.start(0);this.rehost(code)},
+ startLocal(code){this.mode='host';this.code=code;game.start(0);ui.status(`<b>${esc(W.cur?W.cur.name:'world')}</b> · private · Esc → invite friends`,true)},
+ invite(){if(!this.peer)this.rehost(this.code);return this.code},
  rehost(code){this.code=code;
   this.peer=new Peer('wdoors-'+code,window.PEER_OPTS);
   this.peer.on('open',()=>{this._retry=0;ui.status(`hosting${W.cur?' <b>'+esc(W.cur.name)+'</b>':''} · code <b>${code}</b>`,true)});
@@ -920,6 +934,7 @@ function handleAct(pid,m){const p=game.P.get(pid);if(!p||!p.alive)return;const x
   removeItemVis(m.id);bcast({t:'it-',id:m.id});give(pid,it.k,1)}
  else if(m.a==='chop'){const t=trees[m.i];if(!t||t.down||Math.hypot(t.x-xz[0],t.z-xz[1])>4)return;t.regrow=performance.now()+60000;treeState(m.i,false);bcast({t:'tree',i:m.i,up:0});give(pid,'wood',4)}
  else if(m.a==='throw'){if(!cfg().throwOK)return;const pm={t:'proj',id:projId++,k:m.k==='bomb'?'bomb':'rock',o:pid,x:m.x,y:m.y,z:m.z,vx:m.vx,vy:m.vy,vz:m.vz};addProj(pm);bcast(pm)}
+ else if(m.a==='chat'){const msg=String(m.m||'').slice(0,140);if(!msg)return;chatLine(p.name,msg);bcast({t:'chat',n:p.name,m:msg})}
  else if(m.a==='roof'){const d=B.doors.get(m.id);if(!d||!d.house||d.roof)return;d.roof=true;detectHouses();bcast({t:'roof',id:m.id});sfx.play('plank',.6,.8)}
  else if(m.a==='dig'){const k=m.k==='sand'?'sand':'mud';if(groundKind(xz[0],xz[1])!==k)return;give(pid,k,1)}
  else if(m.a==='mine'){const b=boulders[m.i];if(!b||b.hp<=0||Math.hypot(b.x-xz[0],b.z-xz[1])>(b.surf?b.surf.r:1)+3)return;b.hp--;setBoulder(b);give(pid,'rock',2);bcast({t:'mine',i:m.i,hp:b.hp});if(b.hp<=0){puff(b.x,b.y+1,b.z,30,4,[.7,.68,.64])}}
@@ -935,6 +950,7 @@ function unrleTo(arr,r){let k=0;for(let i=0;i<r.length;i+=2){arr.fill(r[i],k,k+r
 function clientMsg(d){if(d.t==='give')gain(d.k,d.n);else if(d.t==='world')applyWorld(d);else if(d.t==='it+')addItemVis(d.i);else if(d.t==='it-')removeItemVis(d.id);
  else if(d.t==='tree')treeState(d.i,!!d.up);else if(d.t==='proj')addProj(d);else if(d.t==='pend')endProj(d.id);else if(d.t==='boom'){boomFX(d);for(const [id,p] of projs)if(p.k==='bomb'&&Math.hypot(p.p.x-d.x,p.p.z-d.z)<1.5)endProj(id)}
  else if(d.t==='build')addBuild(d.b);
+ else if(d.t==='chat')chatLine(d.n,d.m);
  else if(d.t==='unbuild')removeBuild(d.k,d.id);
  else if(d.t==='roof'){const o=B.doors.get(d.id);if(o){o.roof=true;detectHouses()}}
  else if(d.t==='mine'){const b=boulders[d.i];if(b){b.hp=d.hp;setBoulder(b)}}
@@ -1053,7 +1069,7 @@ const RECIPES=[
  {k:'irondoor',n:'iron door',need:{iron:6},soon:true,info:'starts a factory (coming soon)'}];
 const WHERE={wood:'hold click on trees',rock:'roll over rocks, or mine boulders with a pickaxe',powder:'roll over gunpowder bags',mud:'dig with a pickaxe on river banks',sand:'dig with a pickaxe on beaches',iron:'caves (soon)'};
 const has=n=>Object.entries(n).every(([k,v])=>(inv[k]||0)>=v);
-function openCraft(on){const m=document.getElementById('craftmenu');m.hidden=!on;{const bb=document.getElementById('bookB');bb.dataset.on='0';bb.textContent='recipe book'}if(on){document.exitPointerLock?.();renderCraft();sfx.play('plank',.4,1.4)}}
+function openCraft(on){const m=document.getElementById('craftmenu');if(on)suppressPause=performance.now()+600;m.hidden=!on;{const bb=document.getElementById('bookB');bb.dataset.on='0';bb.textContent='recipe book'}if(on){document.exitPointerLock?.();renderCraft();sfx.play('plank',.4,1.4)}}
 function renderCraft(book){const m=document.getElementById('craftlist');m.innerHTML='';const list=book?[...RECIPES]:RECIPES.filter(r=>!r.soon&&has(r.need));const hd=nearDoor();
  if(hd&&hd.house&&!hd.roof){const need=roofCost(hd);if(book||has(need))list.unshift({k:'roof',n:'roof for this house',need,get:0,door:hd,info:'hay roof over the whole house'})}
  if(!list.length)m.innerHTML='<p class="mdesc">nothing you can make yet. check the recipe book</p>';
@@ -1065,7 +1081,7 @@ document.getElementById('craftX').onclick=()=>openCraft(false);document.getEleme
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.repeat||!started)return;if(e.code==='KeyG')setBuildMode(!B.mode);if(e.code==='KeyX')craftDoor();if(e.code==='KeyF'){const m=document.getElementById('craftmenu');if(!m.hidden)openCraft(false);else if(nearDoor())openCraft(true)}if(e.code==='Escape')openCraft(false)});
 cv.addEventListener('mousedown',e=>{if(document.pointerLockElement!==cv||!B.mode)return;if(e.button===0)buildClick();if(e.button===2)B.start=null},true);
 
-if(QP.has('dev'))Object.assign(window,{__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
+if(QP.has('dev'))Object.assign(window,{__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
 // ---------- loop ----------
 let started=false,fpsN=0,fpsT=0;
 const clock=new THREE.Clock();const _sR=new THREE.Vector3(),_sU=new THREE.Vector3(),_sY=new THREE.Vector3(0,1,0),_sP=new THREE.Vector3();let stepT=0,camPos=new THREE.Vector3(),camInit=false;
@@ -1074,7 +1090,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-function frame(){syncBend();const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
+function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
  if(dead||!started||clock.elapsedTime<stunUntil){ix=iz=0}
@@ -1132,7 +1148,7 @@ document.getElementById('sndB').onclick=()=>{sfx.toggle();document.getElementByI
 document.addEventListener('pointerlockchange',()=>{const locked=!!document.pointerLockElement;document.getElementById('gear').hidden=locked||!started;if(locked)document.getElementById('settings').hidden=true});
 document.getElementById('again').onclick=()=>game.reset();
 document.getElementById('solo').onclick=()=>{setName();document.getElementById('menu').hidden=true;started=true;net.mode='solo';game.start(0);document.getElementById('net').hidden=false;document.getElementById('net').textContent='solo'};
-document.getElementById('host').onclick=()=>{setName();const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];W.create(c);net.host(c);started=true;W.hostUI()};
+document.getElementById('host').onclick=()=>{setName();const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];W.create(c);net.startLocal(c);started=true;W.hostUI()};
 const joinIt=()=>{const c=document.getElementById('code').value.trim().toUpperCase();if(!c){ui.status('type the code first');return}setName();net.join(c);started=true};
 document.getElementById('join').onclick=joinIt;document.getElementById('code').addEventListener('keydown',e=>{if(e.key==='Enter')joinIt()});
 const p0=new URLSearchParams(location.search).get('join');if(p0)document.getElementById('code').value=p0;if(p0&&QP.has('autojoin'))setTimeout(joinIt,800);
@@ -1158,7 +1174,7 @@ const W={cur:null,n:0,lastSave:0,
   if(hostMode&&this.n%10===0){const s=Math.round((Date.now()-this.lastSave)/1000);const k=net.conns.size;document.getElementById('hmtxt').textContent=`${this.cur.name} · code ${this.cur.code} · ${k} player${k===1?'':'s'} online · saved ${s}s ago`}},
  open(id,d){d=d||this.ls('wdoors_w_'+id);if(!d){ui.status('that world save is missing');return}if((d.size||'s')!==SZ){location.search='?size='+(d.size||'s')+'&open='+id;return}
   setName();MODE=d.mode||'classic';this.cur={id,code:d.code,name:d.name,mode:MODE,created:d.created};
-  net.host(d.code);started=true;
+  net.startLocal(d.code);started=true;
   const p=game.P.get(net.myId);const hi=p.idx;const tmp=new Uint8Array(G*G);
   if(d.land){unrleTo(tmp,d.land);for(let k=0;k<G*G;k++){if(owner[k]===hi)owner[k]=0;if(tmp[k]&&land[k])owner[k]=hi}}
   if(d.fence){tmp.fill(0);unrleTo(tmp,d.fence);for(let k=0;k<G*G;k++)fence[k]=tmp[k]&&owner[k]===hi?hi:0;rebuildFences()}
@@ -1188,6 +1204,26 @@ document.getElementById('dlB').onclick=()=>W.download();
 document.getElementById('loadW').onclick=()=>document.getElementById('wfile').click();
 document.getElementById('wfile').onchange=e=>{const f=e.target.files[0];if(f)W.upload(f);e.target.value=''};
 addEventListener('visibilitychange',()=>{if(document.hidden)W.save()});addEventListener('pagehide',()=>W.save());
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-'+b.dataset.go);sfx.init();sfx.play('click',.3)});document.querySelectorAll('.pg .back').forEach(b=>b.onclick=()=>{document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-home');sfx.play('click',.3,.8)});
+if(QP.get('join'))document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-join');
+// ---------- pause menu, esc flow, chat ----------
+let pauseOpenT=0,suppressPause=0;const $=id=>document.getElementById(id);
+function anyMenu(){return !$('craftmenu').hidden||!$('settings').hidden||!$('hostmode').hidden||!$('chatin').hidden}
+function openPause(on){$('pause').hidden=!on;if(on){pauseOpenT=performance.now();$('pInvite').hidden=net.mode==='client';if(net.peer&&net.mode==='host')showCode()}else $('settings').hidden=true}
+function showCode(){const c=net.code||'';const link=location.origin+location.pathname+'?size='+SZ+'&join='+c;$('pCode').hidden=false;$('pCode').innerHTML=esc(c)+'<small>tap to copy invite link</small>';$('pCode').onclick=()=>{try{navigator.clipboard.writeText(link);ui.toast('invite link copied')}catch(e){}};$('pInvite').hidden=true}
+$('pResume').onclick=()=>{openPause(false);cv.requestPointerLock?.()};
+$('pInvite').onclick=()=>{net.invite();showCode();ui.toast('your world is open · send the code');sfx.play('join',.5)};
+$('pSet').onclick=()=>{$('settings').hidden=!$('settings').hidden};
+$('pLeave').onclick=()=>{try{W.save()}catch(e){}location.href=location.pathname+(SZ!=='s'?'?size='+SZ:'')};
+document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement||!started||TOUCH)return;if(performance.now()<suppressPause||anyMenu())return;openPause(true)});
+function quiet(){suppressPause=performance.now()+600}
+addEventListener('keydown',e=>{if(e.code!=='Escape')return;if(!$('chatin').hidden){closeChat();return}if(!$('craftmenu').hidden){openCraft(false);return}if(!$('settings').hidden&&$('pause').hidden){$('settings').hidden=true;return}if(!$('pause').hidden&&performance.now()-pauseOpenT>250){openPause(false);return}},true);
+// chat
+function closeChat(){$('chatin').hidden=true;$('chatin').value=''}
+function chatLine(n,m){const d=document.createElement('div');d.innerHTML=`<b>${esc(n)}</b> ${esc(m)}`;$('chatlog').appendChild(d);while($('chatlog').children.length>7)$('chatlog').firstChild.remove();setTimeout(()=>d.style.opacity=0,9000);setTimeout(()=>d.remove(),10200);sfx.play('click',.25,1.6)}
+addEventListener('keydown',e=>{if(e.code!=='KeyT'||e.target.tagName==='INPUT'||!started||!$('pause').hidden)return;e.preventDefault();quiet();document.exitPointerLock?.();$('chatin').hidden=false;setTimeout(()=>$('chatin').focus(),0)});
+$('chatin').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=$('chatin').value.trim().slice(0,140);closeChat();if(m)act({a:'chat',m});quiet();cv.requestPointerLock?.()}if(e.key==='Escape'){closeChat();quiet();cv.requestPointerLock?.()}e.stopPropagation()});
+
 W.render();if(QP.get('open'))setTimeout(()=>W.open(QP.get('open')),600);
 // the tick runs off a worker clock so hidden tabs keep hosting (main-thread timers get throttled)
 try{const tw=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'],{type:'text/javascript'})));tw.onmessage=tick}catch(e){setInterval(tick,50)}

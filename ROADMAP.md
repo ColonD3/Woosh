@@ -197,3 +197,7 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - sprint moves to Ctrl, MC-style: tap Ctrl while moving -> sprint (slight FOV kick) until you stop moving, then it resets
 - one CRAFT key: radial menu of every craftable thing around your cursor, click to craft; after crafting (or Esc) the cursor goes back into the game
 - FIXED: world curve now bends every object (flowers/trees/rocks were floating at high curve), water is a dense plane that follows you so lakes don't "empty" when bent
+### rivers (Toby, Sept 19)
+- NOW-ish: river mesh edges show -> deeper carved insets; nicer river -> lake transition (mist / particles where they meet)
+- later: river current pushes you
+- later: dig/blow a ditch + pour water -> it flows downhill dynamically (MC-like, more woosh-ish)
