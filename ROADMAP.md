@@ -105,3 +105,19 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - graphics pass 1: GTAO ambient occlusion (reconstructed from depth, off on phones, ?ao=0 to disable), VSM soft shadows 4096,
   shadow camera snapped to texels (no shimmer when moving), lavender sky fill, warmer lower sun (28°), softer bloom, milky grade
 - next graphics: leaf shadow flicker from wind (freeze/soften leaf casters), contact shadows, TAA, grass look
+- graphics pass 2 (Sept 19): TAA (jittered camera + depth reprojection + neighborhood clamp, ?taa=0 to disable), grass base now matches the ground instead of fading to black
+- TODO look: UI redesign (current one reads generic), grass closer to the reference
+
+## Soon (from Toby's notion list, Sept 19)
+### Terrain
+- way better terrain gen that uses the 3D assets fully: paths, rivers, and other ideas, while keeping good gameplay
+- caves that look really good; destructible terrain with bombs to expose ores (iron) -> smelt through the iron door
+- boulders minable piece by piece with a tool = better rock source; loose rocks you pick up get rarer; more boulders in caves (also makes caves look better)
+- tools crafted at the wooden door
+### Walls
+- click a start point, click an end point = one wall; start can snap to either side of a door (build both door sides first, then the rest)
+- chests, cooker, pens (fences) mount onto concrete walls in a really satisfying, obvious way
+### Build mode (G toggles)
+- place rocks and wood anywhere on any surface; rocks come in different shapes/sizes, break one if it's not what you wanted
+- your cursor picks the spot (within reach), with a preview; wooshi's arm reaches out and slaps it down
+- mine placed things back by selecting them with the cursor, like minecraft
