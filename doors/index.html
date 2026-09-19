@@ -243,14 +243,14 @@ void main(){
  gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
 fragmentShader:`uniform vec3 fogC;uniform float fogN,fogF;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 void main(){
- vec3 base=vec3(.1,.36,.08);
+ vec3 base=vec3(.19,.47,.12);
  vec3 tipA=vec3(.38,.8,.2),tipB=vec3(.58,.88,.26),tipC=vec3(.24,.66,.16);
  vec3 tip=mix(mix(tipC,tipA,smoothstep(.2,.6,vClump)),tipB,smoothstep(.6,.95,vClump)*.8+vVar*vVar*.2);
  vec3 c=mix(base,tip,pow(vY,1.1))*(.85+.3*vVar);
  c+=vec3(.12,.16,.04)*vGust*vY*.5;
  c=mix(c,vT.rgb*(.4+.55*vY),vT.a*.62);
  c=pow(c,vec3(2.2));
- float sh=mix(.45,1.,vSh);c*=sh*(.55+.45*vY);
+ float sh=mix(.45,1.,vSh);c*=sh*(.8+.2*vY);
  c+=vec3(1.,.8,.35)*vGlow*pow(vY,2.)*.35*sh;
  c*=2.3;
  c=mix(c,fogC,smoothstep(fogN,fogF,vDist));
@@ -590,15 +590,38 @@ Object.defineProperty(window,'__dbg',{get:()=>({remotes:remotes.size,mode:net.mo
 // ---------- post ----------
 const rt=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,samples:TOUCH?0:4});
 const composer=new EffectComposer(renderer,rt);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(innerWidth,innerHeight);
+const useTAA=QP.get('taa')!=='0';const HALTON=[...Array(8)].map((_,i)=>{const h=(b,n)=>{let f=1,r=0;n++;while(n>0){f/=b;r+=f*(n%b);n=Math.floor(n/b)}return r};return[h(2,i)-.5,h(3,i)-.5]});
 class ScenePass extends Pass{constructor(){super();this.rt=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,samples:TOUCH?0:4});
- this.rt.depthTexture=new THREE.DepthTexture();this.rt.depthTexture.type=THREE.UnsignedIntType;this.q=new FullScreenQuad(new THREE.ShaderMaterial(CopyShader));this.q.material.uniforms.tDiffuse.value=this.rt.texture}
+ this.rt.depthTexture=new THREE.DepthTexture();this.rt.depthTexture.type=THREE.UnsignedIntType;this.q=new FullScreenQuad(new THREE.ShaderMaterial({...CopyShader,uniforms:THREE.UniformsUtils.clone(CopyShader.uniforms)}));this.q.material.uniforms.tDiffuse.value=this.rt.texture}
  setSize(w,h){this.rt.setSize(w,h)}
- render(r,wb){r.setRenderTarget(this.rt);r.clear();r.render(scene,camera);r.setRenderTarget(this.renderToScreen?null:wb);this.q.render(r)}}
+ render(r,wb){const J=useTAA?HALTON[(this.f=(this.f||0)+1)%8]:null;if(J){const e=camera.projectionMatrix.elements;e[8]+=J[0]*2/this.rt.width;e[9]+=J[1]*2/this.rt.height}r.setRenderTarget(this.rt);r.clear();r.render(scene,camera);if(J)camera.updateProjectionMatrix();r.setRenderTarget(this.renderToScreen?null:wb);this.q.render(r)}}
 const scenePass=new ScenePass();composer.addPass(scenePass);
 let gtao=null;if(!TOUCH&&QP.get('ao')!=='0'){gtao=new GTAOPass(scene,camera,innerWidth,innerHeight,{depthTexture:scenePass.rt.depthTexture});
  gtao.updateGtaoMaterial({radius:2.4,distanceExponent:1.3,thickness:2,scale:1.6,samples:12,distanceFallOff:1});gtao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:16});gtao.blendIntensity=1;if(QP.has('aodbg'))gtao.output=GTAOPass.OUTPUT.Denoise;composer.addPass(gtao)}
 composer.addPass(new ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
  fragmentShader:'uniform sampler2D tDiffuse;varying vec2 vUv;void main(){vec4 c=texture2D(tDiffuse,vUv);if(any(isnan(c))||any(isinf(c)))c=vec4(0.,0.,0.,1.);gl_FragColor=vec4(clamp(c.rgb,0.,30.),1.);}'}));
+
+class TAAPass extends Pass{constructor(){super();const o={type:THREE.HalfFloatType,depthBuffer:false};this.h=[new THREE.WebGLRenderTarget(1,1,o),new THREE.WebGLRenderTarget(1,1,o)];this.i=0;this.first=true;this.prev=new THREE.Matrix4();this.vp=new THREE.Matrix4();
+ this.m=new THREE.ShaderMaterial({uniforms:{tCur:{value:null},tHist:{value:null},tDepth:{value:scenePass.rt.depthTexture},invVP:{value:new THREE.Matrix4()},prevVP:{value:new THREE.Matrix4()},res:{value:new THREE.Vector2(1,1)},first:{value:1}},
+ vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+ fragmentShader:`uniform sampler2D tCur,tHist,tDepth;uniform mat4 invVP,prevVP;uniform vec2 res;uniform float first;varying vec2 vUv;
+ float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
+ vec3 tm(vec3 c){return c/(1.+lum(c));}
+ void main(){vec3 c=texture2D(tCur,vUv).rgb;if(first>.5){gl_FragColor=vec4(c,1.);return;}
+  vec2 px=1./res;vec3 m1=vec3(0.),m2=vec3(0.);
+  for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec3 q=tm(texture2D(tCur,vUv+vec2(float(x),float(y))*px).rgb);m1+=q;m2+=q*q;}
+  m1/=9.;m2/=9.;vec3 sd=sqrt(max(m2-m1*m1,0.));vec3 mn=m1-1.25*sd,mx=m1+1.25*sd;
+  float d=texture2D(tDepth,vUv).x;vec4 w=invVP*vec4(vUv*2.-1.,d*2.-1.,1.);w/=w.w;vec4 pc=prevVP*w;vec2 puv=pc.xy/pc.w*.5+.5;
+  if(any(lessThan(puv,vec2(0.)))||any(greaterThan(puv,vec2(1.)))){gl_FragColor=vec4(c,1.);return;}
+  vec3 ht=clamp(tm(texture2D(tHist,puv).rgb),mn,mx);
+  float a=mix(.1,.3,clamp(length((puv-vUv)*res)/24.,0.,1.));
+  vec3 o=mix(ht,tm(c),a);gl_FragColor=vec4(o/max(1.-lum(o),1e-3),1.);}`});
+ this.q=new FullScreenQuad(this.m);this.c=new FullScreenQuad(new THREE.ShaderMaterial({...CopyShader,uniforms:THREE.UniformsUtils.clone(CopyShader.uniforms)}))}
+ setSize(w,h){for(const r of this.h)r.setSize(w,h);this.m.uniforms.res.value.set(w,h);this.first=true}
+ render(r,wb,rb){const u=this.m.uniforms;this.vp.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);u.invVP.value.copy(this.vp).invert();u.prevVP.value.copy(this.first?this.vp:this.prev);u.first.value=this.first?1:0;
+  u.tCur.value=rb.texture;u.tHist.value=this.h[this.i].texture;const out=this.h[1-this.i];r.setRenderTarget(out);this.q.render(r);
+  this.c.material.uniforms.tDiffuse.value=out.texture;r.setRenderTarget(this.renderToScreen?null:wb);this.c.render(r);this.i=1-this.i;this.prev.copy(this.vp);this.first=false}}
+if(useTAA)composer.addPass(new TAAPass());
 const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.42,.85,.78);if(QP.get('bloom')!=='0')composer.addPass(bloom);
 composer.addPass(new ShaderPass({uniforms:{tDiffuse:{value:null}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
  fragmentShader:'uniform sampler2D tDiffuse;varying vec2 vUv;void main(){vec4 c=texture2D(tDiffuse,vUv);vec2 d=vUv-.5;float v=1.-dot(d,d)*.55;c.rgb*=v;float Y=dot(c.rgb,vec3(.2126,.7152,.0722));c.rgb=mix(vec3(Y),c.rgb,1.04);c.rgb=c.rgb*.94+vec3(.018,.017,.024);c.rgb=mix(c.rgb,c.rgb*vec3(1.02,1.,.97),smoothstep(.2,1.2,Y));gl_FragColor=c;}'}));

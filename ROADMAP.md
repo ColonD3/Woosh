@@ -121,3 +121,14 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - place rocks and wood anywhere on any surface; rocks come in different shapes/sizes, break one if it's not what you wanted
 - your cursor picks the spot (within reach), with a preview; wooshi's arm reaches out and slaps it down
 - mine placed things back by selecting them with the cursor, like minecraft
+
+## Art direction: painted/stylized (Sept 19)
+- target vibe: Crimson Desert pack + No Way Out (Rocket Brush) forest shots — painted assets, soft short grass matching ground, big soft tree shadows, warm haze, DOF, warm yellow-green palette
+- approved packs: Stylized Rocks and Cliffs Pack (3dmarkus.art), 70 stylized rocks (ondrasaur) = main rock set, Free Stylized Cliff Rock (SimplePolygon), Stylized tree pack (Salah3D); maybe: 100 Natural and Stylized Rock MegaPack (only if placed well)
+- rejected: OozyArtist rocks, polytexrig tree, Alwoke trees, KayKit forest, amipolygon
+- textures: freestylized.com (all approved, with maps) -> assets/stylized/<name>/{color,normal,ambient_occlusion}.jpg (1k); 3dtextures.me stylized also approved
+- sketchfab packs need Toby's login: he downloads glTF into paper-meadow/incoming/
+- CC-BY models need a credits screen
+- packs optimized to models/packs/{rocks70,rockscliffs,trees}.glb (130MB -> 6MB); credits in CREDITS.md
+- ground pass (Sept 19): painted textures (moss_ground_02 + grass_03 blended by big noise, ground_06 dirt patches, cliff_rocks_02 triplanar, sand_01, snow_01) with anti-tiling (rotated second sample, noise-blended) + macro light/dark + warm/cool patches; grass is shorter and takes its color from the ground under it
+- NEXT: swap in packs (rocks70 scattered, rockscliffs as landmarks, pines from trees.glb), then procedural terrain gen v2
