@@ -161,3 +161,10 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - wooshi arm-slap animation when placing
 - UI redesign (needs a style reference from Toby)
 - perf pass (Sept 19): terrain skips texture layers that aren't there, shadow map 2048 (VSM blur was huge at 4096), AO at half res, dynamic resolution (pixel ratio .7-1.5 aiming for 60fps, ?fixres to turn off)
+
+## Little globe worlds (decided Sept 19)
+- fake globe: flat world that WRAPS (walk off east -> come in west, same N/S) + a shader that bends everything down with distance so it looks like a tiny planet
+- sizes small / medium / large / mega = wrap size (+ default curve); chunks generate as you explore, nearest first
+- terrain noise must tile seamlessly so there's no seam at the wrap
+- DONE: world curve shader on everything (terrain, grass, trees, water, builds; not shadows) + "world curve" slider in settings (per player, saved)
+- NEXT: chunked terrain streaming -> wrap (positions, multiplayer, builds) -> size picker in the world menu
