@@ -74,3 +74,4 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - drill snaps onto factory walls, shows in the node board, digs sulfur into its wired chest every ~6s
 - chests: "F open chest" prompt; click = 1, shift+click = all (put and take)
 - NEXT: mixer (sulfur + sand -> gunpowder), then props pass / hearts+food
+- DONE Sept 19: trees no longer regrow; plant branches (G with branches selected, click open ground) -> sapling grows into a tree in ~90s (can't chop saplings); saved + synced
