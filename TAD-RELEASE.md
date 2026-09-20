@@ -59,3 +59,10 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - branches: hold click on bushes (regrow 40s)
 - set spawn at your house door (Q or F)
 - NEXT: node automation editor, gunpowder source, planters, keybinds
+
+## Notes from Toby (Sept 19, later)
+- terrain borders are a bit jagged (later)
+- UI overhaul sometime (later)
+- gunpowder: a DRILL farms a new resource; mixer: that resource + sand -> gunpowder (after nodes)
+- real CAVES still missing (right now only cliff arches over ore) -> needs a proper pass
+- DONE: 1) chests/cookers snap-mount onto factory walls (blue ghost when snapping)  2) iron door node editor (F): wire chests + cookers, cut wires, drag nodes; chest->chest wires move items; new factories auto-wire

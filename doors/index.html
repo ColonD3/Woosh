@@ -36,6 +36,12 @@
   #chestui{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;width:min(380px,calc(100vw - 32px))}#chestT small{display:block;font-weight:500;font-size:12px;opacity:.65}.cgrid{display:flex;flex-wrap:wrap;gap:6px;min-height:44px}
   .card button.ci{position:relative;width:52px;height:52px;padding:6px;background:#f3e7cf;border-radius:12px}.card button.ci svg{width:100%;height:100%}.card button.ci b{position:absolute;right:4px;bottom:1px;font-size:13px;color:#23321f}
   #itemname{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:600 17px Fredoka,system-ui,sans-serif;color:#fffaf0;text-shadow:0 2px 8px rgba(20,30,20,.6);pointer-events:none;opacity:0;transition:opacity .35s;z-index:3;white-space:nowrap}#itemname.on{opacity:1;transition:opacity .08s}
+  #nodeui{position:fixed;inset:24px;z-index:7;width:auto!important;display:flex;flex-direction:column}#nodeboard{position:relative;flex:1;border-radius:14px;overflow:auto;background:#23321f radial-gradient(circle,rgba(255,248,235,.12) 1px,transparent 1.5px) 0 0/22px 22px}
+  .wires{position:absolute;inset:0;width:1400px;height:900px;overflow:visible}.wire{fill:none;stroke:#ffd28a;stroke-width:4;cursor:pointer;filter:drop-shadow(0 0 4px rgba(255,190,90,.7))}.wire:hover{stroke:#ff6a4a}
+  .node{position:absolute;width:168px;background:#fff8eb;border-radius:14px;box-shadow:0 4px 0 #141c12;font:500 13px Fredoka,system-ui,sans-serif;color:#23321f}.node.from{outline:3px solid #ffd28a}
+  .node .nh{display:flex;align-items:center;gap:6px;padding:8px 10px;cursor:grab;border-bottom:2px solid #eadcc1}.node .nh svg{width:22px;height:22px}.node.in .nh{background:#dcefff;border-radius:14px 14px 0 0}.node.out .nh{background:#ffe3d1;border-radius:14px 14px 0 0}.node.cooker .nh{background:#f0e0cf;border-radius:14px 14px 0 0}
+  .node .ni{padding:6px 10px 10px;display:flex;flex-wrap:wrap;gap:6px;min-height:22px}.node .ni span{display:flex;align-items:center;gap:2px}.node .ni svg{width:18px;height:18px}
+  .card .node button.pin,.card .node button.pout{position:absolute;top:29px;width:18px;height:18px;padding:0;border-radius:50%;border:3px solid #23321f;background:#ffd28a}.node .pin{left:-9px}.node .pout{right:-9px}
   #chatlog{position:fixed;left:16px;bottom:calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;max-width:min(420px,calc(100vw - 32px));pointer-events:none;z-index:4}
   #chatlog div{font:500 15px Fredoka,system-ui,sans-serif;color:#fffaf0;background:rgba(30,40,35,.55);padding:5px 10px;border-radius:10px;transition:opacity 1s}#chatlog b{color:#ffd28a}
   #chatin{position:fixed;left:16px;bottom:calc(112px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 32px));font:500 16px Fredoka,system-ui,sans-serif;padding:9px 12px;border-radius:12px;border:2px solid #fffaf0;background:rgba(30,40,35,.75);color:#fffaf0;z-index:6;box-sizing:border-box;outline:none}
@@ -117,7 +123,7 @@
  <div class="pg" id="pg-opts" hidden><b class="pt">settings</b><div class="sens"><label for="sensR">look speed</label><input type="range" id="sensR" min=".2" max="3" step=".05"><b id="sensV"></b></div><button class="g back">back</button></div>
  <p id="st"></p><div hidden><div class="modes" id="modes" role="radiogroup" aria-label="mode"><i class="thumb" id="mthumb"></i><button data-m="peaceful" role="radio">peaceful</button><button data-m="classic" role="radio">classic</button><button data-m="hard" role="radio">hard</button></div><p id="mdesc"></p><button id="solo">solo</button></div></div></div>
 <div id="pause" hidden><div class="card"><h1>paused</h1><button id="pResume">resume</button><button id="pInvite" class="alt">invite friends</button><div id="pCode" hidden></div><button id="pSet" class="g">settings</button><button id="pLeave" class="g">save + leave world</button></div></div>
-<div id="radial" hidden></div><div id="itemname"></div><div id="chestui" class="card" hidden><b id="chestT"></b><div id="chestIn" class="cgrid"></div><b class="pt" style="font-size:14px">your stuff · click to put it all in</b><div id="chestMine" class="cgrid"></div><button id="chestX" class="g">close</button></div><i id="cookall" hidden data-on="0"></i><div id="chatlog"></div><input id="chatin" hidden maxlength="140" placeholder="say something · enter to send · esc to cancel" autocomplete="off">
+<div id="radial" hidden></div><div id="nodeui" class="card" hidden><b>factory automation</b><p id="nodehint" class="mdesc"></p><div id="nodeboard"></div><button id="nodeX" class="g">close</button></div><div id="itemname"></div><div id="chestui" class="card" hidden><b id="chestT"></b><div id="chestIn" class="cgrid"></div><b class="pt" style="font-size:14px">your stuff · click to put it all in</b><div id="chestMine" class="cgrid"></div><button id="chestX" class="g">close</button></div><i id="cookall" hidden data-on="0"></i><div id="chatlog"></div><input id="chatin" hidden maxlength="140" placeholder="say something · enter to send · esc to cancel" autocomplete="off">
 <div id="hostmode" hidden><div><b>hosting mode</b><p id="hmtxt">the world keeps running · keep this tab open</p><button id="hmBack">back to the game</button></div></div><div id="net" hidden></div><div id="mine">0.0%</div><div id="board"></div><div id="dead" hidden></div><div id="fill" hidden><span id="filltxt"></span><div class="bar"><i id="fillbar"></i></div></div>
 <div id="end" hidden><div class="card"><h1 id="endh">island filled!</h1><ol id="endlist"></ol><button id="again">play again</button><p id="endwait" class="mdesc" hidden>waiting for the host to start a new round</p></div></div><div id="toast" hidden></div><div id="fps" hidden></div><div id="inv"></div><div id="craft"></div><div id="prompt" hidden></div><div id="hint" hidden></div><div id="buildhud" hidden></div><div id="craftmenu" class="card" hidden><b>door crafting</b><div id="craftlist"></div><div class="row"><button id="bookB" class="g">recipe book</button><button id="craftX">close</button></div></div><div id="xhair" hidden></div>
 <button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><div class="sens"><label for="bendR">world curve</label><input type="range" id="bendR" min="0" max="1" step=".01"><b id="bendV"></b></div><button id="sndB">sound: on</button><button id="setBack" class="g" hidden>back</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>Q</kbd> craft menu (doors, bombs, tools, roofs)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house · then craft a roof (wood + mud)<br>tools: mine boulders + iron ore (dark rocks with orange crystals), dig mud; iron tool also digs sand<br>cooker (Q to craft, G to place): F cooks iron ore + wood → iron<br><kbd>V</kbd> first person · <kbd>M</kbd> sound · <kbd>P</kbd> fps</p></div>
@@ -972,6 +978,7 @@ function handleAct(pid,m){const p=game.P.get(pid);if(!p||!p.alive)return;const x
  else if(m.a==='chop'){const t=trees[m.i];if(!t||t.down||Math.hypot(t.x-xz[0],t.z-xz[1])>4)return;t.regrow=performance.now()+60000;treeState(m.i,false);bcast({t:'tree',i:m.i,up:0});give(pid,'wood',4)}
  else if(m.a==='throw'){if(!cfg().throwOK)return;const pm={t:'proj',id:projId++,k:m.k==='bomb'?'bomb':'rock',o:pid,x:m.x,y:m.y,z:m.z,vx:m.vx,vy:m.vy,vz:m.vz};addProj(pm);bcast(pm)}
  else if(m.a==='chest'){const c=B.chests.get(m.id);if(!c||Math.hypot(wd(c.x,xz[0]),wd(c.z,xz[1]))>4)return;if(m.op==='put'){const n=Math.max(0,m.n|0);c.items[m.k]=(c.items[m.k]||0)+n}else if(m.op==='take'){const n=c.items[m.k]||0;if(!n)return;c.items[m.k]=0;give(pid,m.k,n)}bcast({t:'chestset',id:c.id,items:c.items});if(openChestId===c.id)renderChest()}
+ else if(m.a==='graph'){const d=B.doors.get(m.id);if(!d||!d.factory||!m.graph||!Array.isArray(m.graph.w))return;d.graph={w:m.graph.w.slice(0,60).map(w=>[String(w[0]),String(w[1])]),pos:m.graph.pos||{}};bcast({t:'graph',id:d.id,graph:d.graph})}
  else if(m.a==='chat'){const msg=String(m.m||'').slice(0,140);if(!msg)return;chatLine(p.name,msg);bcast({t:'chat',n:p.name,m:msg})}
  else if(m.a==='roof'){const d=B.doors.get(m.id);if(!d||!d.house||d.roof)return;d.roof=true;detectHouses();bcast({t:'roof',id:m.id});sfx.play('plank',.6,.8)}
  else if(m.a==='dig'){const k=m.k==='sand'?'sand':'mud';if(groundKind(xz[0],xz[1])!==k)return;give(pid,k,1)}
@@ -989,6 +996,7 @@ function clientMsg(d){if(d.t==='give')gain(d.k,d.n);else if(d.t==='world')applyW
  else if(d.t==='tree')treeState(d.i,!!d.up);else if(d.t==='proj')addProj(d);else if(d.t==='pend')endProj(d.id);else if(d.t==='boom'){boomFX(d);for(const [id,p] of projs)if(p.k==='bomb'&&Math.hypot(p.p.x-d.x,p.p.z-d.z)<1.5)endProj(id)}
  else if(d.t==='build')addBuild(d.b);
  else if(d.t==='chat')chatLine(d.n,d.m);
+ else if(d.t==='graph'){const o=B.doors.get(d.id);if(o){o.graph=d.graph;if(nodeDoor===o)renderNodes()}}
  else if(d.t==='chestset'){const c=B.chests.get(d.id);if(c){c.items=d.items;if(openChestId===c.id)renderChest()}}
  else if(d.t==='cookfx'){const c=B.cookers.get(d.id);if(c)c.heat=1}
  else if(d.t==='unbuild')removeBuild(d.k,d.id);
@@ -1031,7 +1039,7 @@ const B={doors:new Map(),walls:new Map(),rocks:new Map(),cookers:new Map(),chest
 const wallTex={map:sty('cliff_rocks_04','color',1),normalMap:sty('cliff_rocks_04','normal')},plankTex={map:sty('wood_planks_01','color',1),normalMap:sty('wood_planks_01','normal')};
 const concMat=new THREE.MeshStandardMaterial({map:sty('concrete_wall_01','color',1),normalMap:sty('concrete_wall_01','normal'),roughness:.9,color:'#e9e4da'}),ironMat=new THREE.MeshStandardMaterial({color:'#aab2b9',roughness:.35,metalness:.75});
 const wallMat=new THREE.MeshStandardMaterial({...wallTex,roughness:.92,color:'#f1e6d6'}),plankMat=new THREE.MeshStandardMaterial({...plankTex,roughness:.85,color:'#e9c9a2'}),frameMat=new THREE.MeshStandardMaterial({...plankTex,roughness:.85,color:'#b98a5e'});
-const ghostOK=new THREE.MeshBasicMaterial({color:'#9dff8a',transparent:true,opacity:.38,depthWrite:false}),ghostNo=new THREE.MeshBasicMaterial({color:'#ff7a6a',transparent:true,opacity:.38,depthWrite:false});
+const ghostSnap=new THREE.MeshBasicMaterial({color:'#7fd8ff',transparent:true,opacity:.55,depthWrite:false}),ghostOK=new THREE.MeshBasicMaterial({color:'#9dff8a',transparent:true,opacity:.38,depthWrite:false}),ghostNo=new THREE.MeshBasicMaterial({color:'#ff7a6a',transparent:true,opacity:.38,depthWrite:false});
 const WALL_H=2.7,WALL_T=.42,DOOR_W=1.5,REACH=9,ROCK_PER_M=1/1.5;
 const wallCost=L=>Math.max(1,Math.ceil(L*ROCK_PER_M));
 function jambs(d){const c=Math.cos(d.ry),s=Math.sin(d.ry);return[[d.x-c*DOOR_W/2,d.z+s*DOOR_W/2],[d.x+c*DOOR_W/2,d.z-s*DOOR_W/2]]}
@@ -1044,13 +1052,13 @@ function makeDoor(d){const g=new THREE.Group();const y=hAt(d.x,d.z)-.1;g.positio
  const hinge=new THREE.Group();hinge.position.set(-DOOR_W/2+.12,0,0);g.add(hinge);const lg=new THREE.BoxGeometry(DOOR_W-.24,2.36,.12);boxUV(lg,1.3,2.4,.12);const leaf=new THREE.Mesh(lg,d.iron?ironMat:plankMat);leaf.position.set((DOOR_W-.24)/2,1.2,0);leaf.castShadow=leaf.receiveShadow=true;hinge.add(leaf);
  const knob=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),new THREE.MeshStandardMaterial({color:'#3b3129',roughness:.4,metalness:.6}));knob.position.set(DOOR_W-.5,1.15,.1);hinge.add(knob);
  d.hinge=hinge;d.ang=0;d.y=y;return g}
-function addBuild(m,quiet){if(m.k==='door'){if(B.doors.has(m.id))return;const d={id:m.id,x:m.x,z:m.z,ry:m.ry,o:m.o,house:false,roof:!!m.roof,iron:!!m.iron};d.g=makeDoor(d);scene.add(d.g);B.doors.set(m.id,d)}
+function addBuild(m,quiet){if(m.k==='door'){if(B.doors.has(m.id))return;const d={id:m.id,x:m.x,z:m.z,ry:m.ry,o:m.o,house:false,roof:!!m.roof,iron:!!m.iron,graph:m.graph||null};d.g=makeDoor(d);scene.add(d.g);B.doors.set(m.id,d)}
  else if(m.k==='chest'){if(B.chests.has(m.id))return;const c={id:m.id,x:m.x,z:m.z,ry:m.ry,io:m.io,items:m.items||{}};c.g=makeChest(c);scene.add(c.g);B.chests.set(m.id,c);rockSurf.push(c.surf={x:c.x,z:c.z,base:hAt(c.x,c.z)-.1,top:hAt(c.x,c.z)+.85,r:.6})}
  else if(m.k==='cooker'){if(B.cookers.has(m.id))return;const c={id:m.id,x:m.x,z:m.z,ry:m.ry};c.g=makeCooker(c);scene.add(c.g);B.cookers.set(m.id,c);rockSurf.push(c.surf={x:c.x,z:c.z,base:hAt(c.x,c.z)-.1,top:hAt(c.x,c.z)+1.3,r:.95})}
  else if(m.k==='rock'){if(B.rocks.has(m.id))return;const r={id:m.id,x:m.x,y:m.y!=null?m.y:hAt(m.x,m.z)-.08*m.s,z:m.z,ry:m.ry,s:m.s,m:m.m};r.g=makeRock(r);scene.add(r.g);B.rocks.set(m.id,r);rockSurf.push(r.surf={x:r.x,z:r.z,base:r.y,top:r.y+r.s*.85,r:r.s*.55})}
  else if(m.k==='wall'){if(B.walls.has(m.id))return;const w={id:m.id,ax:m.ax,az:m.az,bx:m.bx,bz:m.bz,mat:m.mat==='concrete'?'concrete':'rock'};w.g=makeWall(w);scene.add(w.g);B.walls.set(m.id,w)}
  B.nid=Math.max(B.nid,m.id+1);if(!quiet){sfx.play('plank',.5,.9);puff(m.k==='door'?m.x:(m.ax+m.bx)/2,hAt(m.x??m.ax,m.z??m.az)+.3,m.k==='door'?m.z:(m.az+m.bz)/2,14,2,[.85,.8,.7])}detectHouses()}
-function buildsList(){return[...[...B.doors.values()].map(d=>({k:'door',id:d.id,x:d.x,z:d.z,ry:d.ry,o:d.o,roof:d.roof?1:0,iron:d.iron?1:0})),...[...B.walls.values()].map(w=>({k:'wall',id:w.id,ax:w.ax,az:w.az,bx:w.bx,bz:w.bz,mat:w.mat})),...[...B.cookers.values()].map(c=>({k:'cooker',id:c.id,x:c.x,z:c.z,ry:c.ry})),...[...B.chests.values()].map(c=>({k:'chest',id:c.id,x:c.x,z:c.z,ry:c.ry,io:c.io,items:{...c.items}})),...[...B.rocks.values()].map(r=>({k:'rock',id:r.id,x:r.x,y:+r.y.toFixed(2),z:r.z,ry:r.ry,s:r.s,m:r.m}))]}
+function buildsList(){return[...[...B.doors.values()].map(d=>({k:'door',id:d.id,x:d.x,z:d.z,ry:d.ry,o:d.o,roof:d.roof?1:0,iron:d.iron?1:0,graph:d.graph||undefined})),...[...B.walls.values()].map(w=>({k:'wall',id:w.id,ax:w.ax,az:w.az,bx:w.bx,bz:w.bz,mat:w.mat})),...[...B.cookers.values()].map(c=>({k:'cooker',id:c.id,x:c.x,z:c.z,ry:c.ry})),...[...B.chests.values()].map(c=>({k:'chest',id:c.id,x:c.x,z:c.z,ry:c.ry,io:c.io,items:{...c.items}})),...[...B.rocks.values()].map(r=>({k:'rock',id:r.id,x:r.x,y:+r.y.toFixed(2),z:r.z,ry:r.ry,s:r.s,m:r.m}))]}
 function removeBuild(k,id){const M=k==='door'?B.doors:k==='wall'?B.walls:k==='cooker'?B.cookers:k==='chest'?B.chests:B.rocks;const o=M.get(id);if(!o)return;scene.remove(o.g);if(o.roofMesh)scene.remove(o.roofMesh);M.delete(id);if(o.surf){const i=rockSurf.indexOf(o.surf);if(i>=0)rockSurf.splice(i,1)}sfx.play('pick',.5,.7);detectHouses()}
 function clearBuildsRoofs(){for(const d of B.doors.values())if(d.roofMesh)scene.remove(d.roofMesh)}
 function clearBuilds(){clearBuildsRoofs();for(const c of B.chests.values()){scene.remove(c.g);const i=rockSurf.indexOf(c.surf);if(i>=0)rockSurf.splice(i,1)}B.chests.clear();for(const c of B.cookers.values()){scene.remove(c.g);const i=rockSurf.indexOf(c.surf);if(i>=0)rockSurf.splice(i,1)}B.cookers.clear();for(const r of B.rocks.values()){scene.remove(r.g);const i=rockSurf.indexOf(r.surf);if(i>=0)rockSurf.splice(i,1)}B.rocks.clear();for(const d of B.doors.values())scene.remove(d.g);for(const w of B.walls.values())scene.remove(w.g);B.doors.clear();B.walls.clear()}
@@ -1082,7 +1090,7 @@ function holdingDoor(){return ['door','idoor','cooker','chest'].includes(HOTBAR[
 function setBuildMode(on){B.mode=on;B.start=null;if(!on){for(const k of['ghostW','ghostD','marker'])if(B[k]){scene.remove(B[k]);B[k]=null}}
  document.getElementById('buildhud').hidden=!on;if(on){ui.toast(holdingDoor()?'place your door · click':'build walls · click a start point, click an end point');sfx.play('click',.3,.8)}}
 function buildClick(){if(dead)return;const a=buildAim();a.x=wrapC(a.x);a.z=wrapC(a.z);
- if(holdingDoor()){const hk=HOTBAR[sel];if(!inv[hk]){ui.toast('none left · craft more with Q');sfx.play('nope',.3);return}inv[hk]--;renderInv();const ry=yaw+Math.PI;act({a:'build',k:hk,io:chestIO,x:+a.x.toFixed(2),z:+a.z.toFixed(2),ry:+ry.toFixed(3)});armSlap(a);return}
+ if(holdingDoor()){const hk=HOTBAR[sel];if(!inv[hk]){ui.toast('none left · craft more with Q');sfx.play('nope',.3);return}inv[hk]--;renderInv();let ry=yaw+Math.PI,px=a.x,pz=a.z;const sn=MOUNT_D[hk]?wallSnap(a.x,a.z,MOUNT_D[hk]):null;if(sn){px=sn.x;pz=sn.z;ry=sn.ry;sfx.play('plank',.6,.6);ui.toast('attached to the factory')}act({a:'build',k:hk,io:chestIO,x:+wrapC(px).toFixed(2),z:+wrapC(pz).toFixed(2),ry:+ry.toFixed(3)});armSlap(a);return}
  if(HOTBAR[sel]==='rock'){if(!inv.rock){ui.toast('no rocks · roll over some, or mine boulders');sfx.play('nope',.3);return}const ra=rockAim();inv.rock--;renderInv();act({a:'build',k:'rock',x:+wrapC(ra.x).toFixed(2),y:+ra.y.toFixed(2),z:+wrapC(ra.z).toFixed(2),ry:+(rnd()*6.28).toFixed(2),s:+(.45+rnd()*.6).toFixed(2),m:Math.floor(rnd()*ROCK_SHAPES.length)});armSlap(a);return}
  const s=snapPt(a.x,a.z);if(!B.start){B.start=s;sfx.play('click',.35,1.3);return}
  const L=Math.hypot(s.x-B.start.x,s.z-B.start.z);if(L<.6){B.start=null;return}const c=wallCost(L),wm=HOTBAR[sel]==='concrete'?'concrete':'rock';if(inv[wm]<c){ui.toast(`need ${c} ${INV_NAMES[wm]} for that wall (you have ${inv[wm]})`);sfx.play('nope',.3);return}
@@ -1090,10 +1098,10 @@ function buildClick(){if(dead)return;const a=buildAim();a.x=wrapC(a.x);a.z=wrapC
 let slapT=0,slapTo=new THREE.Vector3();function armSlap(p){slapT=.35;slapTo.set(p.x,hAt(p.x,p.z),p.z);shake=.12}
 function updBuild(dt,t){
  for(const d of B.doors.values()){let near=false;if(d.house){const pl=[[pos.x,pos.z],...[...remotes.values()].map(r=>[r.x,r.z])];near=pl.some(([x,z])=>Math.hypot(x-d.x,z-d.z)<2.4)}const tgt=near?1.75:0;const pa=d.ang;d.ang+=(tgt-d.ang)*Math.min(1,dt*7);d.hinge.rotation.y=-d.ang;if((pa<.05)!==(d.ang<.05)&&d.house)sfx.play('plank',.35,near?1.3:.9)}
- const pr=document.getElementById('prompt');if(!B.mode&&!dead&&started){const d=nearDoor();if(d&&document.getElementById('craftmenu').hidden){pr.hidden=false;pr.innerHTML='<kbd>F</kbd> craft at door';}else if(pr.innerHTML.includes('craft at door'))pr.hidden=true}
+ const pr=document.getElementById('prompt');if(!B.mode&&!dead&&started){const d=nearDoor();if(d&&document.getElementById('craftmenu').hidden){pr.hidden=false;pr.innerHTML=d.factory?'<kbd>F</kbd> factory automation':'<kbd>F</kbd> craft at door';}else if(pr.innerHTML.includes('craft at door'))pr.hidden=true}
  if(slapT>0){slapT-=dt;me.g.userData.slap=Math.sin((1-slapT/.35)*Math.PI)}else me.g.userData.slap=0;
  if(!B.mode)return;const a=buildAim();
- if(holdingDoor()){if(!B.ghostD){B.ghostD=new THREE.Mesh(new THREE.BoxGeometry(DOOR_W+.3,2.8,.5),ghostOK);scene.add(B.ghostD)}B.ghostD.material=inv[HOTBAR[sel]]?ghostOK:ghostNo;if(HOTBAR[sel]==='chest')document.getElementById('buildhud').innerHTML=`<b>build mode</b> · placing an <b>${chestIO==='in'?'INPUT':'OUTPUT'}</b> chest (<kbd>R</kbd> to switch) · put it touching factory walls · <kbd>G</kbd> exit`;B.ghostD.position.set(a.x,hAt(a.x,a.z)+1.4,a.z);B.ghostD.rotation.y=yaw+Math.PI;if(B.ghostW)B.ghostW.visible=false;return}
+ if(holdingDoor()){if(!B.ghostD){B.ghostD=new THREE.Mesh(new THREE.BoxGeometry(DOOR_W+.3,2.8,.5),ghostOK);scene.add(B.ghostD)}B.ghostD.scale.set(1,1,1);B.ghostD.material=inv[HOTBAR[sel]]?ghostOK:ghostNo;if(HOTBAR[sel]==='chest')document.getElementById('buildhud').innerHTML=`<b>build mode</b> · placing an <b>${chestIO==='in'?'INPUT':'OUTPUT'}</b> chest (<kbd>R</kbd> to switch) · put it touching factory walls · <kbd>G</kbd> exit`;{const hk=HOTBAR[sel];const sn=MOUNT_D[hk]?wallSnap(a.x,a.z,MOUNT_D[hk]):null;const gx=sn?sn.x:a.x,gz=sn?sn.z:a.z;const gh=hk==='chest'?.8:hk==='cooker'?1.4:2.8;B.ghostD.scale.set(hk==='chest'?.65:hk==='cooker'?1:1,gh/2.8,hk==='chest'?1.4:hk==='cooker'?2.6:1);B.ghostD.position.set(gx,hAt(gx,gz)+gh/2,gz);B.ghostD.rotation.y=sn?sn.ry:yaw+Math.PI;B.ghostD.material=!inv[hk]?ghostNo:sn?ghostSnap:ghostOK;if(MOUNT_D[hk]&&hk!=='chest')document.getElementById('buildhud').innerHTML=`<b>build mode</b> · placing a cooker · ${sn?'<b>snaps onto the factory wall</b>':'aim at a factory wall to attach it'} · <kbd>G</kbd> exit`;if(hk==='chest')document.getElementById('buildhud').innerHTML=`<b>build mode</b> · <b>${chestIO==='in'?'INPUT':'OUTPUT'}</b> chest (<kbd>R</kbd> switch) · ${sn?'<b>snaps onto the factory wall</b>':'aim at a factory wall to attach it'} · <kbd>G</kbd> exit`}if(B.ghostW)B.ghostW.visible=false;return}
  if(B.ghostD){scene.remove(B.ghostD);B.ghostD=null}
  if(HOTBAR[sel]==='rock'){if(B.ghostW)B.ghostW.visible=false;if(!B.marker){B.marker=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,3.2,16),ghostOK);scene.add(B.marker)}const ra=rockAim();B.marker.material=inv.rock?ghostOK:ghostNo;B.marker.position.set(ra.x,ra.y+.2,ra.z);B.marker.scale.set(2.4,.18,2.4);document.getElementById('buildhud').innerHTML=`<b>build mode</b> · click to place a rock (${inv.rock} left) · aim at a rock or wall to stack on it · every one is a different shape · mine it back with a pickaxe · <kbd>G</kbd> exit`;return}
  if(B.marker)B.marker.scale.set(1,1,1);
@@ -1133,10 +1141,10 @@ function renderCraft(book){const m=document.getElementById('craftlist');m.innerH
  if(book){const w=document.createElement('p');w.className='mdesc';w.innerHTML='<b>where stuff comes from</b><br>'+Object.entries(WHERE).map(([k,v])=>`${INV_NAMES[k]||k}: ${v}`).join('<br>');m.appendChild(w)}}
 function craftDoor(){if(inv.wood<6){ui.toast('a door needs 6 wood');sfx.play('nope',.3);return}inv.wood-=6;inv.door++;renderInv('door');sfx.play('craft',.5);showHint('door crafted! pick it (5), press G, click to place. then wall it in with rocks')}
 document.getElementById('craftX').onclick=()=>openCraft(false);document.getElementById('bookB').onclick=e=>{const b=e.target.dataset.on!=='1';e.target.dataset.on=b?'1':'0';e.target.textContent=b?'back':'recipe book';renderCraft(b)};
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.repeat||!started)return;if(e.code==='KeyG')setBuildMode(!B.mode);if(e.code==='KeyF'){const m=document.getElementById('craftmenu');if(!m.hidden)openCraft(false);else if(nearDoor())openCraft(true)}if(e.code==='Escape')openCraft(false)});
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.repeat||!started)return;if(e.code==='KeyG')setBuildMode(!B.mode);if(e.code==='KeyF'){const m=document.getElementById('craftmenu');const nd=nearDoor();if(nodeDoor){openNodes(null)}else if(!m.hidden)openCraft(false);else if(nd&&nd.factory)openNodes(nd);else if(nd)openCraft(true)}if(e.code==='Escape')openCraft(false)});
 cv.addEventListener('mousedown',e=>{if(document.pointerLockElement!==cv||!B.mode)return;if(e.button===0)buildClick();if(e.button===2)B.start=null},true);
 
-if(QP.has('dev'))Object.assign(window,{__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
+if(QP.has('dev'))Object.assign(window,{__openNodes:openNodes,__wallSnap:wallSnap,__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
 // ---------- loop ----------
 let started=false,fpsN=0,fpsT=0;
 const clock=new THREE.Clock();const _sR=new THREE.Vector3(),_sU=new THREE.Vector3(),_sY=new THREE.Vector3(0,1,0),_sP=new THREE.Vector3();let stepT=0,camPos=new THREE.Vector3(),camInit=false;
@@ -1262,6 +1270,12 @@ document.getElementById('wfile').onchange=e=>{const f=e.target.files[0];if(f)W.u
 addEventListener('visibilitychange',()=>{if(document.hidden)W.save()});addEventListener('pagehide',()=>W.save());
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-'+b.dataset.go);sfx.init();sfx.play('click',.3)});document.querySelectorAll('.pg .back').forEach(b=>b.onclick=()=>{document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-home');sfx.play('click',.3,.8)});
 if(QP.get('join'))document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-join');
+// snap chests/cookers flush onto factory walls
+function wallSnap(x,z,depth){let best=null,bd=2.6;for(const d of B.doors.values()){if(!d.factory||!d.loop)continue;const P=d.loop;for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1];const vx=b[0]-a[0],vz=b[1]-a[1],L=Math.hypot(vx,vz)||1;let t=((x-a[0])*vx+(z-a[1])*vz)/(L*L);if(t<.08||t>.92)continue;
+  const cx=a[0]+vx*t,cz=a[1]+vz*t;const dd=Math.hypot(x-cx,z-cz);if(dd>bd)continue;const nx=-vz/L,nz=vx/L;const side=Math.sign((x-cx)*nx+(z-cz)*nz)||1;const off=WALL_T/2+depth/2+.02;
+  bd=dd;best={x:cx+nx*side*off,z:cz+nz*side*off,ry:Math.atan2(nx*side,nz*side),door:d}}}return best}
+const MOUNT_D={chest:.72,cooker:1.3};
+
 // ---------- chests + factory automation ----------
 let chestIO='in';
 const chestMatIn=new THREE.MeshStandardMaterial({...plankTex,roughness:.8,color:'#d9b27a'}),bandIn=new THREE.MeshStandardMaterial({color:'#3aa7ff',roughness:.5}),bandOut=new THREE.MeshStandardMaterial({color:'#ff7a2e',roughness:.5});
@@ -1276,10 +1290,14 @@ function renderChest(){const c=B.chests.get(openChestId);if(!c){$('chestui').hid
 function openChest(c){openChestId=c?c.id:null;$('chestui').hidden=!c;if(c){quiet();document.exitPointerLock?.();renderChest();sfx.play('plank',.4,1.2)}else if(started&&!TOUCH)cv.requestPointerLock?.()}
 // factory brain (host): input chest -> cooker -> output chest
 let facT=0;
+function facParts(d){return{chests:[...B.chests.values()].filter(c=>factoryOf(c.x,c.z,1.3)===d),cooks:[...B.cookers.values()].filter(c=>factoryOf(c.x,c.z,1.7)===d)}}
+function autoGraph(d){const{chests,cooks}=facParts(d);const w=[];const ins=chests.filter(c=>c.io==='in'),outs=chests.filter(c=>c.io==='out');for(const k of cooks){for(const c of ins)w.push(['c'+c.id,'k'+k.id]);if(outs[0])w.push(['k'+k.id,'c'+outs[0].id])}if(!cooks.length&&ins[0]&&outs[0])w.push(['c'+ins[0].id,'c'+outs[0].id]);return{w,pos:{}}}
 function factoryTick(dt){if(net.mode==='client')return;facT-=dt;if(facT>0)return;facT=1;
- for(const d of B.doors.values()){if(!d.factory)continue;const ins=[...B.chests.values()].filter(c=>c.io==='in'&&factoryOf(c.x,c.z,1.3)===d),outs=[...B.chests.values()].filter(c=>c.io==='out'&&factoryOf(c.x,c.z,1.3)===d),cooks=[...B.cookers.values()].filter(c=>factoryOf(c.x,c.z,1.6)===d);
-  if(!ins.length||!outs.length||!cooks.length)continue;
-  for(const ck of cooks){ck.fj=(ck.fj||0)+1;if(ck.fj<3)continue;const src=ins.find(c=>(c.items.ore||0)>0&&(c.items.wood||0)>0);if(!src)continue;ck.fj=0;src.items.ore--;src.items.wood--;const out=outs[0];out.items.ingot=(out.items.ingot||0)+1;ck.heat=1;bcast({t:'chestset',id:src.id,items:src.items});bcast({t:'chestset',id:out.id,items:out.items});bcast({t:'cookfx',id:ck.id});if(openChestId)renderChest()}}}
+ for(const d of B.doors.values()){if(!d.factory)continue;const g=d.graph||autoGraph(d);const{chests,cooks}=facParts(d);const C=id=>chests.find(c=>'c'+c.id===id),K=id=>cooks.find(c=>'k'+c.id===id);const dirty=new Set();
+  for(const ck of cooks){ck.fj=(ck.fj||0)+1;if(ck.fj<3)continue;const srcs=g.w.filter(w=>w[1]==='k'+ck.id).map(w=>C(w[0])).filter(Boolean),dst=g.w.filter(w=>w[0]==='k'+ck.id).map(w=>C(w[1])).filter(Boolean)[0];if(!dst)continue;
+   const oreC=srcs.find(c=>(c.items.ore||0)>0),fuelC=srcs.find(c=>(c.items.wood||0)>0);if(!oreC||!fuelC)continue;ck.fj=0;oreC.items.ore--;fuelC.items.wood--;dst.items.ingot=(dst.items.ingot||0)+1;ck.heat=1;dirty.add(oreC).add(fuelC).add(dst);bcast({t:'cookfx',id:ck.id})}
+  for(const[a,b]of g.w){const A=C(a),Bc=C(b);if(!A||!Bc)continue;const k=Object.keys(A.items).find(k=>A.items[k]>0);if(!k)continue;A.items[k]--;Bc.items[k]=(Bc.items[k]||0)+1;dirty.add(A).add(Bc)}
+  for(const c of dirty)bcast({t:'chestset',id:c.id,items:c.items});if(dirty.size&&openChestId)renderChest();if(dirty.size&&$('nodeui')&&!$('nodeui').hidden)renderNodes()}}
 
 // ---------- branches from bushes ----------
 let bushT=0,bushSnd=0;
@@ -1288,6 +1306,31 @@ function updBush(dt){if(!started||dead||B.mode)return;const pr=document.getEleme
  if(!b){bushT=0;if(pr.innerHTML.includes('branches'))pr.hidden=true;return}
  if(mouseHeld){bushT+=dt/.9;bushSnd-=dt;if(bushSnd<=0){bushSnd=.25;sfx.play('step_grass_'+Math.floor(Math.random()*5),.5,1.3);puff(b.x,b.y+.5,b.z,4,1.5,[.4,.65,.3])}if(bushT>=1){bushT=0;b.cd=now+40000;gain('branch',2)}}else bushT=Math.max(0,bushT-dt);
  pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(bushT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to gather branches`}
+
+// ---------- factory node editor (F at an iron door) ----------
+let nodeDoor=null,wireFrom=null,dragN=null;
+function nodeList(d){const{chests,cooks}=facParts(d);const g=d.graph||(d.graph=autoGraph(d));const L=[];let yi=0,yk=0,yo=0;
+ for(const c of chests){const id='c'+c.id;const col=c.io==='in'?0:2;L.push({id,kind:'chest',io:c.io,o:c,name:(c.io==='in'?'input':'output')+' chest',x:g.pos[id]?.[0]??(col?560:40),y:g.pos[id]?.[1]??(40+(col?yo++:yi++)*120)})}
+ for(const k of cooks){const id='k'+k.id;L.push({id,kind:'cooker',o:k,name:'cooker',x:g.pos[id]?.[0]??300,y:g.pos[id]?.[1]??(40+yk++*120)})}return L}
+function openNodes(d){nodeDoor=d;$('nodeui').hidden=!d;if(d){quiet();document.exitPointerLock?.();renderNodes();sfx.play('plank',.5,.7)}else if(started&&!TOUCH)cv.requestPointerLock?.()}
+function renderNodes(){const d=nodeDoor;if(!d)return;const g=d.graph||(d.graph=autoGraph(d));const L=nodeList(d);const board=$('nodeboard');board.innerHTML='';
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','wires');board.appendChild(svg);
+ const port=(n,side)=>[n.x+(side==='out'?168:0),n.y+38];
+ for(const[a,b]of g.w){const A=L.find(n=>n.id===a),Bn=L.find(n=>n.id===b);if(!A||!Bn)continue;const[x1,y1]=port(A,'out'),[x2,y2]=port(Bn,'in');const pth=document.createElementNS('http://www.w3.org/2000/svg','path');const mx=(x1+x2)/2;pth.setAttribute('d',`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);pth.setAttribute('class','wire');
+  pth.onclick=()=>{g.w=g.w.filter(w=>!(w[0]===a&&w[1]===b));sendGraph();renderNodes();sfx.play('pick',.4,.7)};svg.appendChild(pth)}
+ for(const n of L){const el=document.createElement('div');el.className='node '+n.kind+(n.io?' '+n.io:'');el.style.left=n.x+'px';el.style.top=n.y+'px';
+  const items=n.kind==='chest'?Object.entries(n.o.items).filter(([k,v])=>v>0).map(([k,v])=>`<span>${ICON[k]||''}<b>${v}</b></span>`).join('')||'<i>empty</i>':'<i>ore + wood → iron</i>';
+  el.innerHTML=`<div class="nh">${n.kind==='chest'?ICON.chest:ICON.cooker}<b>${n.name}</b></div><div class="ni">${items}</div><button class="pin" title="connect from here"></button><button class="pout" title="drag a wire out"></button>`;
+  el.querySelector('.pout').onclick=e=>{e.stopPropagation();wireFrom=n.id;renderNodes();sfx.play('click',.3,1.5)};
+  el.querySelector('.pin').onclick=e=>{e.stopPropagation();if(!wireFrom||wireFrom===n.id)return;if(!g.w.some(w=>w[0]===wireFrom&&w[1]===n.id))g.w.push([wireFrom,n.id]);wireFrom=null;sendGraph();renderNodes();sfx.play('craft',.4,1.4)};
+  el.querySelector('.nh').onmousedown=e=>{dragN={n,ox:e.clientX-n.x,oy:e.clientY-n.y}};if(wireFrom===n.id)el.classList.add('from');board.appendChild(el)}
+ $('nodehint').textContent=wireFrom?'now click the LEFT dot of where it should go':'click a node’s right dot, then another node’s left dot to wire them · click a wire to cut it · drag nodes by their title';
+ if(!L.length)board.innerHTML='<p class="mdesc" style="padding:20px">nothing attached yet. place chests + a cooker snapped onto this factory’s walls</p>'}
+addEventListener('mousemove',e=>{if(!dragN||!nodeDoor)return;const g=nodeDoor.graph;g.pos[dragN.n.id]=[Math.max(0,e.clientX-dragN.ox),Math.max(0,e.clientY-dragN.oy)];dragN.n.x=g.pos[dragN.n.id][0];renderNodes()});
+addEventListener('mouseup',()=>{if(dragN){dragN=null;sendGraph()}});
+function sendGraph(){act({a:'graph',id:nodeDoor.id,graph:nodeDoor.graph})}
+document.getElementById('nodeX').onclick=()=>openNodes(null);
+addEventListener('keydown',e=>{if(e.code==='Escape'&&nodeDoor){if(wireFrom){wireFrom=null;renderNodes()}else openNodes(null);e.stopPropagation()}},true);
 
 // ---------- cooker ----------
 const cookStone=new THREE.MeshStandardMaterial({map:sty('cliff_rocks_04','color',1),normalMap:sty('cliff_rocks_04','normal'),roughness:.9,color:'#d9cdbd'});
@@ -1319,7 +1362,7 @@ document.getElementById('chestX').onclick=()=>openChest(null);
 
 // ---------- pause menu, esc flow, chat ----------
 let pauseOpenT=0,suppressPause=0;const $=id=>document.getElementById(id);
-function anyMenu(){return radialOpen||!$('chestui').hidden||!$('craftmenu').hidden||!$('settings').hidden||!$('hostmode').hidden||!$('chatin').hidden}
+function anyMenu(){return radialOpen||!$('nodeui').hidden||!$('chestui').hidden||!$('craftmenu').hidden||!$('settings').hidden||!$('hostmode').hidden||!$('chatin').hidden}
 function openPause(on){$('pause').hidden=!on;if(on){pauseOpenT=performance.now()+(setFromPause?0:0);$('pInvite').hidden=net.mode==='client';if(net.peer&&net.mode==='host')showCode()}else $('settings').hidden=true}
 function showCode(){const c=net.code||'';const link=location.origin+location.pathname+'?size='+SZ+'&join='+c;$('pCode').hidden=false;$('pCode').innerHTML=esc(c)+'<small>tap to copy invite link</small>';$('pCode').onclick=()=>{try{navigator.clipboard.writeText(link);ui.toast('invite link copied')}catch(e){}};$('pInvite').hidden=true}
 $('pResume').onclick=()=>{openPause(false);cv.requestPointerLock?.()};
