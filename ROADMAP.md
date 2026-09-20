@@ -287,3 +287,5 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [done] deep caves: ramp from each surface cave into tunnels + chambers (iron shallow, copper mid, gold deep), darkness, torches (wood+coal, drills make coal), gold smelting
 - [done] tools in chests, 9-slot hotbar + bag overflow, rocks stop spawning after first tool, death keeps 25-50% + tool
 - [next] rock dungeons, gold uses (forge/gold door), diamonds + rock boss chamber
+- [done] caves v3: minecraft-style worm caves + caverns carved into a real volume (surface nets), terrain holes, no domes, vines only at mouths, real darkness, camera collision, bombs carve craters, surface coal, drills need cranking (F), stamina buff, no ground gunpowder, name worlds
+- [next] check cave gen time on big maps, rock dungeons
