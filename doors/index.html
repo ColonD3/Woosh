@@ -488,7 +488,7 @@ function updTrail(av,p){const tr=av.trail,last=tr[tr.length-1];if(!last||Math.hy
   a.set([pt.x+nx,hAt(pt.x+nx,pt.z+nz)+.07,pt.z+nz,pt.x-nx,hAt(pt.x-nx,pt.z-nz)+.07,pt.z-nz],i*6)}
  av.geo.attributes.position.needsUpdate=true;av.geo.setDrawRange(0,(n-1)*6)}
 const COLORS=['#ff5a2e','#3aa7ff','#ffd23a','#c35cff','#37d67a','#ff5ab4','#ffffff','#20d0c8'];
-let me=makeAvatar(COLORS[0]);me.onStep=h=>sfx.tap(h);
+let me=makeAvatar(COLORS[0]);me.onStep=myStep;
 let player=me.g;
 const pos=new THREE.Vector3(0,hAt(0,0),0),vel=new THREE.Vector3();let onGround=true,face=0,squash=0,firstPerson=false;
 
@@ -677,7 +677,8 @@ function onDeadMsg(m){if(m.id===net.myId){dead=true;for(const k in inv)inv[k]=Ma
 
 // ---------- network ----------
 const remotes=new Map();const _rp=new THREE.Vector3();
-function remoteStep(av){return h=>{const d=camera.position.distanceTo(av.g.position);if(d<14)sfx.tap(h,Math.max(0,1-d/14)*.7)}}
+function myStep(h){if(onGround&&Math.hypot(vel.x,vel.z)>1.1)sfx.tap(h)}
+function remoteStep(av){return h=>{const p=av.g.position,lp=av._lp||(av._lp=p.clone()),now=performance.now();const moved=Math.hypot(p.x-lp.x,p.z-lp.z)/Math.max(.016,(now-(av._lt||now-100))/1000);lp.copy(p);av._lt=now;if(moved<1.1)return;const d=camera.position.distanceTo(p);if(d<14)sfx.tap(h,Math.max(0,1-d/14)*.7)}}
 function upsertRemote(id,st){let r=remotes.get(id);if(!r){r={av:makeAvatar(st.c),x:st.x,y:st.y,z:st.z,f:st.f};r.av.onStep=remoteStep(r.av);remotes.set(id,r)}
  if(r.av.hex!==st.c){r.av.dispose();r.av=makeAvatar(st.c);r.av.onStep=remoteStep(r.av)}r.tx=st.x;r.ty=st.y;r.tz=st.z;r.tf=st.f;r.out=st.o;
  const vis=st.a!==false;if(!vis&&r.av.g.visible)r.av.trail=[];r.av.g.visible=r.av.tm.visible=vis;if(!vis){r.x=st.x;r.y=st.y;r.z=st.z}}
@@ -709,7 +710,7 @@ const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:
    c.on('close',()=>{this.conns.delete(c.peer);this.states.delete(c.peer);game.remove(c.peer);dropRemote(c.peer);ui.toast('someone left')})})},
  join(code){this.mode='client';this.peer=window.PEER_OPTS?new Peer(window.PEER_OPTS):new Peer();ui.status('connecting…');
   this.peer.on('open',id=>{this.myId=id;const c=this.peer.connect('wdoors-'+code,{reliable:true});this.hostConn=c;c.on('open',()=>c.send({t:'hello'}));
-   c.on('data',d=>{if(clientMsg(d))return;if(d.t==='welcome'){if(d.size&&d.size!==SZ){location.search='?size='+d.size+'&join='+code+'&autojoin=1';return}this.welcomed=true;if(d.mode){MODE=d.mode;updScores()}myIdx=d.i;me.dispose();me=makeAvatar(d.c);me.onStep=h=>sfx.tap(h);swapMe();ui.status('connected to <b>'+code+'</b>',true);W.remember(code)}
+   c.on('data',d=>{if(clientMsg(d))return;if(d.t==='welcome'){if(d.size&&d.size!==SZ){location.search='?size='+d.size+'&join='+code+'&autojoin=1';return}this.welcomed=true;if(d.mode){MODE=d.mode;updScores()}myIdx=d.i;me.dispose();me=makeAvatar(d.c);me.onStep=myStep;swapMe();ui.status('connected to <b>'+code+'</b>',true);W.remember(code)}
     else if(d.t==='full')ui.status('that world is full (8 players)');
     else if(d.t==='grid'){unrle(d.g);paintGrid()}
     else if(d.t==='spawn')onSpawn(d.x,d.z);
