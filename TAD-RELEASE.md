@@ -75,3 +75,5 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - chests: "F open chest" prompt; click = 1, shift+click = all (put and take)
 - NEXT: mixer (sulfur + sand -> gunpowder), then props pass / hearts+food
 - DONE Sept 19: trees no longer regrow; plant branches (G with branches selected, click open ground) -> sapling grows into a tree in ~90s (can't chop saplings); saved + synced
+- DONE Sept 19: MIXER (1 gear + 3 iron + 4 rock): barrel + spinning paddle; F next to it = 1 sulfur + 1 sand -> 1 gunpowder; snapped onto a factory wall it's a node (auto-wired input chests -> mixer -> output) -> fully automated gunpowder
+- LATER: real caves dug INTO the terrain (Toby: "way cooler") instead of domes
