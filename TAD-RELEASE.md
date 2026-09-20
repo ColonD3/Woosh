@@ -66,3 +66,11 @@ Core loop: chop -> house (door + walls + roof) -> tools -> caves/iron -> cooker 
 - gunpowder: a DRILL farms a new resource; mixer: that resource + sand -> gunpowder (after nodes)
 - real CAVES still missing (right now only cliff arches over ore) -> needs a proper pass
 - DONE: 1) chests/cookers snap-mount onto factory walls (blue ghost when snapping)  2) iron door node editor (F): wire chests + cookers, cut wires, drag nodes; chest->chest wires move items; new factories auto-wire
+
+## DONE Sept 19 (caves + drill)
+- caves: rock domes on hillsides (3 on small, more on bigger globes), opening faces downhill with a walkable dirt ramp, flat floor, iron ore on the inner walls, glowing blue crystals, solid walls
+- vines hang over every cave mouth and sway; hold click to cut them -> vines (grow back after 2 min)
+- gear = 5 iron; drill = 2 gears + 4 vines + 2 iron: gear turns a crank, vine belt, shaft pumps into the ground
+- drill snaps onto factory walls, shows in the node board, digs sulfur into its wired chest every ~6s
+- chests: "F open chest" prompt; click = 1, shift+click = all (put and take)
+- NEXT: mixer (sulfur + sand -> gunpowder), then props pass / hearts+food
