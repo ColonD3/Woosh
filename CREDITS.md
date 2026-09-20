@@ -5,3 +5,5 @@
 - Stylized textures from freestylized.com
 - Stylized Nature MegaKit by Quaternius (CC0)
 (models re-exported: textures resized to 1024 + webp)
+
+- Underground textures (assets/under): rock_surface, rock_face_04, tiger_rock, excavated_soil_wall, Poly Haven (CC0)
