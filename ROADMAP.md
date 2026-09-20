@@ -281,3 +281,6 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - high/ultra can go beyond today's look (bigger shadow maps, more grass, full-res AO, god rays, DOF) for strong machines
 - dynamic resolution stays on top of any preset as the safety net
 - gameplay must be identical at every preset (same world, same hitboxes); only the rendering changes
+
+- [done] characters separate from worlds (inv+stats travel), copper ore (teal crystals) → cooker → copper → wooshi armor (8 copper, -40% dmg)
+- [next] oxidizing copper, blast furnace, armor on the character model
