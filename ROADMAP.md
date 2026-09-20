@@ -273,3 +273,11 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - place a water holder in the pen: keeps sheeps from despawning + makes them reproduce -> kill for meat
 - MEAT = great food + the SHEEP EFFECT (run much faster using less stamina)
 - wire the planter output into the pen in the node board = feed wheat = faster reproduction
+
+## Adaptive graphics presets (Toby, Sept 19) — "different rendering, same game"
+- on first launch, auto-detect the machine (GPU info + a quick fps test) and pick a preset; weak laptops get the light version automatically
+- presets in settings: potato / low / medium / high / ultra, plus the individual toggles still there for tinkering
+- what scales: resolution cap, shadow map size + softness (or off), AO (off / half-res / full), TAA vs cheap AA, bloom, grass density + radius, foliage/props density + draw distance, water reflection quality, texture size (512 / 1k / 2k), fog distance
+- high/ultra can go beyond today's look (bigger shadow maps, more grass, full-res AO, god rays, DOF) for strong machines
+- dynamic resolution stays on top of any preset as the safety net
+- gameplay must be identical at every preset (same world, same hitboxes); only the rendering changes
