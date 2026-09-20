@@ -210,3 +210,14 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - refs/07-jakeline-forge-house.webp — the dream house: curved tiled roof, timber + stone, vines, waterfall, snowy peak behind
 - refs/08-forest-path.jpg — dirt path through a forest, bushes along the edges, cabin in the distance, warm light
 - what they share: painted textures with baked light, warm yellow-green palette, big soft shadow shapes, sun haze/god rays, dense clumped foliage at edges, strong silhouettes, lots of small props (stumps, flowers, pebbles)
+
+## SHEEPS (Toby's spec, Sept 19 — they are NOT sheep, they're just called sheeps)
+- look nothing like sheep. that's the joke
+- run decently fast, arms held straight up in the air for no reason, dirpiest run cycle ever: floppy side-to-side, arms flopping while held up
+- running = "wowowowowow"; heard ONLY when fairly close, fake-doppler rise/fall as they pass: "....wowowooWOWOWOWOWWOwooowow...."
+- they only make sounds while RUNNING (never walking/standing)
+- not always frantic: they run sometimes, especially near players — they run away BUT always path close past you first so you hear the pass-by, then flee
+- every once in a while they faceplant goofily, little "ow..." sound, pause ~1s, then keep running "wwowowowowow"
+- steep edge while running: pause... then yeet off it "WAAAAAaaaaa-"
+- if you hold wheat: toddlers on sugar, they chase you going "NOM NOM NOM NOM NOM" (hideously hilarious) -> that's how you lure them into the animal pen
+- later: pens attach outside factories, sheeps become part of automations (wheat -> sheep -> mutton -> cooker...), carpets from sheeps
