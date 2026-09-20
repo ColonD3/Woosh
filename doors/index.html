@@ -1317,7 +1317,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');const visPos=new THREE.Vector3();let camWant=7,camT=7;
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0;const visPos=new THREE.Vector3();let camWant=7,camT=7;
 function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
@@ -1330,7 +1330,7 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  let g=0;if(creative&&!dead){const fl=(keys.ControlLeft?30:14);const cp2=Math.cos(pitch);const up=(keys.Space?1:0)-(keys.ShiftLeft||keys.ShiftRight?1:0);vel.set(dirX*fl,up*fl,dirZ*fl);pos.addScaledVector(vel,dt);onGround=false;g=pos.y-5;caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2}else{
  if((keys.Space||jumpTouch)&&onGround&&!dead){vel.y=8.6;sfx.play('jump',.2,1.8);onGround=false;puff(pos.x,pos.y,pos.z,8,2,[.9,.88,.78]);squash=-.25}
  vel.y-=28*dt;vel.y=Math.max(vel.y,-40);
- const ox0=pos.x,oz0=pos.z;{const ox=pos.x,oz=pos.z;pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)){pos.x=ox;vel.x*=-.3}pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)){pos.z=oz;vel.z*=-.3}}{caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
+ const ox0=pos.x,oz0=pos.z,oy0=pos.y;{const ox=pos.x,oz=pos.z;pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)){pos.x=ox;vel.x*=-.3}pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)){pos.z=oz;vel.z*=-.3}}{caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
  if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
 
@@ -1338,7 +1338,16 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(pos.y<=g){if(!onGround&&vel.y<-15)hurt(Math.round((-vel.y-15)*.55),'you fell too far');if(!onGround&&vel.y<-6){sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
   if(onGround&&g-pos.y>.4){pos.y+=Math.min(g-pos.y,9*dt);if(!caveM){vel.x*=.9;vel.z*=.9}}else pos.y=g;vel.y=0;onGround=true}
  else if(pos.y>g+.05)onGround=false;
- if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.4,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}}
+ if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.4,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}
+ // sticky legs: in caves, holding a direction against rock lets wooshi roll along it (walls, overhangs, ceilings)
+ if(caveM&&il>0&&!dead&&!keys.Space){const cx=ox0,cy=oy0+.55,cz=oz0;const f=CV.F(cx,cy,cz);
+  if(f>-.85){const g=cvGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const moved=Math.hypot(pos.x-ox0,pos.z-oz0),want=speed*dt;
+   if(sticky||ny<.55||moved<want*.4){sticky=true;const dl=Math.hypot(dirX,dirZ)||1;let tx=dirX/dl,ty=ny<.9?.85:0,tz=dirZ/dl;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
+    let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;for(let k=0;k<3;k++){const f2=CV.F(px,py,pz);const g2=cvGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;const mv=(.5+f2);px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv}
+    if(CV.F(px,py,pz)<-.2){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55])}else sticky=false}}else sticky=false}else sticky=false
+ if(caveM&&il>0&&!dead){if(Math.hypot(pos.x-ox0,pos.y-oy0,pos.z-oz0)<speed*dt*.12)stuckT+=dt;else stuckT=0;
+  if(stuckT>.3){stuckT=0;const c=[pos.x,pos.y+.55,pos.z];const g=cvGrad(...c);const gl=Math.hypot(...g)||1;const dl=Math.hypot(dirX,dirZ)||1;
+   for(const [ax,ay,az] of [[-g[0]/gl*.3+dirX/dl*.2,.35,-g[2]/gl*.3+dirZ/dl*.2],[0,.6,0],[-g[0]/gl*.5,-g[1]/gl*.5,-g[2]/gl*.5],[dirX/dl*.4,.2,dirZ/dl*.4],[-dirX/dl*.4,.4,-dirZ/dl*.4]]){if(CV.F(c[0]+ax,c[1]+ay,c[2]+az)<-.3&&CV.F(c[0]+ax,c[1]+ay+.5,c[2]+az)<0){pos.x+=ax;pos.y+=ay;pos.z+=az;vel.set(0,0,0);break}}}}else stuckT=0}
  const hs=Math.hypot(vel.x,vel.z);
  if(hs>.5){face=Math.atan2(vel.x,vel.z);if(!moved&&il>0){moved=true;setTimeout(()=>document.getElementById('hud').classList.add('fade'),4000)}}
  if(onGround&&hs>3){stepT-=dt;if(stepT<=0){stepT=sprint?.18:.3;puff(pos.x,g,pos.z,sprint?3:2,1.2,g<1.2?[.9,.82,.6]:[.8,.85,.6])}}
