@@ -1088,14 +1088,14 @@ const sfx={ctx:null,buf:{},muted:false,gain:null,
   const len=this.ctx.sampleRate*4,nb=this.ctx.createBuffer(1,len,this.ctx.sampleRate),d=nb.getChannelData(0);let l=0;for(let i=0;i<len;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5}
   const src=this.ctx.createBufferSource();src.buffer=nb;src.loop=true;const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
   const wg=this.ctx.createGain();wg.gain.value=.05;src.connect(f).connect(wg).connect(this.gain);src.start();this.wind=wg;this.windF=f;
-  {const c=this.ctx,L=c.sampleRate*2.2,ir=c.createBuffer(2,L,c.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,3)}const cv=c.createConvolver();cv.buffer=ir;this.rv=c.createGain();this.rv.gain.value=0;this.rv.connect(cv).connect(this.gain)}},
+  {const c=this.ctx,L=Math.floor(c.sampleRate*1.1),ir=c.createBuffer(1,L,c.sampleRate);const d=ir.getChannelData(0);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,3);const cv=c.createConvolver();cv.buffer=ir;this.cvN=cv;this.rv=c.createGain();this.rv.gain.value=0;this.rvOn=false}},
  chirp(){const c=this.ctx,t=c.currentTime,n=2+Math.floor(Math.random()*4),f0=2200+Math.random()*2200,pan=c.createStereoPanner();pan.pan.value=Math.random()*1.6-.8;pan.connect(this.gain);for(let k=0;k<n;k++){const o=c.createOscillator(),g=c.createGain(),t0=t+k*(.09+Math.random()*.06);o.frequency.setValueAtTime(f0*(1+Math.random()*.2),t0);o.frequency.exponentialRampToValueAtTime(f0*(.6+Math.random()*.9),t0+.07);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.018,t0+.01);g.gain.exponentialRampToValueAtTime(.0005,t0+.08);o.connect(g).connect(pan);o.start(t0);o.stop(t0+.1)}},
  crick(){const c=this.ctx,t=c.currentTime,o=c.createOscillator(),g=c.createGain(),pan=c.createStereoPanner();pan.pan.value=Math.random()*1.6-.8;o.frequency.value=4300+Math.random()*500;g.gain.value=0;for(let k=0;k<6;k++){const t0=t+k*.045;g.gain.setValueAtTime(.007,t0);g.gain.setValueAtTime(0,t0+.022)}o.connect(g).connect(pan).connect(this.gain);o.start(t);o.stop(t+.3)},
  play(n,vol=.5,rate=1){const b=this.buf[n];if(!b||!this.ctx)return;const s=this.ctx.createBufferSource();s.buffer=b;s.playbackRate.value=rate*(.93+Math.random()*.14);
-  const g=this.ctx.createGain();g.gain.value=vol;s.connect(g).connect(this.gain);if(this.rv)g.connect(this.rv);s.start()},
+  const g=this.ctx.createGain();g.gain.value=vol;s.connect(g).connect(this.gain);if(this.rvOn)g.connect(this.rv);s.start()},
  tap(h,vol=1){const k=Math.floor(Math.random()*5);if(ug){this.play(`step_concrete_${k}`,.2*vol,1.5+Math.random()*.3);return}this.play(h<1.2?`step_carpet_${k}`:h>16?`step_snow_${k}`:`step_grass_${k}`,(h<1.2?.16:.11)*vol,2.1+Math.random()*.5)},
  step(h){const k=Math.floor(Math.random()*5);if(ug){this.play(`step_concrete_${k}`,.45);return}this.play(h<1.2?`step_carpet_${k}`:h>16?`step_snow_${k}`:`step_grass_${k}`,h<1.2?.5:.32)},
- update(t,g){if(!this.wind)return;const sw=.04+.035*(Math.sin(t*.23)*.5+.5)*(Math.sin(t*.61+1)*.5+.5)+Math.min(.12,Math.max(0,pos.y-8)*.009);this.rv&&(this.rv.gain.value+=((ug?.55:0)-this.rv.gain.value)*.03);if(!ug&&!this.muted){const night=nightF>.5;if(Math.random()<(night?.05:.012))night?this.crick():this.chirp()}this.wind.gain.value+= (sw-this.wind.gain.value)*.05;this.windF.frequency.value=380+sw*2000},
+ update(t,g){if(!this.wind)return;const sw=.04+.035*(Math.sin(t*.23)*.5+.5)*(Math.sin(t*.61+1)*.5+.5)+Math.min(.12,Math.max(0,pos.y-8)*.009);if(this.rv){const want=ug?.5:0;this.rv.gain.value+=(want-this.rv.gain.value)*.05;const on=this.rv.gain.value>.02;if(on!==this.rvOn){this.rvOn=on;try{if(on){this.rv.connect(this.cvN);this.cvN.connect(this.gain)}else{this.rv.disconnect();this.cvN.disconnect()}}catch(e){}}}if(!ug&&!this.muted){const night=nightF>.5;if(Math.random()<(night?.05:.012))night?this.crick():this.chirp()}this.wind.gain.value+= (sw-this.wind.gain.value)*.05;this.windF.frequency.value=380+sw*2000},
  toggle(){this.muted=!this.muted;if(this.gain)this.gain.gain.value=this.muted?0:1;ui.toast(this.muted?'sound off':'sound on')}};
 addEventListener('pointerdown',()=>{sfx.init();sfx.ctx?.resume()},{once:false});addEventListener('keydown',()=>sfx.init());
 
@@ -1543,6 +1543,10 @@ function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
 const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0;const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 const PT={};let PFon=true;window.__pt=PT;
+function bc(n){try{localStorage.setItem('woosh_bc',n+'|'+Date.now())}catch(e){}}
+function bcd(n){try{localStorage.setItem('woosh_bc','done:'+n+'|'+Date.now())}catch(e){}}
+function traced(n,fn){return function(){bc(n);try{return fn.apply(this,arguments)}finally{bcd(n)}}}
+setTimeout(()=>{try{const v=localStorage.getItem('woosh_bc');if(v&&!v.startsWith('done:'))ui.toast('last freeze was in: '+v.split('|')[0],6);localStorage.removeItem('woosh_bc')}catch(e){}},3500);
 function pf(n,fn){return function(){const t0=performance.now();try{return fn.apply(this,arguments)}finally{PT[n]=(PT[n]||0)+(performance.now()-t0)}}}
 function frame(){syncBend();const _fT0=performance.now();for(const k in PT)PT[k]=0;if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
@@ -1695,11 +1699,11 @@ const W={cur:null,n:0,lastSave:0,
    el.appendChild(r)}
   const rc=document.getElementById('recent');rc.innerHTML='';for(const c of this.ls('wdoors_joined')||[]){const b=document.createElement('button');b.textContent=c;b.onclick=()=>{document.getElementById('code').value=c;joinIt()};rc.appendChild(b)}},
  hostUI(){document.getElementById('hostB').hidden=false;document.getElementById('dlB').hidden=false}};
-{const wrap=(o,k,n)=>{if(typeof o[k]==='function')o[k]=pf(n,o[k])};
- wrap(CV,'carve','carve');wrap(CV,'mesh','mesh');wrap(CV,'upd','cvupd');wrap(sfx,'play','sfx');
- updChop=pf('chop',updChop);updMine=pf('mine',updMine);updTrees=pf('trees',updTrees);updParticles=pf('parts',updParticles);
+{const wrap=(o,k,n,tr)=>{if(typeof o[k]==='function')o[k]=tr?traced(n,pf(n,o[k])):pf(n,o[k])};
+ wrap(CV,'carve','carve',1);wrap(CV,'mesh','mesh',1);wrap(CV,'upd','cvupd');wrap(sfx,'play','sfx');
+ updChop=traced('chop',pf('chop',updChop));updMine=traced('mine',pf('mine',updMine));updTrees=pf('trees',updTrees);updParticles=pf('parts',updParticles);
  updEnemies=pf('enemies',updEnemies);hostWorldTick=pf('world',hostWorldTick);puff=pf('puff',puff);debris=pf('debris',debris);
- setBoulder=pf('setBoulder',setBoulder);mineBurst=pf('mineBurst',mineBurst);treeState=pf('treeState',treeState);dayUpd=pf('day',dayUpd);
+ setBoulder=pf('setBoulder',setBoulder);mineBurst=traced('mineBurst',pf('mineBurst',mineBurst));treeState=traced('treeState',pf('treeState',treeState));dayUpd=pf('day',dayUpd);
  digAim=pf('digAim',digAim);solidPush=pf('push',solidPush);bIndex=pf('bIndex',bIndex);}
 if(QP.has('dev'))window.__W=W;
 function confirmDel(w){return window.__delOK===w.id||(window.__delOK=w.id,ui.status('press ✕ again to delete <b>'+esc(w.name)+'</b> for good'),false)}
