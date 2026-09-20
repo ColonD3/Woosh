@@ -293,3 +293,4 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [next] farming (seeds), gold door + gold factory roofs, perf of world build on big maps
 - [done] stuck-in-holes fix, tools only break stone (dirt/grass/sand = bombs only), glow shrooms edible (big regen), fewer/smaller surface ore rocks, saplings 17-40s, /mode creative|survival
 - [done] smooth sculpted-clay caves (field normals + vertex snapping, 0.5m detail where dug), mining sphere + chunk burst + per-material crunch, no tripping (smoothed body, bigger crawlspaces), fewer boulders/ores
+- [done] paper-brutalist UI revamp, fall damage toggle, full camera pitch range
