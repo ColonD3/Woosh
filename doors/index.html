@@ -594,7 +594,7 @@ void main(){
  float k=y*y;lp.xz+=bend*k*tall;lp.y-=length(bend)*k*tall*.4;
  vec3 wp=vec3(w.x,h,w.y)+lp;
  {float mm=smoothstep(.35,.65,vn(w*.012)*.55+vn(w*.0256+7.)*.3+vn(w*.0564+3.)*.15);vGC=pow(mix(textureLod(pG1,w*.16,3.).rgb,textureLod(pG2,w*.13,3.).rgb,mm),vec3(1./2.2));}
- vT=texture2D(terr,(w+S*.5)/S);{vec3 bb=texture2D(bioT,(w+S*.5)/S).rgb;vBio=bb.r;vB2=bb.g;vBh=bb.b;}vSh=texture2D(shade,(w+S*.5)/S).r;{vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;vSc=sc.xyz;}}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
+ vT=texture2D(terr,(w+S*.5)/S);{vec3 bb=texture2D(bioT,(w+S*.5)/S).rgb;vBio=bb.r;vB2=bb.g;vBh=bb.b;}vSh=texture2D(shade,(w+S*.5)/S).r;{vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;vSc=sc.xyz;}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
  vec3 vd=normalize(wp-camPos);vGlow=pow(max(dot(vd,sunDir),0.),4.);
  {vec2 rd=wp.xz-camPos.xz;wp.y-=dot(rd,rd)*uBend;}gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
 fragmentShader:`#include <packing>
@@ -1183,10 +1183,12 @@ function updItems(dt,t){for(const it of items.values()){const g=it.vis;g.userDat
  for(const it of items.values()){if(Math.hypot(wd(it.x,pos.x),wd(it.z,pos.z))<1.15&&Math.abs(surfAt(it.x,it.z)-pos.y)<1.5){pickCd=.25;it.vis.visible=false;act({a:'pick',id:it.id});break}}}
 
 // --- trees: chop, fall, regrow ---
+function imDirty(im,i){const at=im.instanceMatrix;if(at.addUpdateRange){if(!at._wooshFrame||at._wooshFrame!==frameSeq){at._wooshFrame=frameSeq;at.clearUpdateRanges?.()}at.addUpdateRange(i*16,16)}else if(at.updateRange){at.updateRange.offset=i*16;at.updateRange.count=16}at.needsUpdate=true}
+let frameSeq=0;
 const _m4=new THREE.Matrix4(),_qq=new THREE.Quaternion(),_sc=new THREE.Vector3(),_ps=new THREE.Vector3(),_ax=new THREE.Vector3();
 const treeAnims=new Map();
 function setTreeMatrix(t,s,tilt){const p=t.p;if(!p||!p.refs)return;_qq.setFromEuler(new THREE.Euler(0,p.ry,0));if(tilt){_ax.set(Math.cos(t.fallDir||0),0,Math.sin(t.fallDir||0));_qq.premultiply(new THREE.Quaternion().setFromAxisAngle(_ax,tilt))}
- _ps.set(p.x,p.y,p.z);_sc.setScalar(p.s*s);_m4.compose(_ps,_qq,_sc);for(const [im,i] of p.refs){im.setMatrixAt(i,_m4);im.instanceMatrix.needsUpdate=true}}
+ _ps.set(p.x,p.y,p.z);_sc.setScalar(p.s*s);_m4.compose(_ps,_qq,_sc);for(const [im,i] of p.refs){im.setMatrixAt(i,_m4);imDirty(im,i)}}
 function treeState(i,up){const t=trees[i];if(!t)return;t.down=!up;if(up||!t.fdT||performance.now()-t.fdT>3000)t.fallDir=Math.random()*6.28;treeAnims.set(i,{up,t:0});
  if(!up){const c=t.p?.c;puff(t.x,t.h+2.5,t.z,40,4,c?[c.r,c.g,c.b]:[.5,.7,.3]);const d=camera.position.distanceTo(_ps.set(t.x,t.h,t.z));if(d<30)sfx.play('chop_2',.5*(1-d/30),.6)}}
 function updTrees(dt){for(const [i,a] of treeAnims){const t=trees[i];a.t+=dt;
@@ -1370,7 +1372,7 @@ function clientMsg(d){if(d.t==='gifts'){setTimeout(()=>showBanner('gifts arrived
 // ---------- building: doors, walls, houses, door crafting ----------
 // -- pickaxe: mine boulders piece by piece, place + mine loose rocks ----------
 let mineT=0,mineSnd=0;
-function bMat(p,m){for(const[im,i]of p.refs||[]){dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(p.rx||0,p.ry,p.rz||0);dummy.scale.setScalar((p.sc||0)*m);dummy.updateMatrix();im.setMatrixAt(i,dummy.matrix);im.instanceMatrix.needsUpdate=true}}
+function bMat(p,m){for(const[im,i]of p.refs||[]){dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(p.rx||0,p.ry,p.rz||0);dummy.scale.setScalar((p.sc||0)*m);dummy.updateMatrix();im.setMatrixAt(i,dummy.matrix);imDirty(im,i)}}
 function setBoulder(p){if(p.cr){const keep=Math.ceil(p.cr.length*p.hp/p.hp0);p.cr.forEach(([im,i,mx],k)=>{if(k<keep)im.setMatrixAt(i,mx);else im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0));im.instanceMatrix.needsUpdate=true})}const sc=p.s*(.35+.65*p.hp/p.hp0);const dmg=p.hp<(p.lhp??p.hp0);p.lhp=p.hp;p.sc=p.hp>0?sc:0;bMat(p,1);if(dmg&&typeof bPunch!=='undefined'){const col=p.au?[.95,.8,.3]:p.cu?[.4,.8,.65]:p.coal?[.22,.22,.28]:p.ore?[.45,.4,.38]:[.72,.72,.74];const r=(p.surf?p.surf.r0:1)*sc/p.s;debris(p.x,p.y+sc*.6,p.z,p.hp>0?5:14,col,.1+.06*r);if(p.hp>0)bPunch.set(p,0);else{puff(p.x,p.y+.6,p.z,30,4,[.7,.68,.64]);shake=Math.max(shake,.15)}}
  if(p.surf){p.surf.top=p.hp>0?p.y+sc:-99;p.surf.r=p.hp>0?p.surf.r0*sc/p.s:.001}}
 function nearestBoulder(){let b=-1,bd=1.4;for(let i=0;i<boulders.length;i++){const p=boulders[i];if(p.hp<=0)continue;if(p.y!=null&&Math.abs(p.y-pos.y)>3.5)continue;if(p.ug){const dx=wd(pos.x,p.x),dy=pos.y+.8-(p.y+p.s*.4),dz=wd(pos.z,p.z),L=Math.hypot(dx,dy,dz)||1,r=p.surf.r+.3;if(CV.F(p.x+dx/L*r,p.y+p.s*.4+dy/L*r,p.z+dz/L*r)>0)continue}const d=Math.hypot(wd(p.x,pos.x),wd(p.z,pos.z))-(p.surf?p.surf.r:1);if(d<bd){bd=d;b=i}}return b}
@@ -1558,7 +1560,7 @@ setTimeout(()=>{try{const v=_bc0[0],h=_bc0[1];let out='';
  if(out)diag(out+'\n(tap to dismiss)');
  }catch(e){}},3000);
 function pf(n,fn){return function(){const t0=performance.now();try{return fn.apply(this,arguments)}finally{PT[n]=(PT[n]||0)+(performance.now()-t0)}}}
-function frame(){STAGE='input';syncBend();const _fT0=performance.now();for(const k in PT)PT[k]=0;if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
+function frame(){STAGE='input';frameSeq++;syncBend();const _fT0=performance.now();for(const k in PT)PT[k]=0;if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
  if(dead||!started||clock.elapsedTime<stunUntil){ix=iz=0}
