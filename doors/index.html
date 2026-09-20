@@ -556,7 +556,9 @@ bg.setAttribute('position',new THREE.Float32BufferAttribute([-.5,0,0, .5,0,0, -.
  bg.setAttribute('offset',new THREE.InstancedBufferAttribute(o,4));bg.instanceCount=COUNT;}
 // ---------- biomes: lush forest / meadow / golden fields ----------
 const BIO=(x,z)=>fbmP((wrapC(x)+S/2)/S,(wrapC(z)+S/2)/S,Math.max(2,Math.round(S/90)),3,71);
-const bioTex=(()=>{const M=128,d=new Uint8Array(M*M*4);for(let j=0;j<M;j++)for(let i=0;i<M;i++){const b=BIO(-S/2+(i+.5)/M*S,-S/2+(j+.5)/M*S);const k=(j*M+i)*4;d[k]=Math.round(b*255);d[k+3]=255}const t=new THREE.DataTexture(d,M,M,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.LinearFilter;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t})();
+const BIO2=(x,z)=>fbmP((wrapC(x)+S/2)/S,(wrapC(z)+S/2)/S,Math.max(2,Math.round(S/70)),3,137);
+const BIOME=(x,z,h)=>{const b=BIO(x,z),m=BIO2(x,z);if(h>11.5)return'alpine';if(b<.36&&m<.40&&h<4.2)return'marsh';if(m>.60&&b>.34&&b<.68)return'forest';if(b>.60&&m<.42)return'canyon';if(m<.28)return'birch';return'meadow'};
+const bioTex=(()=>{const M=128,d=new Uint8Array(M*M*4);for(let j=0;j<M;j++)for(let i=0;i<M;i++){const x=-S/2+(i+.5)/M*S,z=-S/2+(j+.5)/M*S;const b=BIO(x,z),m=BIO2(x,z);const k=(j*M+i)*4;d[k]=Math.round(b*255);d[k+1]=Math.round(m*255);d[k+2]=Math.round(Math.min(1,Math.max(0,hAt(x,z)/18))*255);d[k+3]=255}const t=new THREE.DataTexture(d,M,M,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.LinearFilter;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.needsUpdate=true;return t})();
 const SHN=512;const shadeTex=new THREE.DataTexture(new Uint8Array(SHN*SHN*4).fill(255),SHN,SHN,THREE.RGBAFormat);shadeTex.magFilter=shadeTex.minFilter=THREE.LinearFilter;
 const wayTex=(()=>{const d=new Uint8Array(N*N*4);for(let k=0;k<N*N;k++){d[k*4]=WAY[k*2]*255;d[k*4+1]=WAY[k*2+1]*255;d[k*4+3]=255}const t=new THREE.DataTexture(d,N,N,THREE.RGBAFormat);t.magFilter=t.minFilter=THREE.LinearFilter;t.needsUpdate=true;return t})();
 for(const t of[wayTex,shadeTex])t.wrapS=t.wrapT=THREE.RepeatWrapping;
@@ -566,7 +568,7 @@ const grass=new THREE.Mesh(bg,new THREE.ShaderMaterial({uniforms:grassU,side:THR
 vertexShader:`
 #include <packing>
 uniform sampler2D sMap;uniform mat4 sMat;uniform float sOn;
-uniform float uBend;uniform sampler2D hMap,terr,shade,pG1,pG2,wayT,cvM,bioT;varying float vBio;varying vec3 vGC;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
+uniform float uBend;uniform sampler2D hMap,terr,shade,pG1,pG2,wayT,cvM,bioT;varying float vB2,vBh, vBio;varying vec3 vGC;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
 varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 float tH(vec2 ij){return texture2D(hMap,(ij+.5)/N).r;}
 float hgt(vec2 xz){vec2 g=mod((xz+S*.5)/S,1.)*(N-1.);g=min(g,vec2(N-1.001));vec2 b=floor(g),f=g-b;
@@ -592,16 +594,16 @@ void main(){
  float k=y*y;lp.xz+=bend*k*tall;lp.y-=length(bend)*k*tall*.4;
  vec3 wp=vec3(w.x,h,w.y)+lp;
  {float mm=smoothstep(.35,.65,vn(w*.012)*.55+vn(w*.0256+7.)*.3+vn(w*.0564+3.)*.15);vGC=pow(mix(textureLod(pG1,w*.16,3.).rgb,textureLod(pG2,w*.13,3.).rgb,mm),vec3(1./2.2));}
- vT=texture2D(terr,(w+S*.5)/S);vBio=texture2D(bioT,(w+S*.5)/S).r;vSh=texture2D(shade,(w+S*.5)/S).r;if(sOn>.5){vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;if(sc.x>0.&&sc.x<1.&&sc.y>0.&&sc.y<1.&&sc.z<1.){vec2 ds=unpackRGBATo2Half(texture2D(sMap,sc.xy));float cmp=sc.z-.0015;float hard=step(cmp,ds.x);float lit=1.;if(hard<1.){float dd=cmp-ds.x;float vv=max(0.,ds.y*ds.y);float pp=vv/(vv+dd*dd);lit=clamp((pp-.3)/.65,0.,1.);}vSh=min(vSh,lit);}}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
+ vT=texture2D(terr,(w+S*.5)/S);{vec3 bb=texture2D(bioT,(w+S*.5)/S).rgb;vBio=bb.r;vB2=bb.g;vBh=bb.b;}vSh=texture2D(shade,(w+S*.5)/S).r;if(sOn>.5){vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;if(sc.x>0.&&sc.x<1.&&sc.y>0.&&sc.y<1.&&sc.z<1.){vec2 ds=unpackRGBATo2Half(texture2D(sMap,sc.xy));float cmp=sc.z-.0015;float hard=step(cmp,ds.x);float lit=1.;if(hard<1.){float dd=cmp-ds.x;float vv=max(0.,ds.y*ds.y);float pp=vv/(vv+dd*dd);lit=clamp((pp-.3)/.65,0.,1.);}vSh=min(vSh,lit);}}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
  vec3 vd=normalize(wp-camPos);vGlow=pow(max(dot(vd,sunDir),0.),4.);
  {vec2 rd=wp.xz-camPos.xz;wp.y-=dot(rd,rd)*uBend;}gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
-fragmentShader:`varying float vBio;uniform vec3 fogC;uniform float fogN,fogF;varying vec3 vGC;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
+fragmentShader:`varying float vBio,vB2,vBh;uniform vec3 fogC;uniform float fogN,fogF;varying vec3 vGC;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 void main(){
  vec3 base=vec3(.13,.36,.07);
  vec3 tipA=vec3(.5,.78,.18),tipB=vec3(.74,.86,.27),tipC=vec3(.26,.58,.12);
  vec3 tip=mix(mix(tipC,tipA,smoothstep(.2,.6,vClump)),tipB,smoothstep(.6,.95,vClump)*.8+vVar*vVar*.2);
  vec3 g=vGC*1.08;vec3 c=mix(g*.9,mix(g*1.25+vec3(.03,.04,0.),tip,.25),pow(vY,1.2))*(.9+.2*vVar);
- {float gold=smoothstep(.56,.7,vBio),lush=smoothstep(.44,.3,vBio);c=mix(c,c*vec3(1.45,1.05,.42)+vec3(.05,.02,0.),gold*.85);c=mix(c,c*vec3(.72,.95,.78),lush*.7);}
+ {float marsh=smoothstep(.44,.3,vB2)*smoothstep(.42,.3,vBio),forest=smoothstep(.56,.68,vB2),dry=smoothstep(.58,.72,vBio)*smoothstep(.46,.32,vB2);c=mix(c,c*vec3(.74,.82,.62)+vec3(.02,.03,.015),marsh*.85);c=mix(c,c*vec3(.6,.78,.52),forest*.7);c=mix(c,c*vec3(1.35,1.12,.62)+vec3(.04,.03,0.),dry*.8);}{float gold=smoothstep(.56,.7,vBio),lush=smoothstep(.44,.3,vBio);c=mix(c,c*vec3(1.45,1.05,.42)+vec3(.05,.02,0.),gold*.85);c=mix(c,c*vec3(.72,.95,.78),lush*.7);}
  c+=vec3(.12,.16,.04)*vGust*vY*.5;
  c=mix(c,vT.rgb*(.4+.55*vY),vT.a*.62);
  c=pow(c,vec3(2.2));
@@ -614,9 +616,9 @@ grass.frustumCulled=false;grass.layers.set(1);scene.add(grass);
 
 // ---------- trees & rocks ----------
 const trees=[];
-for(let t=0;t<4500*(S/240)**2&&trees.length<190*(S/240)**2;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2-1)*EDGE*.9;const h=hAt(x,z);
+for(let t=0;t<14000*(S/240)**2&&trees.length<420*(S/240)**2;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2-1)*EDGE*.9;const h=hAt(x,z);
  if(caveAt(x,z,1.5)||wayAt(x,z)>.15||h<1.6||h>11||slopeAt(x,z)>.5||fbm(x*.03+99,z*.03,2)<.46)continue;if(Math.hypot(x,z)<6)continue;
- const bb=BIO(x,z);if(bb>.62&&rnd()<.75)continue;if(trees.some(q=>Math.hypot(q.x-x,q.z-z)<(bb<.38?2.4:3.2)))continue;trees.push({x,z,h,s:.8+rnd()*.6,bio:bb})}
+ const bb=BIO(x,z),bm=BIOME(x,z,h);const dens={forest:1,birch:.8,meadow:.45,marsh:.28,canyon:.06,alpine:.18}[bm];if(rnd()>dens)continue;const sp={forest:1.9,birch:2.4,meadow:3.2,marsh:3.4,canyon:5,alpine:3}[bm];if(trees.some(q=>Math.hypot(q.x-x,q.z-z)<sp))continue;trees.push({x,z,h,s:.8+rnd()*.6,bio:bb,bm})}
 const dummy=new THREE.Object3D();
 // ---------- nature kit (Quaternius, CC0) ----------
 const BUSHES=[],SHROOMS=[];const gltfL=new GLTFLoader();const swayU={value:0};const boulders=[];
@@ -654,10 +656,14 @@ const GREENS=['#4f9a35','#5fae3a','#3f8a2f','#72b940'].map(L),AUTUMN=['#e8541f',
 function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length<n;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2-1)*EDGE*.9,h=hAt(x,z);if(wayAt(x,z)<.2&&!caveAt(x,z,1)&&test(x,z,h))out.push({x,z,y:h,ry:rnd()*6.283})}return out}
 {const common=[],twisted=[],pine=[],broad=[],caveBits=[];
  for(const t of trees){const p={x:t.x,z:t.z,y:t.h-.15,ry:rnd()*6.283};t.p=p;
-  if(t.h>6.5||rnd()<.3){p.m=Math.floor(rnd()*3);p.s=7+rnd()*4.5;p.c=L(pick(['#ffffff','#eef4dc','#f6f1d6']));pine.push(p);t.r=.45}
-  else if(rnd()<.22){p.m=0;p.s=4.5+rnd()*2;p.c=L(pick(['#ffffff','#f3f0d2']));broad.push(p);t.r=.5}
-  else if(rnd()<.16){p.m=Math.floor(rnd()*3);p.s=.36+rnd()*.12;p.c=pick(AUTUMN);twisted.push(p);t.r=.6}
-  else{p.m=Math.floor(rnd()*5);p.s=.68+rnd()*.3;p.c=rnd()<(t.bio>.6?.85:t.bio<.38?.12:.45)?pick(AUTUMN):pick(GREENS);common.push(p);t.r=.4}}
+  const bm=t.bm||'meadow';
+  if(bm==='marsh'||(bm==='canyon'&&rnd()<.7)){p.m=Math.floor(rnd()*3);p.s=.4+rnd()*.16;p.c=L(pick(['#7d7a63','#8a8168','#6f7360']));twisted.push(p);t.r=.6}
+  else if(bm==='birch'){if(rnd()<.55){p.m=0;p.s=4.6+rnd()*2.2;p.c=L(pick(['#ffffff','#f7f4e2']));broad.push(p);t.r=.5}else{p.m=Math.floor(rnd()*5);p.s=.7+rnd()*.24;p.c=L(pick(['#e8e9c8','#dfe7bd','#f0eccf']));common.push(p);t.r=.4}}
+  else if(bm==='alpine'||t.h>6.5){p.m=Math.floor(rnd()*3);p.s=7+rnd()*4.5;p.c=L(pick(['#e9eee0','#dfe6d4','#f2eedc']));pine.push(p);t.r=.45}
+  else if(bm==='forest'){if(rnd()<.42){p.m=Math.floor(rnd()*3);p.s=7.5+rnd()*4;p.c=L(pick(['#cfdcc0','#c6d4b4','#dbe4c8']));pine.push(p);t.r=.45}
+   else{p.m=Math.floor(rnd()*5);p.s=.78+rnd()*.34;p.c=L(pick(['#9fc07a','#8fb572','#a8c389','#86ad6c']));common.push(p);t.r=.4}}
+  else{if(rnd()<.2){p.m=0;p.s=4.5+rnd()*2;p.c=L(pick(['#ffffff','#f3f0d2']));broad.push(p);t.r=.5}
+   else{p.m=Math.floor(rnd()*5);p.s=.68+rnd()*.3;p.c=rnd()<(t.bio>.6?.8:.3)?pick(AUTUMN):pick(GREENS);common.push(p);t.r=.4}}}
  place(['CommonTree_1','CommonTree_2','CommonTree_3','CommonTree_4','CommonTree_5'],common,{tint:1});
  place(['TwistedTree_1','TwistedTree_2','TwistedTree_3'],twisted,{tint:1});
  place(['pack:trees#2','pack:trees#3','pack:trees#4'],pine,{tint:1});place(['pack:trees#5'],broad,{tint:1});
@@ -695,7 +701,22 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  const mush=SHROOMS;for(const t of trees)if(rnd()<.35){const a=rnd()*6.283,r=.8+rnd()*1.2,x=t.x+Math.cos(a)*r,z=t.z+Math.sin(a)*r;mush.push({x,z,y:hAt(x,z),ry:rnd()*6.283,m:0,s:.9+rnd()*.6})}
  place(['Mushroom_Common'],mush,{shadow:false,layer:1});
  const peb=scatter(240,(x,z,h)=>h>.5&&h<12);peb.forEach(p=>{p.m=Math.floor(rnd()*8);p.s=.1+rnd()*.22;p.y-=.03});
- place([0,1,2,3,5,7,8,12].map(i=>'pack:rocks70#'+i),peb,{shadow:false});}
+ place([0,1,2,3,5,7,8,12].map(i=>'pack:rocks70#'+i),peb,{shadow:false});
+ // ---- authored moments: cairns, fire rings, standing stones, fallen logs, ruins ----
+ {const flat=(x,z,h)=>slopeAt(x,z)<.3&&wayAt(x,z)<.15&&!caveAt(x,z,2)&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<4);
+  const cairnP=[],ringP=[],charP=[],stoneP=[],logP=[],ruinP=[];
+  for(const c of scatter(7,(x,z,h)=>h>7&&h<16&&flat(x,z,h))){const n=4+Math.floor(rnd()*3);for(let k=0;k<n;k++){const sc=(.42-k*.055)*(.9+rnd()*.2);cairnP.push({x:c.x+(rnd()-.5)*.12,z:c.z+(rnd()-.5)*.12,y:c.y+k*.26,ry:rnd()*6.283,rx:(rnd()-.5)*.2,rz:(rnd()-.5)*.2,m:Math.floor(rnd()*4),s:sc})}}
+  for(const c of scatter(9,(x,z,h)=>h>1.5&&h<4.2&&flat(x,z,h))){for(let k=0;k<8;k++){const a2=k/8*6.283+rnd()*.2;ringP.push({x:c.x+Math.cos(a2)*.95,z:c.z+Math.sin(a2)*.95,y:c.y-.04,ry:rnd()*6.283,m:Math.floor(rnd()*4),s:.16+rnd()*.07})}
+   for(let k=0;k<3;k++){const a2=k/3*6.283;charP.push({x:c.x+Math.cos(a2)*.3,z:c.z+Math.sin(a2)*.3,y:c.y+.05,ry:a2,rx:1.45,m:Math.floor(rnd()*3),s:.1+rnd()*.03})}}
+  for(const c of scatter(3,(x,z,h)=>h>2.5&&h<9&&flat(x,z,h))){const n=6+Math.floor(rnd()*3),rr=3.6+rnd();for(let k=0;k<n;k++){const a2=k/n*6.283;stoneP.push({x:c.x+Math.cos(a2)*rr,z:c.z+Math.sin(a2)*rr,y:hAt(c.x+Math.cos(a2)*rr,c.z+Math.sin(a2)*rr)-.5,ry:a2,rx:(rnd()-.5)*.06,rz:(rnd()-.5)*.06,m:0,s:2.6+rnd()*1.1})}}
+  for(const c of scatter(16,(x,z,h)=>h>1.6&&h<10&&slopeAt(x,z)<.35&&wayAt(x,z)<.2&&!caveAt(x,z,2))){const a2=rnd()*6.283;logP.push({x:c.x,z:c.z,y:c.y+.35,ry:a2,rx:1.5708,m:Math.floor(rnd()*3),s:.34+rnd()*.12,c:L('#8c7f66')})}
+  for(const c of scatter(5,(x,z,h)=>h>2&&h<9&&flat(x,z,h))){const a2=rnd()*6.283,w=2.4+rnd()*1.4,d=1.8+rnd();for(const[ox,oz]of[[-w,-d],[0,-d],[w,-d],[-w,d],[w,0],[-w,0]]){if(rnd()<.25)continue;const x=c.x+Math.cos(a2)*ox-Math.sin(a2)*oz,z=c.z+Math.sin(a2)*ox+Math.cos(a2)*oz;ruinP.push({x,z,y:hAt(x,z)-.45,ry:a2+(rnd()-.5)*.3,rx:(rnd()-.5)*.12,m:Math.floor(rnd()*3),s:.9+rnd()*.5})}}
+  place([0,1,2,3].map(i=>'pack:rocks70#'+[12,7,5,3][i]),cairnP);
+  place([0,1,2,3].map(i=>'pack:rocks70#'+[0,1,2,8][i]),ringP,{shadow:false});
+  place(['TwistedTree_1','TwistedTree_2','TwistedTree_3'],charP,{shadow:false,tint:1});
+  place(['pack:rockscliffs#5'],stoneP);
+  place(['pack:trees#2','pack:trees#3','pack:trees#4'],logP,{tint:1});
+  place([42,44,51].map(i=>'pack:rocks70#'+i),ruinP);}}
 function bakeShade(){const d=shadeTex.image.data;d.fill(255);const px=S/SHN;const sy=Math.max(.25,sunDir.y);const ox=-sunDir.x/sy,oz=-sunDir.z/sy,ol=Math.hypot(ox,oz)||1;const lim=Math.min(ol,2.6);const ux=ox/ol*lim,uz=oz/ol*lim;
  const stamp=(x,z,r,dark)=>{const cx=(wrapC(x)+S/2)/px,cz=(wrapC(z)+S/2)/px,R2=r/px;for(let j=Math.floor(cz-R2);j<=cz+R2;j++)for(let i=Math.floor(cx-R2);i<=cx+R2;i++){const dd=Math.hypot(i+.5-cx,j+.5-cz)/R2;if(dd>=1)continue;const I=((i%SHN)+SHN)%SHN,J=((j%SHN)+SHN)%SHN;const k=(J*SHN+I)*4;const v=255*(1-dark*(1-smooth(.45,1,dd)));if(v<d[k])d[k]=v}};
  const blob=(x,z,h,r,dark)=>{const n=4;for(let q=0;q<=n;q++){const f=q/n;stamp(x+ux*h*f,z+uz*h*f,r*(.75+.25*Math.sin(f*Math.PI)),dark)}};
