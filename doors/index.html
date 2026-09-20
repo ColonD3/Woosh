@@ -568,7 +568,7 @@ const grass=new THREE.Mesh(bg,new THREE.ShaderMaterial({uniforms:grassU,side:THR
 vertexShader:`
 #include <packing>
 uniform sampler2D sMap;uniform mat4 sMat;uniform float sOn;
-uniform float uBend;uniform sampler2D hMap,terr,shade,pG1,pG2,wayT,cvM,bioT;varying float vB2,vBh, vBio;varying vec3 vGC;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
+uniform float uBend;uniform sampler2D hMap,terr,shade,pG1,pG2,wayT,cvM,bioT;varying float vB2,vBh, vBio;varying vec3 vSc;varying vec3 vGC;uniform float S,N,R,time;uniform vec3 pPos,camPos,sunDir;attribute vec4 offset;
 varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 float tH(vec2 ij){return texture2D(hMap,(ij+.5)/N).r;}
 float hgt(vec2 xz){vec2 g=mod((xz+S*.5)/S,1.)*(N-1.);g=min(g,vec2(N-1.001));vec2 b=floor(g),f=g-b;
@@ -594,10 +594,11 @@ void main(){
  float k=y*y;lp.xz+=bend*k*tall;lp.y-=length(bend)*k*tall*.4;
  vec3 wp=vec3(w.x,h,w.y)+lp;
  {float mm=smoothstep(.35,.65,vn(w*.012)*.55+vn(w*.0256+7.)*.3+vn(w*.0564+3.)*.15);vGC=pow(mix(textureLod(pG1,w*.16,3.).rgb,textureLod(pG2,w*.13,3.).rgb,mm),vec3(1./2.2));}
- vT=texture2D(terr,(w+S*.5)/S);{vec3 bb=texture2D(bioT,(w+S*.5)/S).rgb;vBio=bb.r;vB2=bb.g;vBh=bb.b;}vSh=texture2D(shade,(w+S*.5)/S).r;if(sOn>.5){vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;if(sc.x>0.&&sc.x<1.&&sc.y>0.&&sc.y<1.&&sc.z<1.){vec2 ds=unpackRGBATo2Half(texture2D(sMap,sc.xy));float cmp=sc.z-.0015;float hard=step(cmp,ds.x);float lit=1.;if(hard<1.){float dd=cmp-ds.x;float vv=max(0.,ds.y*ds.y);float pp=vv/(vv+dd*dd);lit=clamp((pp-.3)/.65,0.,1.);}vSh=min(vSh,lit);}}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
+ vT=texture2D(terr,(w+S*.5)/S);{vec3 bb=texture2D(bioT,(w+S*.5)/S).rgb;vBio=bb.r;vB2=bb.g;vBh=bb.b;}vSh=texture2D(shade,(w+S*.5)/S).r;{vec4 sc=sMat*vec4(w.x,h+.15,w.y,1.);sc.xyz/=sc.w;vSc=sc.xyz;}}vY=y;vVar=offset.w;vDist=distance(wp,camPos);
  vec3 vd=normalize(wp-camPos);vGlow=pow(max(dot(vd,sunDir),0.),4.);
  {vec2 rd=wp.xz-camPos.xz;wp.y-=dot(rd,rd)*uBend;}gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);}`,
-fragmentShader:`varying float vBio,vB2,vBh;uniform vec3 fogC;uniform float fogN,fogF;varying vec3 vGC;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
+fragmentShader:`#include <packing>
+uniform sampler2D sMap;uniform float sOn;varying vec3 vSc;varying float vBio,vB2,vBh;uniform vec3 fogC;uniform float fogN,fogF;varying vec3 vGC;varying vec4 vT;varying float vY,vVar,vDist,vGust,vGlow,vSh,vClump;
 void main(){
  vec3 base=vec3(.13,.36,.07);
  vec3 tipA=vec3(.5,.78,.18),tipB=vec3(.74,.86,.27),tipC=vec3(.26,.58,.12);
@@ -607,7 +608,8 @@ void main(){
  c+=vec3(.12,.16,.04)*vGust*vY*.5;
  c=mix(c,vT.rgb*(.4+.55*vY),vT.a*.62);
  c=pow(c,vec3(2.2));
- float sh=mix(.3,1.,vSh);c*=sh*(.8+.2*vY);
+ float shd=vSh;if(sOn>.5&&vSc.x>0.&&vSc.x<1.&&vSc.y>0.&&vSc.y<1.&&vSc.z<1.){vec2 ds=unpackRGBATo2Half(texture2D(sMap,vSc.xy));float cmp=vSc.z-.0015;float lit=1.;if(step(cmp,ds.x)<1.){float dd=cmp-ds.x,vv=max(0.,ds.y*ds.y);lit=clamp((vv/(vv+dd*dd)-.3)/.65,0.,1.);}shd=min(shd,lit);}
+ float sh=mix(.3,1.,shd);c*=sh*(.8+.2*vY);
  c+=vec3(1.,.8,.35)*vGlow*pow(vY,2.)*.35*sh;
  c*=1.9;
  c=mix(c,fogC,smoothstep(fogN,fogF,vDist));
