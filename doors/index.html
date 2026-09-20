@@ -1427,7 +1427,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0;const visPos=new THREE.Vector3();let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0;const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0);const visPos=new THREE.Vector3();let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
@@ -1452,7 +1452,7 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  // sticky legs: in caves, holding a direction against rock lets wooshi roll along it (walls, overhangs, ceilings)
  if(caveM&&il>0&&!dead&&!keys.Space){const cx=ox0,cy=oy0+.55,cz=oz0;const f=CV.F(cx,cy,cz);
   if(f>-.85){const g=cvGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const moved=Math.hypot(pos.x-ox0,pos.z-oz0),want=speed*dt;
-   if(moved<want*.35)blockT+=dt;else blockT=0;const dl0=Math.hypot(dirX,dirZ)||1;const wallAhead=CV.F(ox0+dirX/dl0*.65,oy0+.5,oz0+dirZ/dl0*.65)>0;if(sticky&&ny>.78&&!wallAhead)sticky=false;else if(!sticky&&blockT>.12&&wallAhead)sticky=true;if(sticky){const dl=Math.hypot(dirX,dirZ)||1;let tx=dirX/dl,ty=ny<.9?.85:0,tz=dirZ/dl;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
+   if(moved<want*.35)blockT+=dt;else blockT=0;const dl0=Math.hypot(dirX,dirZ)||1;const wx=ox0+dirX/dl0*.7,wz=oz0+dirZ/dl0*.7;const wallAhead=CV.F(wx,oy0+.35,wz)>0||CV.F(wx,oy0+.85,wz)>0;if(sticky&&ny>.78&&!wallAhead)sticky=false;else if(!sticky&&blockT>.08&&wallAhead)sticky=true;if(sticky){stickyN.set(nx,ny,nz);_dv.set(dirX,0,dirZ).normalize().applyQuaternion(camQ);let tx=_dv.x,ty=_dv.y+(ny<.9&&camUpV.y>.9?.85:0),tz=_dv.z;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
     let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;for(let k=0;k<3;k++){const f2=CV.F(px,py,pz);const g2=cvGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;const mv=(.5+f2);px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv}
     if(CV.F(px,py,pz)<-.2){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55])}else sticky=false}}else sticky=false}else sticky=false
  if(caveM&&il>0&&!dead){if(Math.hypot(pos.x-ox0,pos.y-oy0,pos.z-oz0)<speed*dt*.12)stuckT+=dt;else stuckT=0;
@@ -1467,18 +1467,19 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(!myOut)me.trail=[];if(!dead)updTrail(me,pos);me.tm.visible=!dead;net.tick(dt,t);
  // camera
  player.visible=!firstPerson&&!dead;
- if(firstPerson){const eye=new THREE.Vector3(pos.x,pos.y+1.5,pos.z);camera.position.copy(eye);camPos.copy(eye);
+ if(firstPerson){camera.up.set(0,1,0);const eye=new THREE.Vector3(pos.x,pos.y+1.5,pos.z);camera.position.copy(eye);camPos.copy(eye);
   camera.lookAt(eye.x+Math.sin(yaw)*Math.cos(pitch),eye.y-Math.sin(pitch),eye.z+Math.cos(yaw)*Math.cos(pitch));}else{
  {const ox=wrapC(pos.x)-pos.x,oz=wrapC(pos.z)-pos.z;if(ox||oz){pos.x+=ox;pos.z+=oz;camPos.x+=ox;camPos.z+=oz;camera.position.x+=ox;camera.position.z+=oz}}
  if(!camInit){camPos.set(pos.x,pos.y+1.3,pos.z);camInit=true}
  {const a=1-Math.exp(-dt*6.5);camPos.x+=(pos.x-camPos.x)*a;camPos.z+=(pos.z-camPos.z)*a;camPos.y+=(pos.y+1.3-camPos.y)*(1-Math.exp(-dt*5))}
  {const a=1-Math.exp(-dt*20);let dy=yaw-vYaw;vYaw+=dy*a;vPitch+=(pitch-vPitch)*a}
  const tgt=_tgt.copy(camPos);camWant+=((ug?4.2:7)-camWant)*(1-Math.exp(-dt*2));const dist=camWant;
- const want=new THREE.Vector3(tgt.x-Math.sin(vYaw)*Math.cos(vPitch)*dist,tgt.y+Math.sin(vPitch)*dist,tgt.z-Math.cos(vYaw)*Math.cos(vPitch)*dist);
- if(caveM){for(let k=0;k<12&&CV.F(tgt.x,tgt.y,tgt.z)>-.45;k++){const g=cvGrad(tgt.x,tgt.y,tgt.z);const gl=Math.hypot(g[0],g[1],g[2])||1;tgt.x-=g[0]/gl*.2;tgt.y-=g[1]/gl*.2;tgt.z-=g[2]/gl*.2}want.set(tgt.x-Math.sin(vYaw)*Math.cos(vPitch)*dist,tgt.y+Math.sin(vPitch)*dist,tgt.z-Math.cos(vYaw)*Math.cos(vPitch)*dist)}
+ {const up=sticky&&!dead?stickyN:_Y;camUpV.lerp(up,1-Math.exp(-dt*3.5)).normalize();camQ.setFromUnitVectors(_Y,camUpV)}
+ const want=new THREE.Vector3(),_od=_cd.set(Math.sin(vYaw)*Math.cos(vPitch),-Math.sin(vPitch),Math.cos(vYaw)*Math.cos(vPitch)).applyQuaternion(camQ);want.set(tgt.x-_od.x*dist,tgt.y-_od.y*dist,tgt.z-_od.z*dist);
+ if(caveM){for(let k=0;k<12&&CV.F(tgt.x,tgt.y,tgt.z)>-.45;k++){const g=cvGrad(tgt.x,tgt.y,tgt.z);const gl=Math.hypot(g[0],g[1],g[2])||1;tgt.x-=g[0]/gl*.2;tgt.y-=g[1]/gl*.2;tgt.z-=g[2]/gl*.2}want.set(tgt.x-_od.x*dist,tgt.y-_od.y*dist,tgt.z-_od.z*dist)}
  {const dx=want.x-tgt.x,dy=want.y-tgt.y,dz=want.z-tgt.z,L=Math.hypot(dx,dy,dz);let t=.2;while(t<L){const px=tgt.x+dx/L*t,py=tgt.y+dy/L*t,pz=tgt.z+dz/L*t;const d=-CV.F(px,py,pz);if(d<.4){t=Math.max(.2,t-.3);break}t+=Math.max(.12,d*.7)}t=Math.min(t,L);
   camT=t<camT?t:camT+(t-camT)*(1-Math.exp(-dt*3));camT=Math.min(camT,L);want.set(tgt.x+dx/L*camT,tgt.y+dy/L*camT,tgt.z+dz/L*camT);if(!caveM){const floor=hAt(want.x,want.z)+.6;if(want.y<floor)want.y=floor}}
- camera.position.copy(want);camera.lookAt(tgt);}
+ camera.position.copy(want);camera.up.copy(camUpV);camera.lookAt(tgt);}
  {const R=_sR.crossVectors(sunDir,_sY).normalize(),U=_sU.crossVectors(R,sunDir).normalize(),tx=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;const a=Math.round(pos.dot(R)/tx)*tx,b=Math.round(pos.dot(U)/tx)*tx,c=pos.dot(sunDir);_sP.copy(R).multiplyScalar(a).addScaledVector(U,b).addScaledVector(sunDir,c);sun.target.position.copy(_sP);sun.position.copy(_sP).addScaledVector(sunDir,100)}
  for(const c of clouds)c.position.x+=dt*1.2,c.position.x>900&&(c.position.x-=1800);sky.position.copy(camera.position);water.position.x=Math.round(camera.position.x/2)*2;water.position.z=Math.round(camera.position.z/2)*2;grassU.time.value=t;terrFX.tTime.value=t;swayU.value=t;water.material.uniforms.time.value=t*.6;grassU.pPos.value.copy(pos);grassU.camPos.value.copy(camera.position);
  updParticles(dt,t);sfx.update(t);updItems(dt,t);updChop(dt);updProjs(dt,t);updFX(dt);updTrees(dt);updFenceMode(dt,t);updBuild(dt,t);updMine(dt,t);updCook(dt);updVines(dt);updDrills(dt);updMixers(dt);updMaps(dt);updShrooms(dt);updSaplings();factoryTick(dt);updBush(dt);hostWorldTick(dt);
