@@ -297,3 +297,10 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [done] day/night + sunsets, sleep in houses (Z), night shades + cave crawlers (click to fight), wooshi personality (look around/doze/wiggle/flinch), milestone banners, fades, loading screen, bigger menu, UI click sounds, hurt vignette, stone footsteps in caves
 
 - dense forest biome: faked light shafts through canopy gaps, visible when you stand in shadow (not global mist)
+- SOUND (next): cc0 pack review w/ Toby -> per-surface footsteps, cave reverb, altitude wind, birds day / crickets night, layered hits, more sfx variety
+- world reacts: grass bends under wooshi, birds flush, bush rustle, water ripples, landing dust
+- camera: turn lag/ease, strafe roll, landing bob, idle drift
+- UI: auto-hide controls panel + quest box, hearts/hunger fade when full
+- authored moments: ruins, old campfire, log bridge, paths that lead somewhere, mossy rock piles (~10)
+- time-of-day moods: real golden hour, overcast days, rain + wet ground
+- transitions: sleep fade, spawn fade-in, menu flies into game
