@@ -504,18 +504,18 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  place(['TwistedTree_1','TwistedTree_2','TwistedTree_3'],twisted,{tint:1});
  place(['pack:trees#2','pack:trees#3','pack:trees#4'],pine,{tint:1});place(['pack:trees#5'],broad,{tint:1});
  const grassy=(x,z,h)=>h>1.4&&h<9&&slopeAt(x,z)<.42&&Math.hypot(x,z)>6;
- const rocks=scatter(55,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
+ const rocks=scatter(30,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
  const BIG=[[42,1.52/1.31],[44,1.46/1.09],[45,1.6/1.13],[47,1.5/1.75],[51,1.49/1.65],[52,1.58/1.38],[55,1.75/1.75],[58,2.66/1.34],[64,2.64/2.23],[66,2.02/1.92],[68,2.65/1.49],[69,3.88/2.1]];
- rocks.forEach(p=>{p.m=Math.floor(rnd()*BIG.length);const H=rnd()<.35?1.6+rnd()*1.4:.6+rnd()*.7;p.s=H;p.y-=.18*H;p.rx=(rnd()-.5)*.15;p.rz=(rnd()-.5)*.15;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:BIG[p.m][1]*H*.5};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=Math.round(2+H*2)});boulders.push(...rocks);
+ rocks.forEach(p=>{p.m=Math.floor(rnd()*BIG.length);const H=rnd()<.12?1.4+rnd()*.8:.5+rnd()*.6;p.s=H;p.y-=.18*H;p.rx=(rnd()-.5)*.15;p.rz=(rnd()-.5)*.15;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:BIG[p.m][1]*H*.5};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=Math.round(2+H*2)});boulders.push(...rocks);
  place(BIG.map(b=>'pack:rocks70#'+b[0]),rocks);
  // landmark boulders + cliff spires on slopes and ridges
 
  // iron ore: dark rock with orange crystals, in rocky/mountain ground; some tucked under cliff arches ("caves")
- const ores=scatter(Math.round(20*(S/240)**2),(x,z,h)=>(slopeAt(x,z)>.32||h>9)&&h<17&&h>1&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<2.5));
+ const ores=scatter(Math.round(36*(S/240)**2),(x,z,h)=>(slopeAt(x,z)>.32||h>9)&&h<17&&h>1&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<2.5));
  ores.forEach(o=>{const r=rnd();o.tk=r<.42?'coal':r<.7?'cu':'fe'});
  for(const q of CV.spots){const y=q.y,r=rnd();const tk=y>-15?(r<.45?'coal':r<.85?'fe':'cu'):y>-42?(r<.2?'coal':r<.58?'fe':'cu'):(r<.12?'coal':r<.4?'fe':r<.93?'cu':'au');ores.push({x:q.x,z:q.z,y:q.y,ry:rnd()*6.283,ug:1,tk})}
  const ORE_SH=[44,51,55,64,66];
- ores.forEach(p=>{p.m=Math.floor(rnd()*ORE_SH.length);const H=p.ug?.8+rnd()*.5:.8+rnd()*.55;p.s=H;p.y-=.2*H;p.rx=(rnd()-.5)*.2;p.rz=(rnd()-.5)*.2;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:H*.6};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=p.tk==='au'?2:6;p.ore=true;p.cu=p.tk==='cu';p.au=p.tk==='au';p.coal=p.tk==='coal'});
+ ores.forEach(p=>{p.m=Math.floor(rnd()*ORE_SH.length);const H=p.ug?.8+rnd()*.5:1.1+rnd()*.9;p.s=H;p.y-=.2*H;p.rx=(rnd()-.5)*.2;p.rz=(rnd()-.5)*.2;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:H*.6};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=p.tk==='au'?2:6;p.ore=true;p.cu=p.tk==='cu';p.au=p.tk==='au';p.coal=p.tk==='coal'});
  place(ORE_SH.map(i=>'pack:rocks70#'+i+'@ore'),ores);
  for(const[grp,col,emi]of[[ores.filter(o=>o.tk==='fe'),'#ff9a3c','#ff6a10'],[ores.filter(o=>o.coal),'#26262c','#050506'],[ores.filter(o=>o.cu),'#4fe0b0','#18b080'],[ores.filter(o=>o.au),'#ffd84a','#ffb000']]){if(!grp.length)continue;const cg=new THREE.OctahedronGeometry(.13,0);cg.scale(1,1.9,1);const cm=new THREE.MeshStandardMaterial({color:col,emissive:emi,emissiveIntensity:1.6,roughness:.3,metalness:.4});const per=6;const im=new THREE.InstancedMesh(cg,cm,grp.length*per);im.castShadow=false;im.frustumCulled=false;
   grp.forEach((p,oi)=>{p.cr=[];for(let k=0;k<per;k++){const a=rnd()*6.283,up=.25+rnd()*.55;const r=p.surf.r*(.75+.1*rnd());const e=new THREE.Object3D();e.position.set(p.x+Math.cos(a)*r*(1-up*.4),p.y+p.s*up,p.z+Math.sin(a)*r*(1-up*.4));e.rotation.set(rnd()*.8-.4,rnd()*6,rnd()*.8-.4);const sc=.6+rnd()*.8;e.scale.setScalar(sc);e.updateMatrix();im.setMatrixAt(oi*per+k,e.matrix);p.cr.push([im,oi*per+k,e.matrix.clone()])}});scene.add(im)}
