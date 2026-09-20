@@ -289,3 +289,5 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [next] rock dungeons, gold uses (forge/gold door), diamonds + rock boss chamber
 - [done] caves v3: minecraft-style worm caves + caverns carved into a real volume (surface nets), terrain holes, no domes, vines only at mouths, real darkness, camera collision, bombs carve craters, surface coal, drills need cranking (F), stamina buff, no ground gunpowder, name worlds
 - [next] check cave gen time on big maps, rock dungeons
+- [done] terrain v3: whole world is one solid field meshed w/ surface nets (terrain+caves one mesh), dig anywhere w/ tools (grass->dirt/mud->stone/granite/deep), bombs carve + drop, seeds, granite block, buried ores (gold very rare, deep), cave types (tunnels, crawlspaces, big halls, shafts, ravines, hidden systems), stalactites/mites, cave rocks, glow shrooms, polyhaven underground textures, rocks settle flush
+- [next] farming (seeds), gold door + gold factory roofs, perf of world build on big maps
