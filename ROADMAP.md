@@ -221,3 +221,55 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - steep edge while running: pause... then yeet off it "WAAAAAaaaaa-"
 - if you hold wheat: toddlers on sugar, they chase you going "NOM NOM NOM NOM NOM" (hideously hilarious) -> that's how you lure them into the animal pen
 - later: pens attach outside factories, sheeps become part of automations (wheat -> sheep -> mutton -> cooker...), carpets from sheeps
+
+## THE BIG PROGRESSION (Toby, Sept 19 late) — gold, energy, survival, characters, the rock, the clouds
+
+### Survival stats
+- HEALTH: goes down only from damage (fall damage, players hitting you, hostile mobs later). 0 = death. eating restores health. PvP: you can hit other players
+- HUNGER: always draining; you need food constantly; 0 hunger = you DIE (no slow-down phase)
+- STAMINA: drains the longer you run; if it gets really low (mildly hard to reach) you get slower AND hunger drains faster; stand still to rest it back up
+- stamina potion: refills all stamina (lets you keep running)
+
+### Characters are separate from worlds
+- level up your character; characters carry items BETWEEN worlds
+- menu: make new characters, make new worlds, independently
+- this is what forces searching MULTIPLE worlds (for the rock / the clouds)
+
+### Copper + armor
+- mine copper -> cook in a BLAST FURNACE -> copper ingots -> place them down and let them OXIDIZE (10-30s) -> collect
+- oxidized copper -> WOOSHI ARMOR: adds protection, legs go STIFF, you roll around stiff, slower up steep slopes, metal rolling sound, visibly armored
+- later: DIAMOND ARMOR via the forge, way more damage resistance
+
+### Gold + energy
+- gold is rare, deep in caves; 3 gold -> (at the FORGE: iron door + gold) -> GOLD DOOR = unlocks energy/electricity; replaces your iron door
+- gold rebar for the roof; bigger factory = more roof needed, but also more wall space for attachments (e.g. many mixers in parallel)
+- GENERATOR = gears + vines + lots of copper; connects to the gold factory, powers other machines; burns COAL
+- ELECTRIC DRILL (copper + stuff, faster than the mechanical drill): pick what ore it mines in its options (coal etc.); different ores take different times
+- automation: electric drill -> coal -> generator -> powers brewer, electric mixer, etc.
+- all electric things are crafted with copper (+ other stuff)
+- every machine (drills, generators...) can be upgraded with GOLD (faster/more efficient), then DIAMOND (really good, diamonds are hard to get)
+- (Toby wants ideas for fun electric machines — see list below)
+
+### The rock (boss) — the only real diamond source
+- a ROCK DUNGEON sometimes spawns deep underground; ONE rock per world
+- activate it -> fight THE ROCK (it's just a big rock lol): lunges, tries to roll you over, does a lot of damage (why copper armor matters)
+- beat it -> its vault opens -> chests with 1-2 diamonds + a HERO OF THE ROCK potion
+- best odds: make SMALL worlds and explore every cave
+- HERO OF THE ROCK potion (limited time): newly generated small worlds get 3-6 rock dungeons
+- BREWER (needs energy): put in glass bottles + an ingredient; the ingredient decides the potion. hero of the rock: put the found potion + water bottles in, it copies it into the bottles
+- diamonds can technically be drilled but take forever
+
+### Clouds (night) + the key + the cloud elevator
+- CLOUDS fall on the ground at night: rare, lightly glowing, walk around and find them
+- KEY = diamond + cloud; craft it with a gold door -> the CLOUD ELEVATOR that magically takes you up
+- up there: literally just clouds, with treasure: best source of diamonds + copper (copper is also fine with electric drills, just easier up there)
+- WATER HOLDERS come from the clouds (more cloud loot ideas TBD)
+
+### Water, farming, sheeps (depends on water holders!)
+- you can't farm until you have a water holder: hold water, place it in a pond
+- seeds come from blowing up grass
+- wheat grows in a PLANTER (needs water) -> wheat
+- wheat lures sheeps into the pen; FENCES let sheeps in but never out
+- place a water holder in the pen: keeps sheeps from despawning + makes them reproduce -> kill for meat
+- MEAT = great food + the SHEEP EFFECT (run much faster using less stamina)
+- wire the planter output into the pen in the node board = feed wheat = faster reproduction
