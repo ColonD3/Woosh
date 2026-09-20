@@ -1553,7 +1553,7 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
     const e=STEP;const nx=hAt(x-e,z)-hAt(x+e,z),nz=hAt(x,z-e)-hAt(x,z+e),L=Math.hypot(nx,2*e,nz);nA.setXYZ(v,nx/L,2*e/L,nz/L)}
    else{lw.set([0,1,0,0],v*4);const dirt=1-smooth(1.5,2.6,d);const X=wrapC(x),Z=wrapC(z);const gr=smooth(.6,.67,CV.n3(X*.045,y*.07,Z*.045));const dp=y<-34?smooth(-34,-50,y)*smooth(.28,.42,CV.n3(x*.05+40,y*.05,z*.05)):0;
     const rest=1-dirt;ug.set([dirt,rest*(1-gr)*(1-dp),rest*gr*(1-dp),rest*dp],v*4);if(h<1.15&&d<1.6){lw.set([0,0,1,0],v*4);ug.set([0,0,0,0],v*4)}}}
-  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setAttribute('lw',new THREE.BufferAttribute(lw,4));g.setAttribute('ug',new THREE.BufferAttribute(ug,4));g.computeBoundingSphere();
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.setAttribute('lw',new THREE.BufferAttribute(lw,4));g.setAttribute('ug',new THREE.BufferAttribute(ug,4));g.computeBoundingSphere();g.boundingSphere.radius+=10;
   const m=new THREE.Mesh(g,terrMat);m.position.set(ox,oy,oz);m.receiveShadow=true;m.userData.o=[ox,oy,oz];m.userData.deep=oy+CY<CV.colMin(cx,cz)-4;scene.add(m);CV.chunks.set(k,m);m.visible=false};
  const colMin=new Float32Array(NCX*NCX).fill(1e9),colMax=new Float32Array(NCX*NCX).fill(-1e9);
  for(let cz=0;cz<NCX;cz++)for(let cx=0;cx<NCX;cx++){for(let z=0;z<=CX;z+=2)for(let x=0;x<=CX;x+=2){const h=hAt(-S/2+cx*CX+x,-S/2+cz*CX+z);const q=cz*NCX+cx;if(h<colMin[q])colMin[q]=h;if(h>colMax[q])colMax[q]=h}}
@@ -1575,13 +1575,13 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
  CV.glowGone=i=>{const q=CV.glowL&&CV.glowL[i];if(!q||q.gone)return;q.gone=1;CV.glowIM.im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0));CV.glowIM.im.instanceMatrix.needsUpdate=true};
  // digs + bombs carve the world: add a sphere to the field, re-mesh touched chunks, hide decor inside it
  CV.carve=(x,y,z,r,dig)=>{const key2=[x,y,z].map(v=>v.toFixed(1)).join(',');if(CV.craters.some(c=>c.k===key2))return;CV.craters.push({k:key2,x,y,z,r,dig:dig?1:0});CV.addPrim({a:[x,y,z],b:[x,y,z],r,up:1,dn:1,dig:!!dig,bb:r+3});
-  const e=r+2.5;for(const k of CV.chunksFor(x-e,y-e,z-e,x+e,y+e,z+e)){CV.hi.add(k);const[a,b,c]=k.split(',').map(Number);CV.mesh(a,b,c)}visT=0;
+  const e=r+2.5;for(const k of CV.chunksFor(x-e,y-e,z-e,x+e,y+e,z+e)){const[a,b,c]=k.split(',').map(Number);CV.mesh(a,b,c)}visT=0;
   if(y+r+2>hAt(x,z)){CV.maskRect(x-r-2,z-r-2,x+r+2,z+r+2);CV.maskTex.needsUpdate=true}
   for(const d of deco){let ch=false;d.list.forEach((q,i)=>{if(Math.hypot(wd(q[0],x),q[1]-y,wd(q[2],z))<r+.6&&!q.gone){q.gone=1;ch=true;d.im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0))}});if(ch)d.im.instanceMatrix.needsUpdate=true}};
  // chunks sit at the copy nearest the camera (the world wraps) + distance/depth culling
  let visT=0;CV.upd=(dt)=>{const cp=camera.position;if(CV.queue.length){const t1=performance.now();while(CV.queue.length&&performance.now()-t1<9){let bi=0,bd=1e9;for(let i=0;i<CV.queue.length;i++){const q=CV.queue[i];const d=Math.hypot(wd(-S/2+q[0]*CX+CX/2,cp.x),wd(-S/2+q[2]*CX+CX/2,cp.z),(-120+q[1]*CY+CY/2-cp.y)*1.5);if(d<bd){bd=d;bi=i}}const q=CV.queue.splice(bi,1)[0];CV.mesh(q[0],q[1],q[2]);visT=0}}visT-=dt;const doVis=visT<=0;if(doVis)visT=.3;
   for(const m of CV.chunks.values()){const o=m.userData.o;const px=o[0]+S*Math.round((cp.x-(o[0]+CX/2))/S),pz=o[2]+S*Math.round((cp.z-(o[2]+CX/2))/S);if(m.position.x!==px||m.position.z!==pz)m.position.set(px,o[1],pz);
-   if(doVis){const hd=Math.hypot(px+CX/2-cp.x,pz+CX/2-cp.z);m.visible=m.userData.deep?hd<90&&Math.abs(o[1]+CY/2-cp.y)<70:hd<300}}}
+   if(doVis){const hd=Math.hypot(px+CX/2-cp.x,pz+CX/2-cp.z);const bd=BEND.value>1e-6?Math.min(300,Math.sqrt(90/BEND.value)+30):300;m.frustumCulled=BEND.value<1e-6;m.visible=m.userData.deep?hd<90&&Math.abs(o[1]+CY/2-cp.y)<70:hd<bd}}}
  // water + grass ignore holes in the ground
  water.material.uniforms.uCaveM={value:CV.maskTex};water.material.uniforms.uHM={value:hTex};water.material.fragmentShader='uniform sampler2D uCaveM,uHM;\n'+water.material.fragmentShader.replace('void main() {','void main() {\n{vec2 q=mod(worldPosition.xz+WORLD_S*.5,WORLD_S);if(texture2D(uCaveM,q/WORLD_S).r>.4)discard;if(texture2D(uHM,(q/'+STEP.toFixed(5)+'+.5)/'+N+'.0).r>.5)discard;}');water.material.needsUpdate=true}
 // field-based character helpers (used near/inside caves)
