@@ -45,6 +45,14 @@
   .node .ni{padding:6px 10px 10px;display:flex;flex-wrap:wrap;gap:6px;min-height:22px}.node .ni span{display:flex;align-items:center;gap:2px}.node .ni svg{width:18px;height:18px}
   .card .node button.pin,.card .node button.pout{position:absolute;top:29px;width:18px;height:18px;padding:0;border-radius:50%;border:3px solid #23321f;background:#ffd28a}.node .pin{left:-9px}.node .pout{right:-9px}
   #resumeHint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:600 18px Fredoka,system-ui,sans-serif;color:#fffaf0;background:rgba(25,35,30,.55);padding:12px 20px;border-radius:14px;pointer-events:none;z-index:4}
+  .sgrp{font:600 12px Fredoka,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;opacity:.55;margin-top:6px}.tg{display:flex;align-items:center;gap:8px;font:500 15px Fredoka,system-ui,sans-serif}.tg input{width:18px;height:18px;accent-color:#ff5a2e}
+  #mapui{position:fixed;inset:0;z-index:7;display:grid;place-items:center;background:rgba(20,28,24,.72)}#mapwrap{display:flex;gap:14px;align-items:flex-start;max-width:calc(100vw - 32px)}
+  #mapc{width:min(78vh,calc(100vw - 300px));height:min(78vh,calc(100vw - 300px));border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.4);cursor:crosshair;image-rendering:auto;background:#1d4c6b}
+  #wplist{width:240px;max-height:78vh;overflow:auto}#wplist .wp{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#f3e7cf;font:500 14px Fredoka,system-ui,sans-serif}#wplist .wp i{width:12px;height:12px;border-radius:50%;flex:none}#wplist .wp span{flex:1}#wplist .wp small{opacity:.6}
+  .card #wplist button.x{padding:2px 8px;font-size:13px;background:#d9cdb4;color:#23321f}
+  #minimap{position:fixed;right:16px;top:calc(56px + env(safe-area-inset-top,0px));width:150px;height:150px;border-radius:50%;box-shadow:0 0 0 3px #fff8eb,0 6px 20px rgba(0,0,0,.3);z-index:3;pointer-events:none}
+  .wplab{position:fixed;transform:translate(-50%,-100%);font:600 13px Fredoka,system-ui,sans-serif;color:#fffaf0;text-shadow:0 1px 4px rgba(0,0,0,.7);pointer-events:none;white-space:nowrap;z-index:2;text-align:center}.wplab small{display:block;font-weight:500;opacity:.8}
+  #wpnew{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:8;width:min(320px,calc(100vw - 32px))}#wpcols{display:flex;gap:8px}#wpcols i{width:26px;height:26px;border-radius:50%;cursor:pointer;box-shadow:0 0 0 2px #fff8eb}#wpcols i.on{box-shadow:0 0 0 3px #23321f}
   #chatlog{position:fixed;left:16px;bottom:calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;max-width:min(420px,calc(100vw - 32px));pointer-events:none;z-index:4}
   #chatlog div{font:500 15px Fredoka,system-ui,sans-serif;color:#fffaf0;background:rgba(30,40,35,.55);padding:5px 10px;border-radius:10px;transition:opacity 1s}#chatlog b{color:#ffd28a}
   #chatin{position:fixed;left:16px;bottom:calc(112px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 32px));font:500 16px Fredoka,system-ui,sans-serif;padding:9px 12px;border-radius:12px;border:2px solid #fffaf0;background:rgba(30,40,35,.75);color:#fffaf0;z-index:6;box-sizing:border-box;outline:none}
@@ -114,7 +122,7 @@
 </style>
 </head><body>
 <div class="title">woosh</div>
-<div class="hud" id="hud"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>V</b> first person · <b>M</b> sound · <b>P</b> fps<br><kbd>click</kbd> chop · <kbd>1-9</kbd> hotbar · <kbd>R</kbd> use · <kbd>Q</kbd> craft · &#9881; all controls<br>click + move mouse to look · <b>Esc</b> frees the mouse</div>
+<div class="hud" id="hud"><b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>V</b> first person · <b>M</b> map · <b>B</b> waypoint · <b>P</b> fps<br><kbd>click</kbd> chop · <kbd>1-9</kbd> hotbar · <kbd>R</kbd> use · <kbd>Q</kbd> craft · &#9881; all controls<br>click + move mouse to look · <b>Esc</b> frees the mouse</div>
 <button id="jump" hidden>jump</button>
 <div id="menu"><div class="ttl"><h1 class="logo">woosh</h1><p class="tag">a tiny globe to build on</p></div>
 <div class="card tscreen">
@@ -126,10 +134,15 @@
  <div class="pg" id="pg-opts" hidden><b class="pt">settings</b><div class="sens"><label for="sensR">look speed</label><input type="range" id="sensR" min=".2" max="3" step=".05"><b id="sensV"></b></div><button class="g back">back</button></div>
  <p id="st"></p><div hidden><div class="modes" id="modes" role="radiogroup" aria-label="mode"><i class="thumb" id="mthumb"></i><button data-m="peaceful" role="radio">peaceful</button><button data-m="classic" role="radio">classic</button><button data-m="hard" role="radio">hard</button></div><p id="mdesc"></p><button id="solo">solo</button></div></div></div>
 <div id="pause" hidden><div class="card"><h1>paused</h1><button id="pResume">resume</button><button id="pInvite" class="alt">invite friends</button><div id="pCode" hidden></div><button id="pSet" class="g">settings</button><button id="pLeave" class="g">save + leave world</button></div></div>
-<div id="radial" hidden></div><div id="resumeHint" hidden>click to keep playing</div><div id="nodeui" class="card" hidden><b>factory automation</b><p id="nodehint" class="mdesc"></p><div id="nodeboard"></div><button id="nodeX" class="g">close</button></div><div id="itemname"></div><div id="chestui" class="card" hidden><b id="chestT"></b><p class="mdesc" style="margin:0">in the chest · click = take 1 · shift+click = take all</p><div id="chestIn" class="cgrid"></div><b class="pt" style="font-size:14px">your stuff · click = put 1 · shift+click = put all</b><div id="chestMine" class="cgrid"></div><button id="chestX" class="g">close</button></div><i id="cookall" hidden data-on="0"></i><div id="chatlog"></div><input id="chatin" hidden maxlength="140" placeholder="say something · enter to send · esc to cancel" autocomplete="off">
+<div id="radial" hidden></div><div id="mapui" hidden><div id="mapwrap"><canvas id="mapc" width="768" height="768"></canvas><div id="wplist" class="card"></div></div></div><canvas id="minimap" width="300" height="300" hidden></canvas><div id="wplabs"></div><div id="wpnew" class="card" hidden><b>new waypoint</b><input id="wpname" maxlength="20" placeholder="name it" autocomplete="off"><div id="wpcols"></div><div class="row"><button id="wpOk">add</button><button id="wpNo" class="g">cancel</button></div></div><div id="resumeHint" hidden>click to keep playing</div><div id="nodeui" class="card" hidden><b>factory automation</b><p id="nodehint" class="mdesc"></p><div id="nodeboard"></div><button id="nodeX" class="g">close</button></div><div id="itemname"></div><div id="chestui" class="card" hidden><b id="chestT"></b><p class="mdesc" style="margin:0">in the chest · click = take 1 · shift+click = take all</p><div id="chestIn" class="cgrid"></div><b class="pt" style="font-size:14px">your stuff · click = put 1 · shift+click = put all</b><div id="chestMine" class="cgrid"></div><button id="chestX" class="g">close</button></div><i id="cookall" hidden data-on="0"></i><div id="chatlog"></div><input id="chatin" hidden maxlength="140" placeholder="say something · enter to send · esc to cancel" autocomplete="off">
 <div id="hostmode" hidden><div><b>hosting mode</b><p id="hmtxt">the world keeps running · keep this tab open</p><button id="hmBack">back to the game</button></div></div><div id="net" hidden></div><div id="mine">0.0%</div><div id="board"></div><div id="dead" hidden></div><div id="fill" hidden><span id="filltxt"></span><div class="bar"><i id="fillbar"></i></div></div>
 <div id="end" hidden><div class="card"><h1 id="endh">island filled!</h1><ol id="endlist"></ol><button id="again">play again</button><p id="endwait" class="mdesc" hidden>waiting for the host to start a new round</p></div></div><div id="toast" hidden></div><div id="fps" hidden></div><div id="inv"></div><div id="craft"></div><div id="prompt" hidden></div><div id="hint" hidden></div><div id="buildhud" hidden></div><div id="craftmenu" class="card" hidden><b>door crafting</b><div id="craftlist"></div><div class="row"><button id="bookB" class="g">recipe book</button><button id="craftX">close</button></div></div><div id="xhair" hidden></div>
-<button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><div class="sens"><label for="bendR">world curve</label><input type="range" id="bendR" min="0" max="1" step=".01"><b id="bendV"></b></div><button id="sndB">sound: on</button><button id="setBack" class="g" hidden>back</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>Q</kbd> craft menu (doors, bombs, tools, roofs)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house · then craft a roof (wood + mud)<br>tools: mine boulders + iron ore (dark rocks with orange crystals), dig mud; iron tool also digs sand<br>cooker (Q to craft, G to place): F cooks iron ore + wood → iron<br><kbd>V</kbd> first person · <kbd>M</kbd> sound · <kbd>P</kbd> fps</p></div>
+<button id="gear" aria-label="settings" hidden>&#9881;</button><div id="settings" class="card" hidden><b>settings</b><div class="sgrp">controls</div><div class="sens"><label for="sensR2">look speed</label><input type="range" id="sensR2" min=".2" max="3" step=".05"><b id="sensV2"></b></div><div class="sens"><label for="fovR">field of view</label><input type="range" id="fovR" min="50" max="90" step="1"><b id="fovV"></b></div>
+<div class="sgrp">world</div><div class="sens"><label for="bendR">world curve</label><input type="range" id="bendR" min="0" max="1" step=".01"><b id="bendV"></b></div>
+<div class="sgrp">sound</div><div class="sens"><label for="volR">volume</label><input type="range" id="volR" min="0" max="1" step=".05"><b id="volV"></b></div>
+<div class="sgrp">screen</div><label class="tg"><input type="checkbox" id="optMini"> minimap</label><label class="tg"><input type="checkbox" id="optFps"> show fps</label><label class="tg"><input type="checkbox" id="optHud"> controls hint</label>
+<div class="sgrp">graphics</div><label class="tg"><input type="checkbox" id="optAO"> ambient occlusion</label><label class="tg"><input type="checkbox" id="optTAA"> smooth edges (TAA)</label><label class="tg"><input type="checkbox" id="optShadow"> shadows</label><label class="tg"><input type="checkbox" id="optBloom"> bloom</label>
+<button id="sndB" hidden>sound: on</button><button id="setBack" class="g" hidden>back</button><button id="hostB" hidden>hosting mode</button><button id="dlB" hidden>download world</button><p class="mdesc"><kbd>hold click</kbd> chop trees · roll over rocks &amp; gunpowder to grab them<br><kbd>1</kbd>–<kbd>4</kbd> or scroll: pick hotbar slot · <kbd>R</kbd> use it (throw rock/bomb)<br><kbd>Q</kbd> craft menu (doors, bombs, tools, roofs)<br><kbd>G</kbd> build mode: click start + end for rock walls, snaps to door sides<br><kbd>F</kbd> at a door: crafting · wall a door in all the way round = house · then craft a roof (wood + mud)<br>tools: mine boulders + iron ore (dark rocks with orange crystals), dig mud; iron tool also digs sand<br>cooker (Q to craft, G to place): F cooks iron ore + wood → iron<br><kbd>V</kbd> first person · <kbd>M</kbd> world map · <kbd>B</kbd> add waypoint · <kbd>P</kbd> fps</p></div>
 <div id="stick" hidden><div id="knob"></div></div>
 <script type="importmap">{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}</script>
 <script src="lib/peerjs.min.js"></script>
@@ -807,7 +820,7 @@ const sfx={ctx:null,buf:{},muted:false,gain:null,
  step(h){const k=Math.floor(Math.random()*5);this.play(h<1.2?`step_carpet_${k}`:h>16?`step_snow_${k}`:`step_grass_${k}`,h<1.2?.5:.32)},
  update(t,g){if(!this.wind)return;const sw=.04+.035*(Math.sin(t*.23)*.5+.5)*(Math.sin(t*.61+1)*.5+.5)+Math.max(0,pos.y-8)*.004;this.wind.gain.value+= (sw-this.wind.gain.value)*.05;this.windF.frequency.value=380+sw*2000},
  toggle(){this.muted=!this.muted;if(this.gain)this.gain.gain.value=this.muted?0:1;ui.toast(this.muted?'sound off':'sound on')}};
-addEventListener('pointerdown',()=>{sfx.init();sfx.ctx?.resume()},{once:false});addEventListener('keydown',e=>{sfx.init();if(e.code==='KeyM'&&e.target.tagName!=='INPUT')sfx.toggle()});
+addEventListener('pointerdown',()=>{sfx.init();sfx.ctx?.resume()},{once:false});addEventListener('keydown',()=>sfx.init());
 
 // ---------- items, crafting, fences, rocks & bombs ----------
 const DIFF={peaceful:{chop:1.3,rocks:0,powder:0,stun:0,throwOK:false,bombR:0},classic:{chop:2,rocks:55,powder:24,stun:1,throwOK:true,bombR:6},hard:{chop:3,rocks:34,powder:13,stun:1.5,throwOK:true,bombR:5.5}};
@@ -1179,7 +1192,7 @@ document.getElementById('craftX').onclick=()=>openCraft(false);document.getEleme
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.repeat||!started)return;if(e.code==='KeyG')setBuildMode(!B.mode);if(e.code==='KeyF'){const m=document.getElementById('craftmenu');const nd=nearDoor();if(nodeDoor){openNodes(null)}else if(!m.hidden)openCraft(false);else if(nd&&nd.factory)openNodes(nd);else if(nd)openCraft(true)}if(e.code==='Escape')openCraft(false)});
 cv.addEventListener('mousedown',e=>{if(document.pointerLockElement!==cv||!B.mode)return;if(e.button===0)buildClick();if(e.button===2)B.start=null},true);
 
-if(QP.has('dev'))Object.assign(window,{__trees:trees,__caves:CAVES,__openNodes:openNodes,__wallSnap:wallSnap,__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
+if(QP.has('dev'))Object.assign(window,{__openMap:openMap,__newWp:newWp,__closeWp:closeWp,__trees:trees,__caves:CAVES,__openNodes:openNodes,__wallSnap:wallSnap,__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
 // ---------- loop ----------
 let started=false,fpsN=0,fpsT=0;
 const clock=new THREE.Clock();const _sR=new THREE.Vector3(),_sU=new THREE.Vector3(),_sY=new THREE.Vector3(0,1,0),_sP=new THREE.Vector3();let stepT=0,camPos=new THREE.Vector3(),camInit=false;
@@ -1225,7 +1238,7 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  camera.position.copy(want);camera.lookAt(tgt);}
  {const R=_sR.crossVectors(sunDir,_sY).normalize(),U=_sU.crossVectors(R,sunDir).normalize(),tx=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;const a=Math.round(pos.dot(R)/tx)*tx,b=Math.round(pos.dot(U)/tx)*tx,c=pos.dot(sunDir);_sP.copy(R).multiplyScalar(a).addScaledVector(U,b).addScaledVector(sunDir,c);sun.target.position.copy(_sP);sun.position.copy(_sP).addScaledVector(sunDir,100)}
  for(const c of clouds)c.position.x+=dt*1.2,c.position.x>900&&(c.position.x-=1800);sky.position.copy(camera.position);water.position.x=Math.round(camera.position.x/2)*2;water.position.z=Math.round(camera.position.z/2)*2;grassU.time.value=t;terrFX.tTime.value=t;swayU.value=t;water.material.uniforms.time.value=t*.6;grassU.pPos.value.copy(pos);grassU.camPos.value.copy(camera.position);
- updParticles(dt,t);sfx.update(t);updItems(dt,t);updChop(dt);updProjs(dt,t);updFX(dt);updTrees(dt);updFenceMode(dt,t);updBuild(dt,t);updMine(dt,t);updCook(dt);updVines(dt);updDrills(dt);updMixers(dt);updSaplings();factoryTick(dt);updBush(dt);hostWorldTick(dt);
+ updParticles(dt,t);sfx.update(t);updItems(dt,t);updChop(dt);updProjs(dt,t);updFX(dt);updTrees(dt);updFenceMode(dt,t);updBuild(dt,t);updMine(dt,t);updCook(dt);updVines(dt);updDrills(dt);updMixers(dt);updMaps(dt);updSaplings();factoryTick(dt);updBush(dt);hostWorldTick(dt);
  if(shake>.001){camera.position.x+=(Math.random()-.5)*shake*.6;camera.position.y+=(Math.random()-.5)*shake*.6;shake*=Math.exp(-dt*7)}
  riverMat.normalMap.offset.y-=dt*.25;if(hostMode){}else if(QP.get('post')==='0')renderer.render(scene,camera);else composer.render();requestAnimationFrame(frame)}
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);bloom.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();pts.material.uniforms.scale.value=innerHeight/2});
@@ -1263,7 +1276,7 @@ const W={cur:null,n:0,lastSave:0,
  data(){const p=game.P.get(net.myId);const hi=p?p.idx:myIdx;
   return{v:1,game:'woosh',size:SZ,name:this.cur.name,code:this.cur.code,mode:MODE,created:this.cur.created,saved:Date.now(),
    land:rle(Array.from(owner,v=>v===hi?1:0)),fence:rle(Array.from(fence,v=>v===hi?1:0)),
-   down:trees.map((t,i)=>t.down?i:-1).filter(i=>i>=0),builds:buildsList(),bould:boulderList(),tmv:treeMoves(),spawn:mySpawn,inv:{...inv},pos:[+pos.x.toFixed(2),+pos.z.toFixed(2)]}},
+   down:trees.map((t,i)=>t.down?i:-1).filter(i=>i>=0),builds:buildsList(),bould:boulderList(),tmv:treeMoves(),spawn:mySpawn,wps:WPS.map(w=>({n:w.n,x:w.x,z:w.z,c:w.c})),inv:{...inv},pos:[+pos.x.toFixed(2),+pos.z.toFixed(2)]}},
  save(){if(!this.cur||net.mode!=='host')return;const d=this.data();if(!this.ls('wdoors_w_'+this.cur.id,d)){ui.toast('could not save (browser storage full or blocked)');return}
   const l=this.list();const e=l.find(w=>w.id===this.cur.id);if(e){e.saved=d.saved;e.name=d.name;e.mode=d.mode}this.setList(l);this.lastSave=Date.now()},
  tick(){if(net.mode!=='host'||!this.cur)return;
@@ -1278,7 +1291,7 @@ const W={cur:null,n:0,lastSave:0,
   if(d.fence){tmp.fill(0);unrleTo(tmp,d.fence);for(let k=0;k<G*G;k++)fence[k]=tmp[k]&&owner[k]===hi?hi:0;rebuildFences()}
   for(const[i,x,z,t0]of d.tmv||[])moveTree(i,x,z,t0);const now=performance.now();for(const i of d.down||[]){const t=trees[i];if(t&&!t.down){t.down=true;setTreeMatrix(t,.001,0)}}
   clearBuilds();for(const b of d.builds||[])addBuild(b,1);applyBoulders(d.bould);
-  if(d.spawn)mySpawn=d.spawn;
+  if(d.spawn)mySpawn=d.spawn;WPS=(d.wps||[]).map(w=>({...w}));rebuildWpMarkers();
   if(d.inv)for(const k in inv)inv[k]=d.inv[k]|0;renderInv();
   if(d.pos){const[x,z]=d.pos;{p.x=wrapC(x);p.z=wrapC(z);onSpawn(p.x,p.z)}}
   game.dirty=true;paintGrid();updScores();this.save();this.hostUI();ui.toast('world loaded · autosaves every 5s')},
@@ -1465,7 +1478,7 @@ document.getElementById('chestX').onclick=()=>openChest(null);
 
 // ---------- pause menu, esc flow, chat ----------
 let pauseOpenT=0,suppressPause=0;const $=id=>document.getElementById(id);
-function anyMenu(){return radialOpen||!$('nodeui').hidden||!$('chestui').hidden||!$('craftmenu').hidden||!$('settings').hidden||!$('hostmode').hidden||!$('chatin').hidden}
+function anyMenu(){return mapOpen||!$('wpnew').hidden||radialOpen||!$('nodeui').hidden||!$('chestui').hidden||!$('craftmenu').hidden||!$('settings').hidden||!$('hostmode').hidden||!$('chatin').hidden}
 function openPause(on){$('pause').hidden=!on;if(on){pauseOpenT=performance.now()+(setFromPause?0:0);$('pInvite').hidden=net.mode==='client';if(net.peer&&net.mode==='host')showCode()}else $('settings').hidden=true}
 function showCode(){const c=net.code||'';const link=location.origin+location.pathname+'?size='+SZ+'&join='+c;$('pCode').hidden=false;$('pCode').innerHTML=esc(c)+'<small>tap to copy invite link</small>';$('pCode').onclick=()=>{try{navigator.clipboard.writeText(link);ui.toast('invite link copied')}catch(e){}};$('pInvite').hidden=true}
 $('pResume').onclick=()=>{openPause(false);cv.requestPointerLock?.()};
@@ -1485,6 +1498,55 @@ $('chatin').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=$('chatin
 // browsers never let Esc re-grab the mouse, so after an Esc-close the next click anywhere does it
 setInterval(()=>{const h=$('resumeHint');const show=started&&!TOUCH&&!document.pointerLockElement&&!anyMenu()&&$('pause').hidden&&$('menu').hidden;if(h.hidden===show)h.hidden=!show},150);
 addEventListener('mousedown',e=>{if(!$('resumeHint').hidden&&e.target===cv)cv.requestPointerLock?.()});
+// ---------- world map, waypoints, minimap ----------
+const mapBase=document.createElement('canvas');mapBase.width=mapBase.height=N;
+function drawMapBase(){const g=mapBase.getContext('2d'),im=g.createImageData(N,N),d=im.data;
+ for(let j=0;j<N;j++)for(let i=0;i<N;i++){const k=j*N+i,h=H[k];const hx=H[j*N+Math.min(N-1,i+1)]-H[j*N+Math.max(0,i-1)],hz=H[Math.min(N-1,j+1)*N+i]-H[Math.max(0,j-1)*N+i];const sh=Math.max(.55,Math.min(1.25,1-(hx+hz)*.35));
+  let c=h<-.2?[58,120,160]:h<1.1?[226,205,150]:h>16?[240,244,250]:h>10?[140,140,132]:[112+h*3,160-h*2,82];if(h<-.2){const dd=Math.min(1,-h/5);c=[58-dd*25,120-dd*35,160-dd*30]}
+  if(WAY[k*2+1]>.5&&h>-.2)c=[70,150,190];else if(WAY[k*2]>.45)c=[176,136,96];
+  const f=h<-.2?1:sh;d[k*4]=c[0]*f;d[k*4+1]=c[1]*f;d[k*4+2]=c[2]*f;d[k*4+3]=255}
+ g.putImageData(im,0,0);g.fillStyle='rgba(30,70,30,.55)';for(const t of trees){if(t.down)continue;const[x,y]=w2m(t.x,t.z,N);g.beginPath();g.arc(x,y,Math.max(1,N/200),0,7);g.fill()}
+ for(const c of CAVES){const[x,y]=w2m(c.x,c.z,N);g.fillStyle='#3a3530';g.beginPath();g.arc(x,y,c.R/STEP,0,7);g.fill()}}
+const w2m=(x,z,sz)=>[(wrapC(x)+S/2)/S*sz,(wrapC(z)+S/2)/S*sz];
+const WP_COL=['#ff5a2e','#3aa7ff','#ffd23a','#6fd46a','#c77dff','#ffffff'];let WPS=[];let wpCol=0;
+function saveWps(){if(W.cur)W.cur.wps=WPS;try{W.save()}catch(e){}}
+function drawMap(){const c=$('mapc'),g=c.getContext('2d'),sz=c.width;g.imageSmoothingEnabled=true;g.drawImage(mapBase,0,0,sz,sz);
+ g.strokeStyle='rgba(255,248,235,.9)';g.lineWidth=3;for(const d of B.doors.values()){if(!d.loop)continue;g.beginPath();d.loop.forEach((p,i)=>{const[x,y]=w2m(p[0],p[1],sz);i?g.lineTo(x,y):g.moveTo(x,y)});g.closePath();g.fillStyle=d.factory?'rgba(170,180,190,.8)':'rgba(230,190,120,.8)';g.fill();g.stroke()}
+ for(const w of WPS){const[x,y]=w2m(w.x,w.z,sz);g.fillStyle=w.c;g.strokeStyle='#1d2a22';g.lineWidth=2;g.beginPath();g.arc(x,y,8,0,7);g.fill();g.stroke();g.font='600 15px Fredoka,system-ui';g.fillStyle='#fffaf0';g.strokeStyle='rgba(20,30,20,.8)';g.lineWidth=4;g.strokeText(w.n,x+12,y+5);g.fillText(w.n,x+12,y+5)}
+ for(const r of remotes.values()){const[x,y]=w2m(r.x,r.z,sz);g.fillStyle='#3aa7ff';g.beginPath();g.arc(x,y,7,0,7);g.fill()}
+ const[px,py]=w2m(pos.x,pos.z,sz);g.save();g.translate(px,py);g.rotate(-yaw+Math.PI);g.fillStyle='#ff5a2e';g.strokeStyle='#fff8eb';g.lineWidth=2.5;g.beginPath();g.moveTo(0,-12);g.lineTo(8,9);g.lineTo(0,4);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore()}
+function renderWpList(){const el=$('wplist');el.innerHTML='<b>waypoints</b><p class="mdesc">B adds one where you stand · click the map to add one there</p>';for(const w of WPS){const r=document.createElement('div');r.className='wp';const d=Math.hypot(wd(w.x,pos.x),wd(w.z,pos.z));r.innerHTML=`<i style="background:${w.c}"></i><span>${esc(w.n)}<br><small>${Math.round(d)}m away</small></span><button class="x">✕</button>`;r.querySelector('button').onclick=()=>{WPS=WPS.filter(q=>q!==w);saveWps();rebuildWpMarkers();renderWpList();drawMap()};el.appendChild(r)}
+ const cl=document.createElement('button');cl.className='g';cl.textContent='close (M)';cl.onclick=()=>openMap(false);el.appendChild(cl)}
+let mapOpen=false;
+function openMap(on){mapOpen=on;$('mapui').hidden=!on;if(on){quiet();document.exitPointerLock?.();drawMapBase();drawMap();renderWpList();sfx.play('plank',.35,1.6)}else if(started&&!TOUCH)cv.requestPointerLock?.()}
+let wpPending=null;
+function newWp(x,z){wpPending={x,z};quiet();document.exitPointerLock?.();$('wpnew').hidden=false;$('wpname').value='';const cs=$('wpcols');cs.innerHTML='';WP_COL.forEach((c,i)=>{const b=document.createElement('i');b.style.background=c;if(i===wpCol)b.className='on';b.onclick=()=>{wpCol=i;[...cs.children].forEach((q,k)=>q.className=k===i?'on':'')};cs.appendChild(b)});setTimeout(()=>$('wpname').focus(),0)}
+function closeWp(ok){if(ok&&wpPending){WPS.push({n:($('wpname').value.trim()||'waypoint '+(WPS.length+1)).slice(0,20),x:+wpPending.x.toFixed(1),z:+wpPending.z.toFixed(1),c:WP_COL[wpCol]});saveWps();rebuildWpMarkers();sfx.play('capture',.4,1.5);if(mapOpen){drawMap();renderWpList()}}wpPending=null;$('wpnew').hidden=true;if(!mapOpen&&started&&!TOUCH)cv.requestPointerLock?.()}
+// 3D: a soft glowing beam + a floating name for each waypoint
+const wpGroup=new THREE.Group();scene.add(wpGroup);const beamGeo=new THREE.CylinderGeometry(.12,.12,60,8,1,true);beamGeo.translate(0,30,0);
+function rebuildWpMarkers(){wpGroup.clear();$('wplabs').innerHTML='';for(const w of WPS){const m=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:w.c,transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending}));m.position.set(w.x,hAt(w.x,w.z),w.z);wpGroup.add(m);const l=document.createElement('div');l.className='wplab';$('wplabs').appendChild(l);w.el=l}}
+const _wv=new THREE.Vector3();
+function updWps(){if(!started)return;for(const w of WPS){if(!w.el)continue;const dx=wd(w.x,pos.x),dz=wd(w.z,pos.z);const d=Math.hypot(dx,dz);_wv.set(pos.x+dx,hAt(w.x,w.z)+2.5+Math.min(d*.02,6),pos.z+dz);_wv.y-=d*d*BEND.value;_wv.project(camera);const on=_wv.z<1&&Math.abs(_wv.x)<1.1&&Math.abs(_wv.y)<1.1&&d>3;w.el.hidden=!on;if(on){w.el.style.left=((_wv.x*.5+.5)*innerWidth)+'px';w.el.style.top=((-_wv.y*.5+.5)*innerHeight)+'px';w.el.innerHTML=`${esc(w.n)}<small>${Math.round(d)}m</small>`;w.el.style.color=w.c}}}
+// minimap
+let miniOn=false,miniT=0;
+function drawMini(){const c=$('minimap'),g=c.getContext('2d'),sz=c.width,R=60;g.clearRect(0,0,sz,sz);g.save();g.beginPath();g.arc(sz/2,sz/2,sz/2,0,7);g.clip();
+ const sc=sz/(2*R),mpp=N/S;const px=(wrapC(pos.x)+S/2)*mpp,pz=(wrapC(pos.z)+S/2)*mpp;
+ g.translate(sz/2,sz/2);g.scale(sc/mpp,sc/mpp);for(const ox of[-N,0,N])for(const oz of[-N,0,N])g.drawImage(mapBase,-px+ox,-pz+oz);g.restore();
+ for(const w of WPS){let dx=wd(w.x,pos.x),dz=wd(w.z,pos.z);const d=Math.hypot(dx,dz);if(d>R*.92){dx*=R*.92/d;dz*=R*.92/d}g.fillStyle=w.c;g.beginPath();g.arc(sz/2+dx*sc,sz/2+dz*sc,6,0,7);g.fill()}
+ for(const r of remotes.values()){const dx=wd(r.x,pos.x),dz=wd(r.z,pos.z);if(Math.hypot(dx,dz)<R){g.fillStyle='#3aa7ff';g.beginPath();g.arc(sz/2+dx*sc,sz/2+dz*sc,6,0,7);g.fill()}}
+ g.save();g.translate(sz/2,sz/2);g.rotate(-yaw+Math.PI);g.fillStyle='#ff5a2e';g.strokeStyle='#fff8eb';g.lineWidth=3;g.beginPath();g.moveTo(0,-14);g.lineTo(10,11);g.lineTo(0,5);g.lineTo(-10,11);g.closePath();g.fill();g.stroke();g.restore()}
+function updMaps(dt){updWps();if(miniOn&&started){miniT-=dt;if(miniT<=0){miniT=.12;if(!drawMini._b){drawMapBase();drawMini._b=1}drawMini()}}if(mapOpen){drawMap._t=(drawMap._t||0)-dt;if(drawMap._t<=0){drawMap._t=.2;drawMap()}}}
+$('mapc').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*S-S/2,z=(e.clientY-r.top)/r.height*S-S/2;newWp(x,z)});
+$('wpOk').onclick=()=>closeWp(true);$('wpNo').onclick=()=>closeWp(false);$('wpname').addEventListener('keydown',e=>{if(e.key==='Enter')closeWp(true);if(e.key==='Escape')closeWp(false);e.stopPropagation()});
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||!started||e.repeat)return;if(e.code==='KeyM'){openMap(!mapOpen)}if(e.code==='KeyB'&&!mapOpen&&$('wpnew').hidden){newWp(pos.x,pos.z)}});
+addEventListener('keydown',e=>{if(e.code==='Escape'&&mapOpen){openMap(false);e.stopPropagation()}},true);
+// settings wiring (saved per player)
+const OPT={mini:false,fps:false,hud:true,ao:true,taa:true,shadow:true,bloom:true,vol:1,fov:60};try{Object.assign(OPT,JSON.parse(localStorage.getItem('wd_opts')||'{}'))}catch(e){}
+function applyOpts(){try{localStorage.setItem('wd_opts',JSON.stringify(OPT))}catch(e){}miniOn=OPT.mini;$('minimap').hidden=!OPT.mini;$('fps').hidden=!OPT.fps;$('hud').style.display=OPT.hud?'':'none';if(gtao)gtao.enabled=OPT.ao;if(taaPass)taaPass.enabled=OPT.taa;sun.castShadow=OPT.shadow;bloom.enabled=OPT.bloom&&QP.get('bloom')!=='0';if(sfx.gain)sfx.gain.gain.value=OPT.vol;sfx.muted=OPT.vol===0;camera.fov=OPT.fov;camera.updateProjectionMatrix();$('volV').textContent=Math.round(OPT.vol*100)+'%';$('fovV').textContent=OPT.fov+'°'}
+for(const[id,k]of[['optMini','mini'],['optFps','fps'],['optHud','hud'],['optAO','ao'],['optTAA','taa'],['optShadow','shadow'],['optBloom','bloom']]){const el=$(id);el.checked=OPT[k];el.onchange=()=>{OPT[k]=el.checked;applyOpts()}}
+$('volR').value=OPT.vol;$('volR').oninput=e=>{OPT.vol=+e.target.value;applyOpts()};$('fovR').value=OPT.fov;$('fovR').oninput=e=>{OPT.fov=+e.target.value;applyOpts()};
+applyOpts();setInterval(()=>{if(sfx.gain&&Math.abs(sfx.gain.gain.value-OPT.vol)>.01&&!hostMode)sfx.gain.gain.value=OPT.vol},1000);
+
 W.render();if(QP.get('open'))setTimeout(()=>W.open(QP.get('open')),600);
 // the tick runs off a worker clock so hidden tabs keep hosting (main-thread timers get throttled)
 try{const tw=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'],{type:'text/javascript'})));tw.onmessage=tick}catch(e){setInterval(tick,50)}

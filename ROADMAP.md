@@ -194,7 +194,7 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - minimap + full world map
 - keybinds menu in settings: rebind everything, combos allowed (alt+T etc)
 - buoyancy: float up slowly in water, Space swims up, Shift swims down
-- sprint moves to Ctrl, MC-style: tap Ctrl while moving -> sprint (slight FOV kick) until you stop moving, then it resets
+- (CANCELLED: ctrl-sprint) keep Shift sprint; in water Shift = swim down, Space = swim up (with buoyancy)
 - one CRAFT key: radial menu of every craftable thing around your cursor, click to craft; after crafting (or Esc) the cursor goes back into the game
 - FIXED: world curve now bends every object (flowers/trees/rocks were floating at high curve), water is a dense plane that follows you so lakes don't "empty" when bent
 ### rivers (Toby, Sept 19)
