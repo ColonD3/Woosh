@@ -201,3 +201,12 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - NOW-ish: river mesh edges show -> deeper carved insets; nicer river -> lake transition (mist / particles where they meet)
 - later: river current pushes you
 - later: dig/blow a ditch + pour water -> it flows downhill dynamically (MC-like, more woosh-ish)
+
+## VISUAL NORTH STAR — refs/ folder (Toby: "eventually look very similar to this level of beauty")
+- refs/01-creamy-lighting-brawler.png — the creamy look: lavender shadows, strong fill, soft AO, bloom only on glowy stuff
+- refs/02-crimson-desert-island.png, refs/03-crimson-desert-rocks.png — painted rocks/cliffs, layered stone, dry grass clumps, depth of field
+- refs/04-no-way-out-forest.png, refs/05-no-way-out-building-kit.jpeg — building pieces (walls, doors, windows, planks) in a sunny clearing: THE target for our houses/building
+- refs/06-no-way-out-pines-boulders.jpeg — pines, flat painted boulders, stumps, yellow flowers, big soft tree shadows + god rays
+- refs/07-jakeline-forge-house.webp — the dream house: curved tiled roof, timber + stone, vines, waterfall, snowy peak behind
+- refs/08-forest-path.jpg — dirt path through a forest, bushes along the edges, cabin in the distance, warm light
+- what they share: painted textures with baked light, warm yellow-green palette, big soft shadow shapes, sun haze/god rays, dense clumped foliage at edges, strong silhouettes, lots of small props (stumps, flowers, pebbles)
