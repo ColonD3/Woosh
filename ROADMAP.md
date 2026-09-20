@@ -284,3 +284,6 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 
 - [done] characters separate from worlds (inv+stats travel), copper ore (teal crystals) → cooker → copper → wooshi armor (8 copper, -40% dmg)
 - [next] oxidizing copper, blast furnace, armor on the character model
+- [done] deep caves: ramp from each surface cave into tunnels + chambers (iron shallow, copper mid, gold deep), darkness, torches (wood+coal, drills make coal), gold smelting
+- [done] tools in chests, 9-slot hotbar + bag overflow, rocks stop spawning after first tool, death keeps 25-50% + tool
+- [next] rock dungeons, gold uses (forge/gold door), diamonds + rock boss chamber
