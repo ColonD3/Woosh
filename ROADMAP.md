@@ -291,3 +291,4 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [next] check cave gen time on big maps, rock dungeons
 - [done] terrain v3: whole world is one solid field meshed w/ surface nets (terrain+caves one mesh), dig anywhere w/ tools (grass->dirt/mud->stone/granite/deep), bombs carve + drop, seeds, granite block, buried ores (gold very rare, deep), cave types (tunnels, crawlspaces, big halls, shafts, ravines, hidden systems), stalactites/mites, cave rocks, glow shrooms, polyhaven underground textures, rocks settle flush
 - [next] farming (seeds), gold door + gold factory roofs, perf of world build on big maps
+- [done] stuck-in-holes fix, tools only break stone (dirt/grass/sand = bombs only), glow shrooms edible (big regen), fewer/smaller surface ore rocks, saplings 17-40s, /mode creative|survival
