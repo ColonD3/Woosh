@@ -483,7 +483,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.7
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.VSMShadowMap;
 document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();
-const FOG=new THREE.Color('#b9dcef');scene.fog=new THREE.Fog(FOG,40,260);
+const FOG=new THREE.Color('#b9dcef');scene.fog=new THREE.Fog(FOG,70,380);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,2000);camera.layers.enable(1);
 const sunDir=new THREE.Vector3().setFromSphericalCoords(1,THREE.MathUtils.degToRad(90-28),THREE.MathUtils.degToRad(150));
 const SKY_TOP=new THREE.Color('#5a90cc'),SKY_HOR=new THREE.Color('#e2e4da');
@@ -1048,10 +1048,10 @@ const GRADE={tDiffuse:{value:null},tDepth:{value:scenePass.rt.depthTexture},invV
 const gradeP=new ShaderPass({uniforms:GRADE,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
  fragmentShader:'uniform sampler2D tDiffuse,tDepth;uniform mat4 invVP;uniform vec3 cam,sun,sp,rayC;uniform float amt;varying vec2 vUv;void main(){vec4 c=texture2D(tDiffuse,vUv);'+
  'float dz=texture2D(tDepth,vUv).x;vec4 w=invVP*vec4(vUv*2.-1.,dz*2.-1.,1.);w/=w.w;vec3 rd=w.xyz-cam;float dist=dz>.9999?600.:length(rd);rd=normalize(rd);float sc=max(dot(rd,sun),0.);'+
- 'float hz=(1.-exp(-dist*.0045))*amt;vec3 air=mix(vec3(.62,.74,.9),vec3(1.25,.95,.62),pow(sc,5.))+vec3(1.4,1.,.6)*pow(sc,40.)*.6;if(dz<.9999)c.rgb=mix(c.rgb,air*.9,hz*.38);'+
+ 'float hz=(1.-exp(-dist*.0045))*amt;vec3 air=mix(vec3(.62,.74,.9),vec3(1.25,.95,.62),pow(sc,5.))+vec3(1.4,1.,.6)*pow(sc,40.)*.6;if(dz<.9999)c.rgb=mix(c.rgb,air*.9,hz*hz*.3);'+
  'if(sp.z>0.){vec2 dl=(sp.xy-vUv)/28.;vec2 u=vUv;float acc=0.,wt=1.;float jit=fract(sin(dot(vUv,vec2(12.9898,78.233)))*43758.5453);u+=dl*jit;for(int i=0;i<28;i++){u+=dl;if(u.x<0.||u.x>1.||u.y<0.||u.y>1.)break;acc+=step(.9999,texture2D(tDepth,u).x)*wt;wt*=.955;}acc/=14.;float fall=pow(max(0.,1.-length((vUv-sp.xy)*vec2(1.7,1.))*.85),2.);c.rgb+=rayC*acc*fall*sp.z*.55*amt;}'+
  'float L=dot(c.rgb,vec3(.2126,.7152,.0722));c.rgb+=(vec3(.52,.44,.78)-L)*.07*(1.-smoothstep(0.,.35,L))*amt;c.rgb*=mix(vec3(1.),vec3(1.05,1.,.9),smoothstep(.35,1.4,L)*amt);'+
- 'vec2 d=vUv-.5;float v=1.-dot(d,d)*.8;c.rgb*=v;float Y=dot(c.rgb,vec3(.2126,.7152,.0722));{float gm=smoothstep(0.,.12,c.g-max(c.r,c.b)),bm=smoothstep(0.,.15,c.b-max(c.r,c.g)),rm=smoothstep(.05,.3,c.r-max(c.g,c.b));c.r+=(c.g-c.r)*.28*gm;c.b*=1.-.35*gm;c.rgb=mix(c.rgb,vec3(Y)*vec3(.93,1.,1.07),.45*bm);c.rgb=mix(c.rgb,vec3(Y)*vec3(1.2,.9,.8),.3*rm);}c.rgb=mix(vec3(Y),c.rgb,.86);c.rgb=mix(c.rgb,c.rgb*vec3(.97,.94,1.04)+vec3(.035,.03,.05),.6*amt);{vec3 x=clamp(c.rgb,0.,1.);c.rgb=mix(c.rgb,x*x*(3.-2.*x),.22*amt);}c.rgb+=(vec3(.08,.06,.16)*(1.-smoothstep(0.,.3,Y))-vec3(0.,.01,.04)*smoothstep(.5,1.,Y))*.35*amt;c.rgb=c.rgb*.94+vec3(.018,.017,.024);c.rgb=mix(c.rgb,c.rgb*vec3(1.02,1.,.97),smoothstep(.2,1.2,Y));gl_FragColor=c;}'});composer.addPass(gradeP);const GU=gradeP.uniforms;GU.tDepth.value=scenePass.rt.depthTexture;GU.sun.value=sunDir;
+ 'vec2 d=vUv-.5;float v=1.-dot(d,d)*.8;c.rgb*=v;float Y=dot(c.rgb,vec3(.2126,.7152,.0722));{float gm=smoothstep(0.,.12,c.g-max(c.r,c.b)),bm=smoothstep(0.,.15,c.b-max(c.r,c.g)),rm=smoothstep(.05,.3,c.r-max(c.g,c.b));c.r+=(c.g-c.r)*.28*gm;c.b*=1.-.35*gm;c.rgb=mix(c.rgb,vec3(Y)*vec3(.93,1.,1.07),.45*bm);c.rgb=mix(c.rgb,vec3(Y)*vec3(1.2,.9,.8),.3*rm);}c.rgb=mix(vec3(Y),c.rgb,.86);c.rgb=mix(c.rgb,c.rgb*vec3(.98,.96,1.03),.6*amt);{vec3 x=clamp(c.rgb,0.,1.);c.rgb=mix(c.rgb,x*x*(3.-2.*x),.22*amt);}c.rgb+=(vec3(.08,.06,.16)*(1.-smoothstep(0.,.3,Y))-vec3(0.,.01,.04)*smoothstep(.5,1.,Y))*.35*amt;c.rgb=c.rgb*.98+vec3(.006,.005,.009);c.rgb=mix(c.rgb,c.rgb*vec3(1.02,1.,.97),smoothstep(.2,1.2,Y));gl_FragColor=c;}'});composer.addPass(gradeP);const GU=gradeP.uniforms;GU.tDepth.value=scenePass.rt.depthTexture;GU.sun.value=sunDir;
 
 composer.addPass(new OutputPass());
 
