@@ -295,3 +295,5 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - [done] smooth sculpted-clay caves (field normals + vertex snapping, 0.5m detail where dug), mining sphere + chunk burst + per-material crunch, no tripping (smoothed body, bigger crawlspaces), fewer boulders/ores
 - [done] paper-brutalist UI revamp, fall damage toggle, full camera pitch range
 - [done] day/night + sunsets, sleep in houses (Z), night shades + cave crawlers (click to fight), wooshi personality (look around/doze/wiggle/flinch), milestone banners, fades, loading screen, bigger menu, UI click sounds, hurt vignette, stone footsteps in caves
+
+- dense forest biome: faked light shafts through canopy gaps, visible when you stand in shadow (not global mist)
