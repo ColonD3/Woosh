@@ -259,11 +259,12 @@ const CAVES=[],CV={prims:[],hash:new Map(),HC:12,spots:[],deep:[],craters:[],dec
  const ci=v=>((Math.floor((wrapC(v)+S/2)/CV.HC)%NC)+NC)%NC;
  CV.addPrim=q=>{CV.prims.push(q);const r=q.r/Math.min(q.up,q.dn,1)+3;const x0=Math.min(q.a[0],q.b[0])-r,x1=Math.max(q.a[0],q.b[0])+r,z0=Math.min(q.a[2],q.b[2])-r,z1=Math.max(q.a[2],q.b[2])+r;
   for(let x=x0;x<=x1+CV.HC;x+=CV.HC)for(let z=z0;z<=z1+CV.HC;z+=CV.HC){const k=ci(Math.min(x,x1))*NC+ci(Math.min(z,z1));let L=CV.hash.get(k);if(!L)CV.hash.set(k,L=[]);if(!L.includes(q))L.push(q)}};
+ CV.ck=(x,z)=>ci(x)*NC+ci(z);
  CV.C=(x,y,z)=>{const L=CV.hash.get(ci(x)*NC+ci(z));if(!L)return 9;let m=9,rough=0;
   for(const q of L){const ax=q.a[0],ay=q.a[1],az=q.a[2];const dx=wd(x,ax),dy=y-ay,dz=wd(z,az);if(q.bb&&(Math.abs(dx)>q.bb||Math.abs(dz)>q.bb))continue;const ex=q.b[0]-ax,ey=q.b[1]-ay,ez=q.b[2]-az;const L2=ex*ex+ey*ey+ez*ez;let t=L2>1e-6?(dx*ex+dy*ey+dz*ez)/L2:0;t=t<0?0:t>1?1:t;
-   const rx=dx-ex*t,rz=dz-ez*t;let ry=dy-ey*t;ry*=ry>0?q.up:q.dn;const d=Math.sqrt(rx*rx+ry*ry+rz*rz)-q.r;const k=q.dig?.35:1.4;
-   if(d<m){const hh=Math.max(k-(m-d),0)/k;m=d-hh*hh*k*.25;rough=q.dig?0:1}else{const hh=Math.max(k-(d-m),0)/k;m=m-hh*hh*k*.25}}
-  if(m>3.5||!rough)return m;const X=wrapC(x),Z=wrapC(z);return m+(n3(X*.28,y*.34,Z*.28)-.5)*1.7+(n3(X*.8+9,y*.9,Z*.8)-.5)*.55};
+   const rx=dx-ex*t,rz=dz-ez*t;let ry=dy-ey*t;ry*=ry>0?q.up:q.dn;const d=Math.sqrt(rx*rx+ry*ry+rz*rz)-q.r;const k=q.dig?.9:1.4;
+   if(d<m){const hh=Math.max(k-(m-d),0)/k;m=d-hh*hh*k*.25;rough=q.dig?2:1}else{const hh=Math.max(k-(d-m),0)/k;m=m-hh*hh*k*.25}}
+  if(m>3.5||!rough)return m;const X=wrapC(x),Z=wrapC(z);if(rough===2)return m+(n3(X*1.4,y*1.4,Z*1.4)-.5)*.22;return m+(n3(X*.28,y*.34,Z*.28)-.5)*1.7+(n3(X*.8+9,y*.9,Z*.8)-.5)*.3};
  CV.F=(x,y,z)=>Math.min(hAt(x,z)-y,CV.C(x,y,z),y+104);
  const seg=(a,b,r,o)=>CV.addPrim({a,b,r,up:1.1,dn:1.45,bb:Math.hypot(b[0]-a[0],b[2]-a[2])+r*3+4,...o});
  const topAt=(x,z,R)=>Math.min(hAt(x,z),hAt(x+R,z),hAt(x-R,z),hAt(x,z+R),hAt(x,z-R));
@@ -273,7 +274,7 @@ const CAVES=[],CV={prims:[],hash:new Map(),HC:12,spots:[],deep:[],craters:[],dec
   CV.rooms.push([x,y,z,Rr]);for(let k=0;k<2+Math.floor(rnd()*2);k++){const a=rnd()*6.283;CV.spotReq.push([x+Math.cos(a)*Rr*(.4+rnd()*.3),y,z+Math.sin(a)*Rr*(.4+rnd()*.3),1])}}
  function ravine(x,y,z,yaw,len){const st=3;let yv=0;for(let s2=0;s2<len;s2+=st){yv+=(rnd()-.5)*.1;yv*=.9;yaw+=yv;const nx=x+Math.cos(yaw)*st,nz=z+Math.sin(yaw)*st;const f=Math.sin(s2/len*Math.PI);const r=.9+f*1.2;
    seg([x,y,z],[nx,y+(rnd()-.5)*.4,nz],r,{up:.16+(1-f)*.25,dn:.35,cav:1});if(rnd()<.08)CV.spotReq.push([nx,y,nz,1]);x=nx;z=nz}CV.rooms.push([x,y,z,4])}
- function worm(x,y,z,yaw,pitch,len,r,lvl,entr,kind){let yv=0;const st=2.2;const rmin=kind==='crawl'?1.05:kind==='big'?3.2:1.6,rmax=kind==='crawl'?1.5:kind==='big'?5.2:3.2;
+ function worm(x,y,z,yaw,pitch,len,r,lvl,entr,kind){let yv=0;const st=2.2;const rmin=kind==='crawl'?1.35:kind==='big'?3.2:1.6,rmax=kind==='crawl'?1.75:kind==='big'?5.2:3.2;
   for(let s2=0;s2<len;s2+=st){yv+=(rnd()-.5)*.22;yv*=.86;yaw+=yv;
    if(entr&&s2<16){pitch=-.5;r=Math.min(2.8,Math.max(2.2,r))}else{
     pitch+=(rnd()-.5)*.14;if(kind==='shaft')pitch=-1.25;pitch=Math.max(kind==='shaft'?-1.35:-.6,Math.min(.3,pitch));const top=hAt(x,z)-r-5;if(y>top)pitch=Math.min(pitch,-.35);if(y<-90)pitch=Math.max(pitch,.08);
@@ -838,7 +839,7 @@ const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:
   this.peer.on('error',e=>ui.status(e.type==='peer-unavailable'?'no world with that code':'connection error: '+e.type))}};
 function hostGone(){started=false;document.exitPointerLock?.();const m=document.getElementById('menu');m.hidden=false;document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-home');ui.status('the host closed their world, so you got sent back here');setTimeout(()=>location.href=location.pathname+(SZ!=='s'?'?size='+SZ:''),4000)}
 function swapMe(){player=me.g;me.trail=[]}
-if(QP.has('dev'))window.__dev={tun:()=>({caves:CAVES.map(c=>[c.mx|0,c.mz|0]),deep:CV.deep.length,chunks:CV.chunks.size,ms:CV.buildMs|0,ug,caveM,ugD}),ugo:(i,f)=>{const c=CV.deep[i%CV.deep.length];let y=c[1];while(CV.F(c[0],y,c[2])<=0&&y>c[1]-9)y-=.1;pos.set(c[0],y+.15,c[2]);vel.set(0,0,0);camInit=false;if(f!=null)yaw=f},nr:()=>{hostMode=true},step:(n)=>{const g=clock.getDelta;clock.getDelta=function(){this.elapsedTime+=1/60;return 1/60};for(let i=0;i<n;i++)frame();clock.getDelta=g},F:(x,y,z)=>CV.F(x,y,z),bst:()=>({all:boulders.length,ore:boulders.filter(b=>b.ore).length,ug:boulders.filter(b=>b.ug).length,ugAbove:boulders.filter(b=>b.ug&&b.y>hAt(b.x,b.z)-1.5).length,big:boulders.filter(b=>!b.ore).length}),me2:()=>[+pos.x.toFixed(2),+pos.y.toFixed(2),+pos.z.toFixed(2),onGround,caveM,!!keys.Space,!!keys.KeyW,+vel.y.toFixed(2),dead,started],carveHere:(r)=>{CV.carve(pos.x,pos.y,pos.z,r||2.4)},dig:()=>digAim(),layer:()=>CV.layer(pos.x,pos.y-1,pos.z),mouth:(i)=>{const c=CAVES[i];pos.set(c.mx,hAt(c.mx,c.mz)+1,c.mz);yaw=-c.ent+Math.PI/2;camInit=false},torch:()=>{inv.torch+=3;placeTorch()},hmap:()=>({H:Array.from(H),W:Array.from(WAY),N,rivers:rivers.length}),boom:()=>boom(pos.x+2,pos.z,'host'),near:()=>nearestTree(),chopT:()=>chopT,keysE:()=>!!keys.KeyE,projAges:()=>[...projs.values()].map(p=>[p.age.toFixed(2),p.landed,p.p.y.toFixed(1)]),gt:()=>clock.elapsedTime,fr:()=>fpsN,give:(k,n)=>gain(k,n),inv:()=>({...inv}),items:()=>items.size,trees:()=>trees.map(t=>[t.x,t.z,!!t.down]),me:()=>[pos.x,pos.z,myIdx],fences:()=>fence.reduce((a,v)=>a+(v?1:0),0),owned:()=>owner.reduce((a,v)=>a+(v===myIdx?1:0),0),
+if(QP.has('dev'))window.__dev={tun:()=>({caves:CAVES.map(c=>[c.mx|0,c.mz|0]),deep:CV.deep.length,chunks:CV.chunks.size,ms:CV.buildMs|0,ug,caveM,ugD}),ugo:(i,f)=>{const c=CV.deep[i%CV.deep.length];let y=c[1];while(CV.F(c[0],y,c[2])<=0&&y>c[1]-9)y-=.1;pos.set(c[0],y+.15,c[2]);vel.set(0,0,0);camInit=false;if(f!=null)yaw=f},nr:()=>{hostMode=true},step:(n)=>{const g=clock.getDelta;clock.getDelta=function(){this.elapsedTime+=1/60;return 1/60};for(let i=0;i<n;i++)frame();clock.getDelta=g},F:(x,y,z)=>CV.F(x,y,z),bst:()=>({all:boulders.length,ore:boulders.filter(b=>b.ore).length,ug:boulders.filter(b=>b.ug).length,ugAbove:boulders.filter(b=>b.ug&&b.y>hAt(b.x,b.z)-1.5).length,big:boulders.filter(b=>!b.ore).length}),buildNear:()=>{const n0=CV.queue.length;CV.queue=CV.queue.filter(q=>{const d=Math.hypot(wd(-S/2+q[0]*24+12,pos.x),wd(-S/2+q[2]*24+12,pos.z),-120+q[1]*12+6-pos.y);if(d<45){CV.mesh(q[0],q[1],q[2]);return false}return true});return n0-CV.queue.length},me2:()=>[+pos.x.toFixed(2),+pos.y.toFixed(2),+pos.z.toFixed(2),onGround,caveM,!!keys.Space,!!keys.KeyW,+vel.y.toFixed(2),dead,started],carveHere:(r)=>{CV.carve(pos.x,pos.y,pos.z,r||2.4)},dig:()=>digAim(),layer:()=>CV.layer(pos.x,pos.y-1,pos.z),mouth:(i)=>{const c=CAVES[i];pos.set(c.mx,hAt(c.mx,c.mz)+1,c.mz);yaw=-c.ent+Math.PI/2;camInit=false},torch:()=>{inv.torch+=3;placeTorch()},hmap:()=>({H:Array.from(H),W:Array.from(WAY),N,rivers:rivers.length}),boom:()=>boom(pos.x+2,pos.z,'host'),near:()=>nearestTree(),chopT:()=>chopT,keysE:()=>!!keys.KeyE,projAges:()=>[...projs.values()].map(p=>[p.age.toFixed(2),p.landed,p.p.y.toFixed(1)]),gt:()=>clock.elapsedTime,fr:()=>fpsN,give:(k,n)=>gain(k,n),inv:()=>({...inv}),items:()=>items.size,trees:()=>trees.map(t=>[t.x,t.z,!!t.down]),me:()=>[pos.x,pos.z,myIdx],fences:()=>fence.reduce((a,v)=>a+(v?1:0),0),owned:()=>owner.reduce((a,v)=>a+(v===myIdx?1:0),0),
  plan:(x,z)=>{fencePlanCells=fencePlan(myIdx,{x,z},inv.fence);return fencePlanCells.length},confirm:()=>confirmFences(),throw:k=>throwIt(k),craftB:()=>craftBomb(),craftF:()=>craftFence(),projs:()=>projs.size,look:(y,p)=>{yaw=y;pitch=p},tp:(x,z)=>onSpawn(x,z),fill:()=>{let n=0;for(let k=0;k<G*G;k++)if(land[k]&&!owner[k]&&n++<landCount*.9)owner[k]=1+(k%3);game.dirty=true}};
 Object.defineProperty(window,'__dbg',{get:()=>({remotes:remotes.size,mode:net.mode,dead,myOut,idx:myIdx,owned:owner.reduce((a,v)=>a+(v===myIdx),0)})});
 
@@ -1047,7 +1048,20 @@ function boomFX(m){const y=m.y??surfAt(m.x,m.z);CV.carve(m.x,y,m.z,2.4);flash.po
  puff(m.x,y+.5,m.z,45,9,[1,.55,.15]);puff(m.x,y+1,m.z,35,6,[.35,.33,.32]);puff(m.x,y+.3,m.z,20,11,[1,.85,.4]);
  const s=new THREE.Mesh(shockGeo,new THREE.MeshBasicMaterial({color:'#fff1c8',transparent:true,opacity:.9,depthWrite:false}));s.position.set(m.x,y+.25,m.z);scene.add(s);shocks.push({s,t:0,r:m.r});
  const d=camera.position.distanceTo(new THREE.Vector3(m.x,y,m.z));boomSnd(Math.max(.08,1-d/60));shake=Math.max(shake,Math.max(0,1-d/28)*.8)}
-function updFX(dt){flash.intensity*=Math.exp(-dt*9);for(let i=shocks.length-1;i>=0;i--){const k=shocks[i];k.t+=dt;const f=k.t/.5;k.s.scale.setScalar(.5+f*k.r);k.s.material.opacity=Math.max(0,.9*(1-f));if(f>=1){scene.remove(k.s);shocks.splice(i,1)}}}
+// ---- mining juice: a sphere of what you're mining (shrinks + cracks as you go), then a burst of chunks
+const mineSph=(()=>{const g=new THREE.Group();const a=new THREE.Mesh(new THREE.IcosahedronGeometry(1,3),new THREE.MeshBasicMaterial({color:'#fff',transparent:true,opacity:.2,depthWrite:false}));
+ const w=new THREE.Mesh(new THREE.IcosahedronGeometry(1.02,1),new THREE.MeshBasicMaterial({color:'#fff',wireframe:true,transparent:true,opacity:0,depthWrite:false}));g.add(a,w);g.visible=false;g.userData={a,w,s:1};scene.add(g);return g})();
+const DEB=[];const debIM=(()=>{const im=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.11,0),new THREE.MeshStandardMaterial({roughness:.8}),96);im.count=0;im.frustumCulled=false;im.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(96*3),3);scene.add(im);return im})();
+function mineBurst(m){if(!m)return;const c=new THREE.Color(m.c);for(let i=0;i<14;i++){if(DEB.length>=96)DEB.shift();const a=Math.random()*6.283,u=Math.random()*.9+.1;DEB.push({p:new THREE.Vector3(m.x,m.y,m.z),v:new THREE.Vector3(Math.cos(a)*u*4,2+Math.random()*4,Math.sin(a)*u*4),t:0,s:.6+Math.random()*.9,c:c.clone().multiplyScalar(.75+Math.random()*.5),home:i<3})}
+ puff(m.x,m.y,m.z,16,2.6,[c.r,c.g,c.b]);shake=Math.max(shake,.12);const pit={stone:.5,granite:.42,deep:.36,ore:.6,mud:.8,sand:.9}[m.k]||.5;sfx.play('chop_'+Math.floor(Math.random()*3),.75,pit);sfx.play('pick',.35,pit*1.6);mineSph.userData.s=1.35}
+function updMineFX(dt){const t=performance.now()/1000;const g=mineSph,u=g.userData;if(MT){g.visible=true;g.position.set(MT.x,MT.y,MT.z);u.a.material.color.set(MT.c);u.w.material.color.set(MT.c).multiplyScalar(1.6);u.s+=(1-u.s)*Math.min(1,dt*10);
+  const k=mineT,pul=1+Math.sin(t*(7+k*26))*.035*(1+k*2);g.scale.setScalar(MT.r*(1-.22*k)*pul*u.s);u.a.material.opacity=.14+.22*k;u.w.material.opacity=k*.7;u.w.rotation.y+=dt*(1+k*6);u.w.rotation.x+=dt*.7}else g.visible=false;
+ let n=0;const o=new THREE.Object3D();for(let i=DEB.length-1;i>=0;i--){const d=DEB[i];d.t+=dt;if(d.t>1.4){DEB.splice(i,1);continue}
+  if(d.home&&d.t>.35){const tx=pos.x-d.p.x,ty=pos.y+.8-d.p.y,tz=pos.z-d.p.z,L=Math.hypot(tx,ty,tz);if(L<.4){DEB.splice(i,1);continue}d.v.lerp(new THREE.Vector3(tx/L*12,ty/L*12,tz/L*12),Math.min(1,dt*8))}else{d.v.y-=22*dt;if(CV.F(d.p.x,d.p.y-.08,d.p.z)>0&&d.v.y<0){d.v.y*=-.35;d.v.x*=.6;d.v.z*=.6}}
+  d.p.addScaledVector(d.v,dt)}
+ for(const d of DEB){const sc=d.s*(d.t>1.1?1-(d.t-1.1)/.3:1);o.position.copy(d.p);o.rotation.set(d.t*7,d.t*5,0);o.scale.setScalar(Math.max(.01,sc));o.updateMatrix();debIM.setMatrixAt(n,o.matrix);debIM.setColorAt(n,d.c);n++}
+ debIM.count=n;debIM.instanceMatrix.needsUpdate=true;if(debIM.instanceColor)debIM.instanceColor.needsUpdate=true}
+function updFX(dt){updMineFX(dt);flash.intensity*=Math.exp(-dt*9);for(let i=shocks.length-1;i>=0;i--){const k=shocks[i];k.t+=dt;const f=k.t/.5;k.s.scale.setScalar(.5+f*k.r);k.s.material.opacity=Math.max(0,.9*(1-f));if(f>=1){scene.remove(k.s);shocks.splice(i,1)}}}
 function noiseBuf(sec){const c=sfx.ctx,b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
 function boomSnd(v){const c=sfx.ctx;if(!c)return;const t=c.currentTime;const n=c.createBufferSource();n.buffer=noiseBuf(1.6);const f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(2400,t);f.frequency.exponentialRampToValueAtTime(90,t+1.4);
  const g=c.createGain();g.gain.setValueAtTime(.9*v,t);g.gain.exponentialRampToValueAtTime(.001,t+1.5);n.connect(f).connect(g).connect(sfx.gain);n.start();
@@ -1110,7 +1124,7 @@ function handleAct(pid,m){const p=game.P.get(pid);if(!p||!p.alive)return;const x
  else if(m.a==='punch'){const q=game.P.get(m.t);if(!q||q.id===pid)return;hitPlayer(q,+m.dx,+m.dz,.3,pid,2)}
  else if(m.a==='chat'){const msg=String(m.m||'').slice(0,140);if(!msg)return;chatLine(p.name,msg);bcast({t:'chat',n:p.name,m:msg})}
  else if(m.a==='roof'){const d=B.doors.get(m.id);if(!d||!d.house||d.roof)return;d.roof=true;detectHouses();bcast({t:'roof',id:m.id});sfx.play('plank',.6,.8)}
- else if(m.a==='dig'){if(m.k){const k=m.k==='sand'?'sand':'mud';if(groundKind(xz[0],xz[1])!==k)return;give(pid,k,1);return}const x=+m.x,y=+m.y,z=+m.z;if(Math.hypot(wd(x,xz[0]),wd(z,xz[1]))>7)return;const L=CV.layer(x,y,z);if(L==='grass'||L==='dirt'||L==='sand')return;const q={t:'carve',x,y,z,r:1,dig:1};CV.carve(x,y,z,1,1);bcast(q);
+ else if(m.a==='dig'){if(m.k){const k=m.k==='sand'?'sand':'mud';if(groundKind(xz[0],xz[1])!==k)return;give(pid,k,1);return}const x=+m.x,y=+m.y,z=+m.z;if(Math.hypot(wd(x,xz[0]),wd(z,xz[1]))>7)return;const L=CV.layer(x,y,z);if(L==='grass'||L==='dirt'||L==='sand')return;const q={t:'carve',x,y,z,r:1.2,dig:1};CV.carve(x,y,z,1.2,1);bcast(q);
   const drop={grass:'mud',dirt:'mud',sand:'sand',stone:'rock',deep:'rock',granite:'granite'}[L];give(pid,drop,1);if(L==='grass'&&Math.random()<.3)give(pid,'seeds',1)}
  else if(m.a==='mine'){const b=boulders[m.i];if(!b||b.hp<=0||Math.hypot(b.x-xz[0],b.z-xz[1])>(b.surf?b.surf.r:1)+3)return;b.hp--;setBoulder(b);if(b.ore)give(pid,b.au?'auore':b.cu?'cuore':b.coal?'coal':'ore',b.au?1:m.t>1?2:1);else give(pid,'rock',2);bcast({t:'mine',i:m.i,hp:b.hp});if(b.hp<=0){puff(b.x,b.y+1,b.z,30,4,[.7,.68,.64])}}
  else if(m.a==='unbuild'){const M=m.k==='door'?B.doors:m.k==='wall'?B.walls:m.k==='cooker'?B.cookers:m.k==='chest'?B.chests:m.k==='drill'?B.drills:m.k==='mixer'?B.mixers:B.rocks;const o=M.get(m.id);if(!o)return;if(m.k==='chest')for(const[k,v]of Object.entries(o.items))if(v>0)give(pid,k,v);if(m.k==='door'&&o.iron){removeBuild('door',m.id);bcast({t:'unbuild',k:'door',id:m.id});give(pid,'idoor',1);return}const back=m.k==='mixer'?['mixer',1]:m.k==='drill'?['drill',1]:m.k==='chest'?['chest',1]:m.k==='cooker'?['cooker',1]:m.k==='rock'?[o.gr?'granite':'rock',1]:m.k==='wall'?[o.mat==='concrete'?'concrete':'rock',wallCost(Math.hypot(o.bx-o.ax,o.bz-o.az))]:['door',1];removeBuild(m.k,m.id);bcast({t:'unbuild',k:m.k,id:m.id});give(pid,back[0],back[1])}
@@ -1157,17 +1171,18 @@ function nearestBuilt(p,maxd){let best=null,bd=maxd;for(const r of B.rocks.value
  for(const d0 of B.doors.values()){const d=Math.hypot(d0.x-p.x,d0.z-p.z);if(d<bd){bd=d;best={k:'door',o:d0}}}for(const c of B.cookers.values()){const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best={k:'cooker',o:c}}}for(const c of B.chests.values()){const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best={k:'chest',o:c}}}for(const c of B.drills.values()){const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best={k:'drill',o:c}}}for(const c of B.mixers.values()){const d=Math.hypot(c.x-p.x,c.z-p.z);if(d<bd){bd=d;best={k:'mixer',o:c}}}return best}
 let hiBuilt=null;const hiMat=new THREE.MeshBasicMaterial({color:'#fff3b0',transparent:true,opacity:.28,depthWrite:false});let hiMesh=null;
 function toolTier(){if(overloaded())return 0;const k=HOTBAR[sel];return k==='itool'&&inv.itool>0?2:k==='pick'&&inv.pick>0?1:0}
-function updMine(dt,t){const pr=document.getElementById('prompt');const tier=toolTier();const pick=tier>0&&!dead&&started;
+let MT=null;const MCOL={stone:'#a4a8ad',granite:'#c9785a',deep:'#5a5d70',mud:'#6b4a2e',sand:'#e3cf94'};
+function updMine(dt,t){MT=null;const pr=document.getElementById('prompt');const tier=toolTier();const pick=tier>0&&!dead&&started;
  // aim at your own placed stuff to mine it back
  hiBuilt=null;if(pick&&document.pointerLockElement){const a=aimPoint();if(Math.hypot(wd(a.x,pos.x),wd(a.z,pos.z))<REACH)hiBuilt=nearestBuilt(a,1.1)}
  if(hiBuilt){const o=hiBuilt.o;if(!hiMesh){hiMesh=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),hiMat);scene.add(hiMesh)}hiMesh.visible=true;const cx=hiBuilt.k==='wall'?(o.ax+o.bx)/2:o.x,cz=hiBuilt.k==='wall'?(o.az+o.bz)/2:o.z;
   hiMesh.position.set(cx,hAt(cx,cz)+(hiBuilt.k==='rock'?.4*o.s:1.3),cz);hiMesh.scale.setScalar(hiBuilt.k==='rock'?o.s*.9:hiBuilt.k==='wall'?Math.hypot(o.bx-o.ax,o.bz-o.az)*.55:1.3);hiMesh.scale.y=hiBuilt.k==='rock'?o.s*.7:1.5}else if(hiMesh)hiMesh.visible=false;
  const bi=pick&&!hiBuilt?nearestBoulder():-1;let gk=null,dpt=null,old=false;if(pick&&!hiBuilt&&bi<0){dpt=digAim();if(dpt)gk=CV.layer(dpt.x,dpt.y,dpt.z);if(!gk||gk==='grass'||gk==='dirt'||gk==='sand'){old=true;const g2=groundKind(pos.x,pos.z);gk=g2;if(g2==='mud')gk='mud'}}if(gk==='sand'&&tier<2){if(mouseHeld&&!updMine._w){updMine._w=1;ui.toast('sand needs an iron tool')}gk=null}
- if(gk){if(mouseHeld){mineT+=dt/({mud:1,sand:.9,stone:1.7,granite:2.1,deep:3}[gk]*(tier>1?.45:1));mineSnd-=dt;if(mineSnd<=0){mineSnd=.3;sfx.play('step_carpet_'+Math.floor(Math.random()*5),.6,.7);puff(dpt.x,dpt.y+.1,dpt.z,6,2,gk==='sand'?[.93,.84,.6]:gk==='granite'?[.7,.42,.33]:gk==='stone'||gk==='deep'?[.6,.6,.6]:[.45,.32,.2])}if(mineT>=1){mineT=0;if(old)act({a:'dig',k:gk});else act({a:'dig',x:+dpt.x.toFixed(2),y:+dpt.y.toFixed(2),z:+dpt.z.toFixed(2)})}}else mineT=Math.max(0,mineT-dt);pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(mineT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to dig ${gk} (to mine)`.replace(' (to mine)','');return}
+ if(gk&&!old&&dpt)MT={x:dpt.x,y:dpt.y,z:dpt.z,r:1.2,c:MCOL[gk]||'#a4a8ad',k:gk};if(gk){if(mouseHeld){mineT+=dt/({mud:1,sand:.9,stone:1.7,granite:2.1,deep:3}[gk]*(tier>1?.45:1));mineSnd-=dt;if(mineSnd<=0){mineSnd=.3;sfx.play('step_carpet_'+Math.floor(Math.random()*5),.6,.7);puff(dpt.x,dpt.y+.1,dpt.z,6,2,gk==='sand'?[.93,.84,.6]:gk==='granite'?[.7,.42,.33]:gk==='stone'||gk==='deep'?[.6,.6,.6]:[.45,.32,.2])}if(mineT>=1){mineT=0;mineBurst(MT);if(old)act({a:'dig',k:gk});else act({a:'dig',x:+dpt.x.toFixed(2),y:+dpt.y.toFixed(2),z:+dpt.z.toFixed(2)})}}else mineT=Math.max(0,mineT-dt);pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(mineT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to dig ${gk} (to mine)`.replace(' (to mine)','');return}
  if(!pick||(bi<0&&!hiBuilt)){mineT=0;if(pr.innerHTML.includes('to mine')||pr.innerHTML.includes('to dig'))pr.hidden=true;return}
  const what=hiBuilt?(hiBuilt.k==='rock'?'your rock':hiBuilt.k==='wall'?'this wall':hiBuilt.k==='cooker'?'the cooker':hiBuilt.k==='chest'?'the chest':hiBuilt.k==='drill'?'the drill':hiBuilt.k==='mixer'?'the mixer':'this door'):boulders[bi]&&boulders[bi].ore?(boulders[bi].au?'gold ore':boulders[bi].cu?'copper ore':boulders[bi].coal?'coal':'iron ore'):'the boulder';
- const tgt=bi>=0?boulders[bi]:null;if(mouseHeld){mineT+=dt/(hiBuilt?.5:tgt&&tgt.ore?(tier>1?.7:1.7):(tier>1?.45:.85));mineSnd-=dt;if(mineSnd<=0){mineSnd=.28;sfx.play('chop_'+Math.floor(Math.random()*3),.45,.62);const p=hiBuilt?hiBuilt.o:boulders[bi];const px=hiBuilt?.k==='wall'?(p.ax+p.bx)/2:p.x,pz=hiBuilt?.k==='wall'?(p.az+p.bz)/2:p.z;puff(pos.x+(px-pos.x)*.5,pos.y+.8,pos.z+(pz-pos.z)*.5,6,2.4,[.72,.7,.66]);shake=.05}
-  if(mineT>=1){mineT=0;if(hiBuilt)act({a:'unbuild',id:hiBuilt.o.id,k:hiBuilt.k});else act({a:'mine',i:bi,t:tier})}}else mineT=Math.max(0,mineT-dt);
+ const tgt=bi>=0?boulders[bi]:null;if(tgt)MT={x:tgt.x,y:tgt.y+tgt.s*.35,z:tgt.z,r:(tgt.surf?tgt.surf.r:1)*1.25,c:tgt.au?'#ffd84a':tgt.cu?'#4fe0b0':tgt.coal?'#3a3a52':tgt.ore?'#ff9a3c':'#a4a8ad',k:tgt.ore?'ore':'stone'};if(mouseHeld){mineT+=dt/(hiBuilt?.5:tgt&&tgt.ore?(tier>1?.7:1.7):(tier>1?.45:.85));mineSnd-=dt;if(mineSnd<=0){mineSnd=.28;sfx.play('chop_'+Math.floor(Math.random()*3),.45,.62);const p=hiBuilt?hiBuilt.o:boulders[bi];const px=hiBuilt?.k==='wall'?(p.ax+p.bx)/2:p.x,pz=hiBuilt?.k==='wall'?(p.az+p.bz)/2:p.z;puff(pos.x+(px-pos.x)*.5,pos.y+.8,pos.z+(pz-pos.z)*.5,6,2.4,[.72,.7,.66]);shake=.05}
+  if(mineT>=1){mineT=0;if(!hiBuilt)mineBurst(MT);if(hiBuilt)act({a:'unbuild',id:hiBuilt.o.id,k:hiBuilt.k});else act({a:'mine',i:bi,t:tier})}}else mineT=Math.max(0,mineT-dt);
  pr.hidden=false;pr.innerHTML=`<span class="ring" style="--p:${(mineT*100).toFixed(0)}%"></span>hold <kbd>click</kbd> to mine ${what}`}
 function digAim(){if(document.pointerLockElement||firstPerson){const d=new THREE.Vector3();camera.getWorldDirection(d);const o=camera.position;for(let s=.5;s<14;s+=.08){const x=o.x+d.x*s,y=o.y+d.y*s,z=o.z+d.z*s;if(CV.F(x,y,z)>0){if(Math.hypot(wd(x,pos.x),y-(pos.y+.8),wd(z,pos.z))>REACH+.8)return null;return{x:x+d.x*.35,y:y+d.y*.35,z:z+d.z*.35}}}return null}
  const fx=Math.sin(yaw),fz=Math.cos(yaw);const x=pos.x+fx*.9,z=pos.z+fz*.9;return{x,y:surfAt(x,z,pos.y+.4)-.3,z}}
@@ -1302,7 +1317,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let camWant=7,camT=7;
+const _dark=new THREE.Color('#07070b');const visPos=new THREE.Vector3();let camWant=7,camT=7;
 function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
@@ -1321,15 +1336,15 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
 
  g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null&&il>0&&!dead){pos.x=ox0;pos.z=oz0;vel.x*=.3;vel.z*=.3;pos.y+=5*dt;vel.y=Math.max(vel.y,0);g=pos.y;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}else if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
  if(pos.y<=g){if(!onGround&&vel.y<-15)hurt(Math.round((-vel.y-15)*.55),'you fell too far');if(!onGround&&vel.y<-6){sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
-  if(onGround&&g-pos.y>.2){pos.y+=Math.min(g-pos.y,7*dt);vel.x*=.9;vel.z*=.9}else pos.y=g;vel.y=0;onGround=true}
+  if(onGround&&g-pos.y>.4){pos.y+=Math.min(g-pos.y,9*dt);if(!caveM){vel.x*=.9;vel.z*=.9}}else pos.y=g;vel.y=0;onGround=true}
  else if(pos.y>g+.05)onGround=false;
- if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.9,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}}
+ if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.4,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}}
  const hs=Math.hypot(vel.x,vel.z);
  if(hs>.5){face=Math.atan2(vel.x,vel.z);if(!moved&&il>0){moved=true;setTimeout(()=>document.getElementById('hud').classList.add('fade'),4000)}}
  if(onGround&&hs>3){stepT-=dt;if(stepT<=0){stepT=sprint?.18:.3;puff(pos.x,g,pos.z,sprint?3:2,1.2,g<1.2?[.9,.82,.6]:[.8,.85,.6])}}
 {const cp=camera.position;const dep=(caveM||ug)?Math.min(1,Math.max(0,(hAt(cp.x,cp.z)-cp.y-2)/6)):0;ugD+=(dep-ugD)*(1-Math.exp(-dt*4));const B0=frame._b||(frame._b={sun:sun.intensity,hemi:hemi.intensity,env:scene.environmentIntensity,fog:scene.fog.color.clone(),n:scene.fog.near,f:scene.fog.far});
   sun.intensity=B0.sun*(1-ugD);hemi.intensity=B0.hemi*(1-ugD*.975);scene.environmentIntensity=B0.env*(1-ugD*.97);scene.fog.color.copy(B0.fog).lerp(_dark,ugD);scene.fog.near=B0.n*(1-ugD)+3*ugD;scene.fog.far=B0.f*(1-ugD)+34*ugD;updTorchLights(dt,t);CV.upd(dt);}
- me.update(dt,pos,t);
+ {const d=pos.y-visPos.y;visPos.x=pos.x;visPos.z=pos.z;if(onGround&&Math.abs(d)<.7)visPos.y+=d*Math.min(1,dt*16);else visPos.y=pos.y}me.update(dt,visPos,t);
  if(!myOut)me.trail=[];if(!dead)updTrail(me,pos);me.tm.visible=!dead;net.tick(dt,t);
  // camera
  player.visible=!firstPerson&&!dead;
@@ -1505,24 +1520,30 @@ function caveShell(c){const cx=c.mx,cz=c.mz;c.strands=[];c.top=hAt(cx,cz)+.2;
   const vm=new THREE.Mesh(merged,vineMat);vm.castShadow=true;scene.add(vm);c.strands.push(vm)}c.vines=c.strands.length}
 function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localStorage.getItem('wdoors_w_'+id));if(d&&d.pos)return d.pos}}catch(e){}return[0,0]}
 // ---- world meshing: surface nets over the solid field. terrain + caves + craters are ONE mesh, in 24x12x24m chunks
-{const CX=24,CY=12,NCX=S/CX,EX=CX+3,EY=CY+3,EXY=EX*EY;const Fv=new Float32Array(EX*EY*EX),Vi=new Int32Array(EX*EY*EX);
+{const CX=24,CY=12,NCX=S/CX;const MX=(CX/.5+3)*(CY/.5+3)*(CX/.5+3);const Fv=new Float32Array(MX),Vi=new Int32Array(MX);CV.hi=new Set();
  CV.chunks=new Map();const key=(a,b,c)=>a+','+b+','+c;CV.CX=CX;CV.CY=CY;
  const sand=new THREE.Color('#ecd495'),g1=new THREE.Color('#2f8f2a'),g2=new THREE.Color('#5cbf33'),stone=new THREE.Color('#8c948a'),stone2=new THREE.Color('#6f7a6c'),snow=new THREE.Color('#f4f8ff');
  // what the ground is made of at a point below the surface
  CV.layer=(x,y,z)=>{const h=hAt(x,z),d=h-y;if(d<.45)return h<1.15?'sand':'grass';if(d<2.3)return h<1.15&&d<1.6?'sand':'dirt';if(y<-40&&CV.n3(x*.05+40,y*.05,z*.05)>.35)return 'deep';const g=CV.n3(wrapC(x)*.045,y*.07,wrapC(z)*.045);if(g>.63)return 'granite';return 'stone'};
  CV.mesh=(cx,cy,cz)=>{const k=key(cx,cy,cz);const old=CV.chunks.get(k);if(old){scene.remove(old);old.geometry.dispose();CV.chunks.delete(k)}
-  const ox=-S/2+cx*CX,oy=-120+cy*CY,oz=-S/2+cz*CX;let pos=0,neg=0;
-  for(let k2=0;k2<EX;k2++)for(let i=0;i<EX;i++){const x=ox+i-1,z=oz+k2-1;const h=hAt(x,z);for(let j=0;j<EY;j++){const y=oy+j-1;let f=h-y;if(f>-4&&y>-104){const c=CV.C(x,y,z);if(c<f)f=c}if(y<=-104)f=Math.max(f,.5);const id=i+EX*j+EXY*k2;Fv[id]=f;if(f>0)pos++;else neg++}}
-  if(!pos||!neg)return;Vi.fill(-1);const P=[],I=[];
+  const ox=-S/2+cx*CX,oy=-120+cy*CY,oz=-S/2+cz*CX;let pos=0,neg=0;const st=CV.hi.has(k)?.5:1,nx=CX/st,ny=CY/st,EX=nx+3,EY=ny+3,EXY=EX*EY;
+  for(let k2=0;k2<EX;k2++)for(let i=0;i<EX;i++){const x=ox+(i-1)*st,z=oz+(k2-1)*st;const h=hAt(x,z);for(let j=0;j<EY;j++){const y=oy+(j-1)*st;let f=h-y;if(f>-4&&y>-104){const c=CV.C(x,y,z);if(c<f)f=c}if(y<=-104)f=Math.max(f,.5);const id=i+EX*j+EXY*k2;Fv[id]=f;if(f>0)pos++;else neg++}}
+  if(!pos||!neg)return;Vi.fill(-1,0,EX*EY*EX);const P=[],I=[];
   const vert=(i,j,k2)=>{const id=i+EX*j+EXY*k2;if(Vi[id]>=0)return Vi[id];let sx=0,sy=0,sz=0,n=0;
    for(let e=0;e<12;e++){let ai,aj,ak,bi,bj,bk;if(e<4){ai=i+(e&1);aj=j+(e>>1&1);ak=k2;bi=ai;bj=aj;bk=ak+1}else if(e<8){ai=i+((e-4)&1);aj=j;ak=k2+((e-4)>>1&1);bi=ai;bj=aj+1;bk=ak}else{ai=i;aj=j+((e-8)&1);ak=k2+((e-8)>>1&1);bi=ai+1;bj=aj;bk=ak}
     const fa=Fv[ai+EX*aj+EXY*ak],fb=Fv[bi+EX*bj+EXY*bk];if((fa>0)===(fb>0))continue;const t=fa/(fa-fb);sx+=ai+(bi-ai)*t;sy+=aj+(bj-aj)*t;sz+=ak+(bk-ak)*t;n++}
-   if(!n){sx=i+.5;sy=j+.5;sz=k2+.5;n=1}Vi[id]=P.length/3;P.push(sx/n-1,sy/n-1,sz/n-1);return Vi[id]};
-  for(let k2=1;k2<=CX;k2++)for(let j=1;j<=CY;j++)for(let i=1;i<=CX;i++){const id=i+EX*j+EXY*k2;const f0=Fv[id];
+   if(!n){sx=i+.5;sy=j+.5;sz=k2+.5;n=1}Vi[id]=P.length/3;P.push((sx/n-1)*st,(sy/n-1)*st,(sz/n-1)*st);return Vi[id]};
+  for(let k2=1;k2<=nx;k2++)for(let j=1;j<=ny;j++)for(let i=1;i<=nx;i++){const id=i+EX*j+EXY*k2;const f0=Fv[id];
    for(let ax=0;ax<3;ax++){const nid=ax===0?id+1:ax===1?id+EX:id+EXY;const f1=Fv[nid];if((f0>0)===(f1>0))continue;
     let q;if(ax===0)q=[vert(i,j-1,k2-1),vert(i,j,k2-1),vert(i,j,k2),vert(i,j-1,k2)];else if(ax===1)q=[vert(i-1,j,k2-1),vert(i-1,j,k2),vert(i,j,k2),vert(i,j,k2-1)];else q=[vert(i-1,j-1,k2),vert(i,j-1,k2),vert(i,j,k2),vert(i-1,j,k2)];
     if(f0>0)I.push(q[0],q[1],q[2],q[0],q[2],q[3]);else I.push(q[0],q[2],q[1],q[0],q[3],q[2])}}
-  if(!I.length)return;const nv=P.length/3;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setIndex(I);g.computeVertexNormals();
+  if(!I.length)return;const nv=P.length/3;
+  // snap every vertex onto the real surface (sub-voxel accurate) and take the normal from the field: smooth "sculpted clay" shading
+  const NRM=new Float32Array(nv*3),e=.08;
+  for(let v=0;v<nv;v++){let x=P[v*3]+ox,y=P[v*3+1]+oy,z=P[v*3+2]+oz;let gx=0,gy=1,gz=0;const hh=hAt(x,z);if(!CV.hash.has(CV.ck(x,z))||CV.C(x,y,z)>hh-y+.35){P[v*3+1]=hh-oy;NRM[v*3+1]=1;continue}
+   for(let it=0;it<(QP.has('noproj')?0:1);it++){const f=CV.F(x,y,z);gx=(CV.F(x+e,y,z)-f)/e;gy=(CV.F(x,y+e,z)-f)/e;gz=(CV.F(x,y,z+e)-f)/e;const g2=gx*gx+gy*gy+gz*gz;if(g2<1e-4)break;let sc=f/g2;const lim=st*.45/Math.sqrt(g2);if(sc>lim)sc=lim;if(sc<-lim)sc=-lim;x-=gx*sc;y-=gy*sc;z-=gz*sc}
+   P[v*3]=x-ox;P[v*3+1]=y-oy;P[v*3+2]=z-oz;const gl=Math.hypot(gx,gy,gz)||1;NRM[v*3]=-gx/gl;NRM[v*3+1]=-gy/gl;NRM[v*3+2]=-gz/gl}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setIndex(I);g.setAttribute('normal',new THREE.BufferAttribute(NRM,3));
   const nA=g.attributes.normal,col=new Float32Array(nv*3),lw=new Float32Array(nv*4),ug=new Float32Array(nv*4),c=new THREE.Color();
   for(let v=0;v<nv;v++){const x=P[v*3]+ox,y=P[v*3+1]+oy,z=P[v*3+2]+oz;const h=hAt(x,z),d=h-y;const cc=CV.C(x,y,z);const terr=d<=cc+.05;
    if(terr&&d<.8){// plain terrain surface: same look as before
@@ -1540,7 +1561,7 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
  CV.chunksFor=(x0,y0,z0,x1,y1,z1)=>{const out=new Set();for(let y=y0;y<=y1+CY;y+=CY)for(let z=z0;z<=z1+CX;z+=CX)for(let x=x0;x<=x1+CX;x+=CX){const X=Math.min(x,x1),Y=Math.min(y,y1),Z=Math.min(z,z1);const cx=((Math.floor((wrapC(X)+S/2)/CX)%NCX)+NCX)%NCX,cz=((Math.floor((wrapC(Z)+S/2)/CX)%NCX)+NCX)%NCX,cy=Math.floor((Y+120)/CY);if(cy>=0)out.add(key(cx,cy,cz))}return out};
  const all=new Set();for(let cz=0;cz<NCX;cz++)for(let cx=0;cx<NCX;cx++){const q=cz*NCX+cx;for(let cy=Math.floor((colMin[q]-1.5+120)/CY);cy<=Math.floor((colMax[q]+1.5+120)/CY);cy++)all.add(key(cx,cy,cz))}
  for(const q of CV.prims){const r=q.r/Math.min(q.up,q.dn,1)+2;for(const k of CV.chunksFor(Math.min(q.a[0],q.b[0])-r,Math.min(q.a[1],q.b[1])-r,Math.min(q.a[2],q.b[2])-r,Math.max(q.a[0],q.b[0])+r,Math.max(q.a[1],q.b[1])+r,Math.max(q.a[2],q.b[2])+r))all.add(k)}
- const t0=performance.now();CV.queue=[];{const sp=W0SPAWN();for(const k of all){const[a,b,c]=k.split(',').map(Number);const d=Math.hypot(wd(-S/2+a*CX+CX/2,sp[0]),wd(-S/2+c*CX+CX/2,sp[1]));if(d<85)CV.mesh(a,b,c);else CV.queue.push([a,b,c])}}CV.buildMs=performance.now()-t0;
+ const t0=performance.now();CV.queue=[];{const sp=W0SPAWN();for(const k of all){const[a,b,c]=k.split(',').map(Number);const d=Math.hypot(wd(-S/2+a*CX+CX/2,sp[0]),wd(-S/2+c*CX+CX/2,sp[1]));if(d<70&&-120+b*CY+CY>CV.colMin(a,c)-6)CV.mesh(a,b,c);else CV.queue.push([a,b,c])}}CV.buildMs=performance.now()-t0;
  // decorations
  const deco=[];{const jit=(g,a)=>{const P=g.attributes.position;for(let i=0;i<P.count;i++){const y=P.getY(i);const w=Math.sin(P.getX(i)*9.1+y*5.3)*Math.cos(P.getZ(i)*7.7);P.setX(i,P.getX(i)*(1+w*a));P.setZ(i,P.getZ(i)*(1+w*a))}g.computeVertexNormals();return g};
   const tg=jit(new THREE.ConeGeometry(1,1,8,4),.18);const rm=new THREE.MeshStandardMaterial({color:'#8a7f73',roughness:.85});
@@ -1554,7 +1575,7 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
  CV.glowGone=i=>{const q=CV.glowL&&CV.glowL[i];if(!q||q.gone)return;q.gone=1;CV.glowIM.im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0));CV.glowIM.im.instanceMatrix.needsUpdate=true};
  // digs + bombs carve the world: add a sphere to the field, re-mesh touched chunks, hide decor inside it
  CV.carve=(x,y,z,r,dig)=>{const key2=[x,y,z].map(v=>v.toFixed(1)).join(',');if(CV.craters.some(c=>c.k===key2))return;CV.craters.push({k:key2,x,y,z,r,dig:dig?1:0});CV.addPrim({a:[x,y,z],b:[x,y,z],r,up:1,dn:1,dig:!!dig,bb:r+3});
-  const e=r+2.5;for(const k of CV.chunksFor(x-e,y-e,z-e,x+e,y+e,z+e)){const[a,b,c]=k.split(',').map(Number);CV.mesh(a,b,c)}visT=0;
+  const e=r+2.5;for(const k of CV.chunksFor(x-e,y-e,z-e,x+e,y+e,z+e)){CV.hi.add(k);const[a,b,c]=k.split(',').map(Number);CV.mesh(a,b,c)}visT=0;
   if(y+r+2>hAt(x,z)){CV.maskRect(x-r-2,z-r-2,x+r+2,z+r+2);CV.maskTex.needsUpdate=true}
   for(const d of deco){let ch=false;d.list.forEach((q,i)=>{if(Math.hypot(wd(q[0],x),q[1]-y,wd(q[2],z))<r+.6&&!q.gone){q.gone=1;ch=true;d.im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0))}});if(ch)d.im.instanceMatrix.needsUpdate=true}};
  // chunks sit at the copy nearest the camera (the world wraps) + distance/depth culling
@@ -1567,8 +1588,8 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
 function cvGrad(x,y,z){const e=.12,f=CV.F(x,y,z);return[(CV.F(x+e,y,z)-f)/e,(CV.F(x,y+e,z)-f)/e,(CV.F(x,y,z+e)-f)/e]}
 function cvFloor(x,y,z){// highest solid surface from knee height (step-up .7) down to 2.4 below; null = a wall at knee height
  const top=y+.7;if(CV.F(x,top,z)>0)return null;for(let d=.06;d<3.1;d+=.08){const yy=top-d;if(CV.F(x,yy,z)>0){let a=yy+.08,b=yy;for(let k=0;k<5;k++){const m=(a+b)/2;if(CV.F(x,m,z)>0)b=m;else a=m}return a}}return -1e9}
-function cvPush(p){for(let it=0;it<3;it++)for(const[hy,r]of[[.85,.4],[1.3,.42],[1.75,.34]]){const y=p.y+hy,f=CV.F(p.x,y,p.z);if(f<=-r)continue;const g=cvGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const push=Math.min(.3,(f+r)/Math.max(.5,gl));if(CV.F(p.x-nx*r*1.05,y-ny*r*1.05,p.z-nz*r*1.05)<=0)continue;
-  if(ny<-.6&&hy>1.2){p.y+=ny*push;if(vel.y>0)vel.y=0;continue}if(Math.abs(ny)>.93)continue;const hl=Math.hypot(nx,nz)||1;p.x+=nx/hl*push;p.z+=nz/hl*push}}
+function cvPush(p){for(let it=0;it<3;it++)for(const[hy,r]of[[.8,.38],[1.2,.36]]){const y=p.y+hy,f=CV.F(p.x,y,p.z);if(f<=-r)continue;const g=cvGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const push=Math.min(.3,(f+r)/Math.max(.5,gl));if(CV.F(p.x-nx*r*1.05,y-ny*r*1.05,p.z-nz*r*1.05)<=0)continue;
+  if(ny<-.6&&hy>1.1){if(CV.F(p.x,p.y+.3,p.z)>0)continue;p.y+=ny*push;if(vel.y>0)vel.y=0;continue}if(Math.abs(ny)>.93)continue;const hl=Math.hypot(nx,nz)||1;p.x+=nx/hl*push;p.z+=nz/hl*push}}
 for(const c of CAVES)caveShell(c);
 const TORCHES=[];const torchIM=(()=>{const g=new THREE.CylinderGeometry(.045,.06,.9,6);g.translate(0,.45,0);const im=new THREE.InstancedMesh(g,new THREE.MeshStandardMaterial({color:'#6b4526',roughness:.9}),300);im.count=0;im.frustumCulled=false;scene.add(im);
  const fg=new THREE.IcosahedronGeometry(.13,1);fg.scale(1,1.5,1);const fm=new THREE.MeshBasicMaterial({color:new THREE.Color(4,2.1,.7),toneMapped:true});const f=new THREE.InstancedMesh(fg,fm,300);f.count=0;f.frustumCulled=false;scene.add(f);im.userData.f=f;return im})();
