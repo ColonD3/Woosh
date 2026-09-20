@@ -615,7 +615,7 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  place(['TwistedTree_1','TwistedTree_2','TwistedTree_3'],twisted,{tint:1});
  place(['pack:trees#2','pack:trees#3','pack:trees#4'],pine,{tint:1});place(['pack:trees#5'],broad,{tint:1});
  const grassy=(x,z,h)=>h>1.4&&h<9&&slopeAt(x,z)<.42&&Math.hypot(x,z)>6;
- const rocks=scatter(30,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
+ const rocks=scatter(10,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
  const BIG=[[42,1.52/1.31],[44,1.46/1.09],[45,1.6/1.13],[47,1.5/1.75],[51,1.49/1.65],[52,1.58/1.38],[55,1.75/1.75],[58,2.66/1.34],[64,2.64/2.23],[66,2.02/1.92],[68,2.65/1.49],[69,3.88/2.1]];
  rocks.forEach(p=>{p.m=Math.floor(rnd()*BIG.length);const H=rnd()<.12?1.4+rnd()*.8:.5+rnd()*.6;p.s=H;p.y-=.18*H;p.rx=(rnd()-.5)*.15;p.rz=(rnd()-.5)*.15;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:BIG[p.m][1]*H*.5};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=Math.round(2+H*2)});boulders.push(...rocks);
  place(BIG.map(b=>'pack:rocks70#'+b[0]),rocks);
@@ -628,12 +628,12 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  const ORE_SH=[44,51,55,64,66];
  ores.forEach(p=>{p.m=Math.floor(rnd()*ORE_SH.length);const H=p.ug?.8+rnd()*.5:.9+rnd()*.6;p.s=H;p.y-=.2*H;p.rx=(rnd()-.5)*.2;p.rz=(rnd()-.5)*.2;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:H*.6};sf.r0=sf.r;if(!p.ug)rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=p.tk==='au'?2:6;p.ore=true;p.cu=p.tk==='cu';p.au=p.tk==='au';p.coal=p.tk==='coal'});
  place(ORE_SH.map(i=>'pack:rocks70#'+i+'@ore'),ores);
- for(const[grp,col,emi]of[[ores.filter(o=>o.tk==='fe'),'#ff9a3c','#ff6a10'],[ores.filter(o=>o.coal),'#101014','#3a3a52'],[ores.filter(o=>o.cu),'#4fe0b0','#18b080'],[ores.filter(o=>o.au),'#ffd84a','#ffb000']]){if(!grp.length)continue;const cg=new THREE.OctahedronGeometry(.13,0);cg.scale(1,1.9,1);const cm=new THREE.MeshStandardMaterial({color:col,emissive:emi,emissiveIntensity:1.6,roughness:.3,metalness:.4});const per=6;const im=new THREE.InstancedMesh(cg,cm,grp.length*per);im.castShadow=false;im.frustumCulled=false;
+ for(const[grp,col,emi]of[[ores.filter(o=>o.tk==='fe'),'#ff9a3c','#ff6a10'],[ores.filter(o=>o.coal),'#101014','#3a3a52'],[ores.filter(o=>o.cu),'#4fe0b0','#18b080'],[ores.filter(o=>o.au),'#ffd84a','#ffb000']]){if(!grp.length)continue;const cg=new THREE.OctahedronGeometry(.13,0);cg.scale(1,1.9,1);const cm=new THREE.MeshStandardMaterial({color:col,emissive:emi,emissiveIntensity:1.6,roughness:.3,metalness:.4});const per=10;const im=new THREE.InstancedMesh(cg,cm,grp.length*per);im.castShadow=false;im.frustumCulled=false;
   grp.forEach((p,oi)=>{p.cr=[];for(let k=0;k<per;k++){const a=rnd()*6.283,up=.25+rnd()*.55;const r=p.surf.r*(.75+.1*rnd());const e=new THREE.Object3D();e.position.set(p.x+Math.cos(a)*r*(1-up*.4),p.y+p.s*up,p.z+Math.sin(a)*r*(1-up*.4));e.rotation.set(rnd()*.8-.4,rnd()*6,rnd()*.8-.4);const sc=.6+rnd()*.8;e.scale.setScalar(sc);e.updateMatrix();im.setMatrixAt(oi*per+k,e.matrix);p.cr.push([im,oi*per+k,e.matrix.clone()])}});scene.add(im)}
  boulders.push(...ores);
  // cave mouths: cliff arch pieces leaning over a couple of ore veins
  for(const p of ores.filter((_,i)=>i%4===0)){const a=rnd()*6.283;for(const side of[-1,1]){const x=p.x+Math.cos(a+side*1.2)*2.6,z=p.z+Math.sin(a+side*1.2)*2.6;caveBits.push({x,z,y:hAt(x,z)-.6,ry:a+side,m:1,s:4.2+rnd()});}}
- const caveBits0=caveBits;const LM=[[0,.9],[1,1.2],[4,.95],[5,2.2],[6,1.25]];const marks=scatter(14,(x,z,h)=>h>3&&h<15&&slopeAt(x,z)>.25&&Math.hypot(x,z)>14&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<5));
+ const caveBits0=caveBits;const LM=[[0,.9],[1,1.2],[4,.95],[5,2.2],[6,1.25]];const marks=scatter(6,(x,z,h)=>h>3&&h<15&&slopeAt(x,z)>.25&&Math.hypot(x,z)>14&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<5));
  caveBits0.forEach(c=>{c.cave=1});marks.push(...caveBits0);marks.forEach(p=>{if(p.cave){p.m=1;const H=p.s;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:1.2*H*.42});return}p.m=Math.floor(rnd()*LM.length);const H=[7,5,4,3,4][p.m]*(.7+rnd()*.6);p.s=H;p.y-=.25*H;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:LM[p.m][1]*H*.42})});
  place(LM.map(l=>'pack:rockscliffs#'+l[0]),marks);
  // grass tufts hugging rocks and tree roots (like the reference shots)
