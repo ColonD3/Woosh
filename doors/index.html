@@ -1427,7 +1427,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0;const visPos=new THREE.Vector3();let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0;const visPos=new THREE.Vector3();let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
@@ -1444,15 +1444,15 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
 
- g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null&&il>0&&!dead){pos.x=ox0;pos.z=oz0;vel.x*=.3;vel.z*=.3;pos.y+=5*dt;vel.y=Math.max(vel.y,0);g=pos.y;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}else if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
+ g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
  if(pos.y<=g){if(!onGround&&vel.y<-15&&OPT.fall)hurt(Math.round((-vel.y-15)*.55),'you fell too far');if(!onGround&&vel.y<-6){sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
   if(onGround&&g-pos.y>.4){pos.y+=Math.min(g-pos.y,9*dt);if(!caveM){vel.x*=.9;vel.z*=.9}}else pos.y=g;vel.y=0;onGround=true}
  else if(pos.y>g+.05)onGround=false;
- if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.4,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}
+
  // sticky legs: in caves, holding a direction against rock lets wooshi roll along it (walls, overhangs, ceilings)
  if(caveM&&il>0&&!dead&&!keys.Space){const cx=ox0,cy=oy0+.55,cz=oz0;const f=CV.F(cx,cy,cz);
   if(f>-.85){const g=cvGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const moved=Math.hypot(pos.x-ox0,pos.z-oz0),want=speed*dt;
-   if(sticky||ny<.55||moved<want*.4){sticky=true;const dl=Math.hypot(dirX,dirZ)||1;let tx=dirX/dl,ty=ny<.9?.85:0,tz=dirZ/dl;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
+   if(moved<want*.35)blockT+=dt;else blockT=0;const dl0=Math.hypot(dirX,dirZ)||1;const wallAhead=CV.F(ox0+dirX/dl0*.65,oy0+.5,oz0+dirZ/dl0*.65)>0;if(sticky&&ny>.78&&!wallAhead)sticky=false;else if(!sticky&&blockT>.12&&wallAhead)sticky=true;if(sticky){const dl=Math.hypot(dirX,dirZ)||1;let tx=dirX/dl,ty=ny<.9?.85:0,tz=dirZ/dl;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
     let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;for(let k=0;k<3;k++){const f2=CV.F(px,py,pz);const g2=cvGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;const mv=(.5+f2);px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv}
     if(CV.F(px,py,pz)<-.2){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55])}else sticky=false}}else sticky=false}else sticky=false
  if(caveM&&il>0&&!dead){if(Math.hypot(pos.x-ox0,pos.y-oy0,pos.z-oz0)<speed*dt*.12)stuckT+=dt;else stuckT=0;
