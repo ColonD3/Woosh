@@ -172,7 +172,7 @@ function fbmP(u,v,P0,oc,o){let s2=0,a=.5,n=0,Pp=P0;for(let k=0;k<oc;k++){s2+=pno
   const land=smooth(.4,.5,cont);h=h*land+(-5)*(1-land);H[j*N+i]=h}
  for(let j=0;j<N;j++){H[j*N+N-1]=H[j*N]}for(let i=0;i<N;i++){H[(N-1)*N+i]=H[i]}}
 // ---------- terrain v2: erosion, rivers, paths ----------
-const WAY=new Float32Array(N*N*2);// [path, river] masks per grid point
+const WAY=new Float32Array(N*N*2);const RLV=new Float32Array(N*N).fill(-1e9),RND=new Float32Array(N*N).fill(9);// [path, river] masks per grid point
 const rivers=[];
 {const idx=(i,j)=>j*N+i;
  // 1) hydraulic erosion: fake raindrops run downhill, pick up dirt on steep bits and drop it in flats -> real valleys + ridges
@@ -202,7 +202,7 @@ const rivers=[];
   const R=[];for(let k=0;k<P.length;k++){const t=k/P.length;R.push(1.4+t*2.2)}
   const bed=new Float32Array(N*N).fill(1e9);
   for(let k=0;k<P.length;k+=1){const[a,b]=P[k],r=R[k]*1.9/STEP;for(let j=Math.floor(b-r);j<=b+r;j++)for(let i2=Math.floor(a-r);i2<=a+r;i2++){if(i2<0||j<0||i2>=N||j>=N)continue;const d=Math.hypot(i2-a,j-b)*STEP;const rr=R[k];if(d>rr*1.9)continue;
-    const kk=idx(i2,j);const depth=d<rr?(hp[k]-.9*(1-(d/rr)**2)-.15):hp[k]+(d-rr)*.55-.15;if(depth<bed[kk])bed[kk]=depth;WAY[kk*2+1]=Math.max(WAY[kk*2+1],1-smooth(rr*.8,rr*1.8,d))}}
+    const kk=idx(i2,j);const depth=d<rr?(hp[k]-.3-1.25*(1-(d/rr)**2)):hp[k]-.3+(d-rr)*.42;if(depth<bed[kk])bed[kk]=depth;if(d<rr*1.25&&d/rr<RND[kk]){RND[kk]=d/rr;RLV[kk]=hp[k]-.28}WAY[kk*2+1]=Math.max(WAY[kk*2+1],1-smooth(rr*.8,rr*1.8,d))}}
   for(let k=0;k<N*N;k++)if(bed[k]<H[k])H[k]=bed[k];
   rivers.push({pts:P.map(([a,b],k)=>[wx(a),hp[k]-.28,wx(b),R[k]])})}
  // 3) paths: from spawn out to a few spots, taking the easy (flat) way, flattened a bit
@@ -283,11 +283,15 @@ tile9(terrain);
 const water=new Water(new THREE.PlaneGeometry(700,700,350,350),{textureWidth:TOUCH?256:512,textureHeight:TOUCH?256:512,waterNormals:tex('waternormals.jpg'),
  sunDirection:sunDir.clone(),sunColor:0xfff2d8,waterColor:0x1f8fa3,distortionScale:3.2,fog:true,alpha:1});
 // river ribbons
-const riverMat=new THREE.MeshStandardMaterial({color:'#4fa9bf',roughness:.12,metalness:0,transparent:true,opacity:.82,normalMap:tex('waternormals.jpg'),normalScale:new THREE.Vector2(.35,.35)});riverMat.normalMap.repeat.set(1,6);
-for(const r of rivers){const P=r.pts,pos=[],uv=[],ix=[];let acc=0;for(let k=0;k<P.length;k++){const a=P[Math.max(0,k-1)],b=P[Math.min(P.length-1,k+1)];let dx=b[2]-a[2],dz=-(b[0]-a[0]);const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;const w=P[k][3]*.95;
- if(k)acc+=Math.hypot(P[k][0]-P[k-1][0],P[k][2]-P[k-1][2]);pos.push(P[k][0]+dx*w,P[k][1],P[k][2]+dz*w,P[k][0]-dx*w,P[k][1],P[k][2]-dz*w);uv.push(0,acc/8,1,acc/8);if(k)ix.push(2*k-2,2*k-1,2*k,2*k-1,2*k+1,2*k)}
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.setAttribute('normal',new THREE.Float32BufferAttribute(pos.map((v,i)=>i%3===1?1:0),3));
- const m=new THREE.Mesh(g,riverMat);m.receiveShadow=true;m.renderOrder=1;scene.add(m);tile9(m)}
+const riverMat=new THREE.MeshStandardMaterial({color:'#2f8fa8',vertexColors:true,roughness:.06,metalness:.1,envMapIntensity:1.4,transparent:true,opacity:.88,depthWrite:false,normalMap:tex('waternormals.jpg'),normalScale:new THREE.Vector2(.35,.35)});riverMat.normalMap.repeat.set(1,1);
+{// river water: one smooth surface over the carved channels (no folding ribbons), edges fade into the bank
+ const lv=RLV.slice();for(let pass=0;pass<3;pass++){const T=lv.slice();for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){const k=j*N+i;if(T[k]<-1e8)continue;let s2=T[k]*2,n=2;for(const o of[-1,1,-N,N])if(T[k+o]>-1e8){s2+=T[k+o];n++}lv[k]=s2/n}}
+ const pos=[],col=[],uv=[],ix=[];const vid=new Int32Array(N*N).fill(-1);
+ const vert=(i,j)=>{const k=j*N+i;if(vid[k]>=0)return vid[k];let L=lv[k];if(L<-1e8){let s2=0,n=0;for(const o of[-1,1,-N,N,-N-1,-N+1,N-1,N+1]){const q=k+o;if(q>=0&&q<N*N&&lv[q]>-1e8){s2+=lv[q];n++}}L=n?s2/n:0}
+  const x=-S/2+i*STEP,z=-S/2+j*STEP;const a=RLV[k]>-1e8?1-smooth(.72,1.2,RND[k]):0;vid[k]=pos.length/3;pos.push(x,L,z);col.push(1,1,1,a);uv.push(x/9,z/9);return vid[k]};
+ for(let j=0;j<N-1;j++)for(let i=0;i<N-1;i++){const k=j*N+i;if(RLV[k]<-1e8&&RLV[k+1]<-1e8&&RLV[k+N]<-1e8&&RLV[k+N+1]<-1e8)continue;const a=vert(i,j),b=vert(i+1,j),c=vert(i,j+1),d=vert(i+1,j+1);ix.push(a,c,b,b,c,d)}
+ if(ix.length){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,4));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();
+  const m=new THREE.Mesh(g,riverMat);m.receiveShadow=true;m.renderOrder=1;scene.add(m);tile9(m)}}
 water.material.uniforms.uBend=BEND;water.material.vertexShader=water.material.vertexShader.replace('gl_Position = projectionMatrix * mvPosition;','{vec3 rel=(vec4(mvPosition.xyz,0.)*viewMatrix).xyz;mvPosition.xyz-=(viewMatrix*vec4(0.,(rel.x*rel.x+rel.z*rel.z)*uBend,0.,0.)).xyz;}gl_Position = projectionMatrix * mvPosition;');
 water.rotation.x=-Math.PI/2;water.position.y=-.2;water.material.uniforms.size.value=2.2;if(QP.get('water')!=='0')scene.add(water);
 
