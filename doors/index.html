@@ -279,7 +279,7 @@ const CAVES=[],CV={prims:[],hash:new Map(),HC:12,spots:[],deep:[],craters:[],dec
     pitch+=(rnd()-.5)*.14;if(kind==='shaft')pitch=-1.25;pitch=Math.max(kind==='shaft'?-1.35:-.6,Math.min(.3,pitch));const top=hAt(x,z)-r-5;if(y>top)pitch=Math.min(pitch,-.35);if(y<-90)pitch=Math.max(pitch,.08);
     r+=(rnd()-.5)*.3;r=Math.max(rmin,Math.min(rmax,r))}
    const nx=x+Math.cos(yaw)*Math.cos(pitch)*st,ny=y+Math.sin(pitch)*st,nz=z+Math.sin(yaw)*Math.cos(pitch)*st;seg([x,y,z],[nx,ny,nz],r,{cav:kind==='big'?1:0});
-   if(s2>10&&rnd()<.07)CV.spotReq.push([nx,ny,nz,0,yaw,r]);if(ny<-30&&rnd()<.1)CV.deep.push([nx,ny,nz]);if(r>2.6&&rnd()<.08)CV.rooms.push([nx,ny,nz,r]);
+   if(s2>6&&rnd()<.16)CV.spotReq.push([nx,ny,nz,0,yaw,r]);if(ny<-30&&rnd()<.1)CV.deep.push([nx,ny,nz]);if(r>2.6&&rnd()<.08)CV.rooms.push([nx,ny,nz,r]);
    if(kind==='shaft'&&s2>len*.9)break;
    if(lvl<3&&s2>16&&rnd()<.035){const r2=rnd();const k2=r2<.22?'crawl':r2<.4?'big':r2<.5?'shaft':'tunnel';worm(nx,ny,nz,yaw+(rnd()<.5?-1:1)*(.7+rnd()*1.3),pitch,k2==='shaft'?10+rnd()*18:30+rnd()*90,k2==='crawl'?1.3:k2==='big'?3.8:r*.9,lvl+1,false,k2)}
    if(s2>24&&rnd()<.01)cavern(nx,ny,nz,rnd()<.25);
@@ -299,9 +299,9 @@ const CAVES=[],CV={prims:[],hash:new Map(),HC:12,spots:[],deep:[],craters:[],dec
  const grad=(x,y,z)=>{const e=.2,f=CV.F(x,y,z);const g=[CV.F(x+e,y,z)-f,CV.F(x,y+e,z)-f,CV.F(x,y,z+e)-f];const l=Math.hypot(...g)||1;return g.map(v=>v/l)};
  for(const q of CV.spotReq){const[x,y,z,cav,yaw,r]=q;if(y>hAt(x,z)-3)continue;let wx,wy,wz;
   if(cav){const fy=floorAt(x,y,z,14);if(fy===null)continue;wx=x;wy=fy;wz=z}else{const sd=rnd()<.5?1:-1,sx=-Math.sin(yaw)*sd,sz=Math.cos(yaw)*sd;const fy=floorAt(x,y,z,r+3);if(fy===null)continue;let w=0;for(;w<r+3;w+=.2)if(CV.F(x+sx*w,fy+.8,z+sz*w)>0)break;wx=x+sx*w;wy=fy+.8;wz=z+sz*w}
-  const g=grad(wx,wy,wz);const exposed=rnd()<.28;const dep=exposed?.15+rnd()*.2:.8+rnd()*1.1;const n=1+Math.floor(rnd()*(exposed?1.5:3));
+  const g=grad(wx,wy,wz);const exposed=rnd()<.4;const dep=exposed?.15+rnd()*.2:.6+rnd()*.9;const n=1+Math.floor(rnd()*(exposed?2:4));
   for(let k=0;k<n;k++)CV.spots.push({x:wx+g[0]*dep+(rnd()-.5)*(k?1.4:0),y:wy+g[1]*dep-.3+(rnd()-.5)*(k?1:0),z:wz+g[2]*dep+(rnd()-.5)*(k?1.4:0),near:1})}
- for(let k=0;k<Math.round(45*(S/240)**2);k++){const x=(rnd()-.5)*S,z=(rnd()-.5)*S,y=-6-rnd()*88;if(y>hAt(x,z)-5||CV.C(x,y,z)<1.8)continue;const n=1+Math.floor(rnd()*3);for(let j=0;j<n;j++)CV.spots.push({x:x+(rnd()-.5)*1.6,y:y+(rnd()-.5),z:z+(rnd()-.5)*1.6,near:0})}
+ for(let k=0;k<Math.round(130*(S/240)**2);k++){const x=(rnd()-.5)*S,z=(rnd()-.5)*S,y=-6-rnd()*88;if(y>hAt(x,z)-5||CV.C(x,y,z)<1.8)continue;const n=1+Math.floor(rnd()*3);for(let j=0;j<n;j++)CV.spots.push({x:x+(rnd()-.5)*1.6,y:y+(rnd()-.5),z:z+(rnd()-.5)*1.6,near:0})}
  // decorations: stalactites/stalagmites in rooms, loose rocks + glow shrooms on floors
  for(const[x,y,z,R]of CV.rooms){const n=Math.round(R*2.2);for(let k=0;k<n;k++){const a=rnd()*6.283,d=rnd()*R*.8;const px=x+Math.cos(a)*d,pz=z+Math.sin(a)*d;if(CV.F(px,y,pz)>0)continue;
    const cy=ceilAt(px,y,pz,R*2),fy=floorAt(px,y,pz,R*2.5);if(cy===null||fy===null||cy>hAt(px,pz)-.6)continue;const room=cy-fy;if(room<2.4)continue;
@@ -838,7 +838,7 @@ const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:
   this.peer.on('error',e=>ui.status(e.type==='peer-unavailable'?'no world with that code':'connection error: '+e.type))}};
 function hostGone(){started=false;document.exitPointerLock?.();const m=document.getElementById('menu');m.hidden=false;document.querySelectorAll('.pg').forEach(p=>p.hidden=p.id!=='pg-home');ui.status('the host closed their world, so you got sent back here');setTimeout(()=>location.href=location.pathname+(SZ!=='s'?'?size='+SZ:''),4000)}
 function swapMe(){player=me.g;me.trail=[]}
-if(QP.has('dev'))window.__dev={tun:()=>({caves:CAVES.map(c=>[c.mx|0,c.mz|0]),deep:CV.deep.length,chunks:CV.chunks.size,ms:CV.buildMs|0,ug,caveM,ugD}),ugo:(i,f)=>{const c=CV.deep[i%CV.deep.length];let y=c[1];while(CV.F(c[0],y,c[2])<=0&&y>c[1]-9)y-=.1;pos.set(c[0],y+.15,c[2]);vel.set(0,0,0);camInit=false;if(f!=null)yaw=f},nr:()=>{hostMode=true},step:(n)=>{const g=clock.getDelta;clock.getDelta=function(){this.elapsedTime+=1/60;return 1/60};for(let i=0;i<n;i++)frame();clock.getDelta=g},me2:()=>[+pos.x.toFixed(2),+pos.y.toFixed(2),+pos.z.toFixed(2),onGround,caveM,!!keys.Space,!!keys.KeyW,+vel.y.toFixed(2),dead,started],carveHere:(r)=>{CV.carve(pos.x,pos.y,pos.z,r||2.4)},dig:()=>digAim(),layer:()=>CV.layer(pos.x,pos.y-1,pos.z),mouth:(i)=>{const c=CAVES[i];pos.set(c.mx,hAt(c.mx,c.mz)+1,c.mz);yaw=-c.ent+Math.PI/2;camInit=false},torch:()=>{inv.torch+=3;placeTorch()},hmap:()=>({H:Array.from(H),W:Array.from(WAY),N,rivers:rivers.length}),boom:()=>boom(pos.x+2,pos.z,'host'),near:()=>nearestTree(),chopT:()=>chopT,keysE:()=>!!keys.KeyE,projAges:()=>[...projs.values()].map(p=>[p.age.toFixed(2),p.landed,p.p.y.toFixed(1)]),gt:()=>clock.elapsedTime,fr:()=>fpsN,give:(k,n)=>gain(k,n),inv:()=>({...inv}),items:()=>items.size,trees:()=>trees.map(t=>[t.x,t.z,!!t.down]),me:()=>[pos.x,pos.z,myIdx],fences:()=>fence.reduce((a,v)=>a+(v?1:0),0),owned:()=>owner.reduce((a,v)=>a+(v===myIdx?1:0),0),
+if(QP.has('dev'))window.__dev={tun:()=>({caves:CAVES.map(c=>[c.mx|0,c.mz|0]),deep:CV.deep.length,chunks:CV.chunks.size,ms:CV.buildMs|0,ug,caveM,ugD}),ugo:(i,f)=>{const c=CV.deep[i%CV.deep.length];let y=c[1];while(CV.F(c[0],y,c[2])<=0&&y>c[1]-9)y-=.1;pos.set(c[0],y+.15,c[2]);vel.set(0,0,0);camInit=false;if(f!=null)yaw=f},nr:()=>{hostMode=true},step:(n)=>{const g=clock.getDelta;clock.getDelta=function(){this.elapsedTime+=1/60;return 1/60};for(let i=0;i<n;i++)frame();clock.getDelta=g},F:(x,y,z)=>CV.F(x,y,z),me2:()=>[+pos.x.toFixed(2),+pos.y.toFixed(2),+pos.z.toFixed(2),onGround,caveM,!!keys.Space,!!keys.KeyW,+vel.y.toFixed(2),dead,started],carveHere:(r)=>{CV.carve(pos.x,pos.y,pos.z,r||2.4)},dig:()=>digAim(),layer:()=>CV.layer(pos.x,pos.y-1,pos.z),mouth:(i)=>{const c=CAVES[i];pos.set(c.mx,hAt(c.mx,c.mz)+1,c.mz);yaw=-c.ent+Math.PI/2;camInit=false},torch:()=>{inv.torch+=3;placeTorch()},hmap:()=>({H:Array.from(H),W:Array.from(WAY),N,rivers:rivers.length}),boom:()=>boom(pos.x+2,pos.z,'host'),near:()=>nearestTree(),chopT:()=>chopT,keysE:()=>!!keys.KeyE,projAges:()=>[...projs.values()].map(p=>[p.age.toFixed(2),p.landed,p.p.y.toFixed(1)]),gt:()=>clock.elapsedTime,fr:()=>fpsN,give:(k,n)=>gain(k,n),inv:()=>({...inv}),items:()=>items.size,trees:()=>trees.map(t=>[t.x,t.z,!!t.down]),me:()=>[pos.x,pos.z,myIdx],fences:()=>fence.reduce((a,v)=>a+(v?1:0),0),owned:()=>owner.reduce((a,v)=>a+(v===myIdx?1:0),0),
  plan:(x,z)=>{fencePlanCells=fencePlan(myIdx,{x,z},inv.fence);return fencePlanCells.length},confirm:()=>confirmFences(),throw:k=>throwIt(k),craftB:()=>craftBomb(),craftF:()=>craftFence(),projs:()=>projs.size,look:(y,p)=>{yaw=y;pitch=p},tp:(x,z)=>onSpawn(x,z),fill:()=>{let n=0;for(let k=0;k<G*G;k++)if(land[k]&&!owner[k]&&n++<landCount*.9)owner[k]=1+(k%3);game.dirty=true}};
 Object.defineProperty(window,'__dbg',{get:()=>({remotes:remotes.size,mode:net.mode,dead,myOut,idx:myIdx,owned:owner.reduce((a,v)=>a+(v===myIdx),0)})});
 
@@ -1302,7 +1302,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');
+const _dark=new THREE.Color('#07070b');let camWant=7,camT=7;
 function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.contains('playing')!==started)document.body.classList.toggle('playing',started);const dt=Math.min(clock.getDelta(),DTMAX),t=clock.elapsedTime;if(!QP.has('fixres')&&!QP.has('bench'))dynRes();fpsN++;if(t-fpsT>.5){const e=document.getElementById('fps');if(!e.hidden)e.textContent=Math.round(fpsN/(t-fpsT))+' fps';fpsN=0;fpsT=t}
  let ix=0,iz=0;if(keys.KeyW||keys.ArrowUp)iz+=1;if(keys.KeyS||keys.ArrowDown)iz-=1;if(keys.KeyA||keys.ArrowLeft)ix+=1;if(keys.KeyD||keys.ArrowRight)ix-=1;
  let sprint=keys.ShiftLeft||keys.ShiftRight;if(TOUCH&&joy.id!==null){ix=-joy.x;iz=-joy.y;sprint=Math.hypot(joy.x,joy.y)>.92}
@@ -1319,10 +1319,11 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
 
- g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
+ g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null&&il>0&&!dead){pos.x=ox0;pos.z=oz0;vel.x*=.3;vel.z*=.3;pos.y+=5*dt;vel.y=Math.max(vel.y,0);g=pos.y;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}else if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
  if(pos.y<=g){if(!onGround&&vel.y<-15)hurt(Math.round((-vel.y-15)*.55),'you fell too far');if(!onGround&&vel.y<-6){sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
   if(onGround&&g-pos.y>.2){pos.y+=Math.min(g-pos.y,7*dt);vel.x*=.9;vel.z*=.9}else pos.y=g;vel.y=0;onGround=true}
- else if(pos.y>g+.05)onGround=false;}
+ else if(pos.y>g+.05)onGround=false;
+ if(caveM&&il>0&&!dead){const want=speed*dt,mv=Math.hypot(pos.x-ox0,pos.z-oz0),dl=Math.hypot(dirX,dirZ)||1;if(mv<want*.35&&CV.F(pos.x+dirX/dl*.6,pos.y+.45,pos.z+dirZ/dl*.6)>0&&CV.F(pos.x,pos.y+1.9,pos.z)<0){pos.y+=4.5*dt;vel.y=Math.max(vel.y,0);onGround=true;if(Math.random()<dt*8)puff(pos.x,pos.y+.3,pos.z,2,1,[.6,.58,.55])}}}
  const hs=Math.hypot(vel.x,vel.z);
  if(hs>.5){face=Math.atan2(vel.x,vel.z);if(!moved&&il>0){moved=true;setTimeout(()=>document.getElementById('hud').classList.add('fade'),4000)}}
  if(onGround&&hs>3){stepT-=dt;if(stepT<=0){stepT=sprint?.18:.3;puff(pos.x,g,pos.z,sprint?3:2,1.2,g<1.2?[.9,.82,.6]:[.8,.85,.6])}}
@@ -1338,9 +1339,10 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(!camInit){camPos.set(pos.x,pos.y+1.3,pos.z);camInit=true}
  {const a=1-Math.exp(-dt*6.5);camPos.x+=(pos.x-camPos.x)*a;camPos.z+=(pos.z-camPos.z)*a;camPos.y+=(pos.y+1.3-camPos.y)*(1-Math.exp(-dt*5))}
  {const a=1-Math.exp(-dt*20);let dy=yaw-vYaw;vYaw+=dy*a;vPitch+=(pitch-vPitch)*a}
- const tgt=camPos;const dist=ug?4.2:7;
+ const tgt=camPos;camWant+=((ug?4.2:7)-camWant)*(1-Math.exp(-dt*2));const dist=camWant;
  const want=new THREE.Vector3(tgt.x-Math.sin(vYaw)*Math.cos(vPitch)*dist,tgt.y+Math.sin(vPitch)*dist,tgt.z-Math.cos(vYaw)*Math.cos(vPitch)*dist);
- if(caveM||CV.C(want.x,want.y,want.z)<4){const dx=want.x-tgt.x,dy=want.y-tgt.y,dz=want.z-tgt.z,L=Math.hypot(dx,dy,dz);let t=.2;while(t<L){const px=tgt.x+dx/L*t,py=tgt.y+dy/L*t,pz=tgt.z+dz/L*t;const d=-CV.F(px,py,pz);if(d<.35){t=Math.max(.2,t-.25);break}t+=Math.max(.1,d*.7)}t=Math.min(t,L);want.set(tgt.x+dx/L*t,tgt.y+dy/L*t,tgt.z+dz/L*t)}else{const floor=hAt(want.x,want.z)+.6;if(want.y<floor)want.y=floor}
+ {const dx=want.x-tgt.x,dy=want.y-tgt.y,dz=want.z-tgt.z,L=Math.hypot(dx,dy,dz);let t=.2;while(t<L){const px=tgt.x+dx/L*t,py=tgt.y+dy/L*t,pz=tgt.z+dz/L*t;const d=-CV.F(px,py,pz);if(d<.4){t=Math.max(.2,t-.3);break}t+=Math.max(.12,d*.7)}t=Math.min(t,L);
+  camT=t<camT?t:camT+(t-camT)*(1-Math.exp(-dt*3));camT=Math.min(camT,L);want.set(tgt.x+dx/L*camT,tgt.y+dy/L*camT,tgt.z+dz/L*camT);if(!caveM){const floor=hAt(want.x,want.z)+.6;if(want.y<floor)want.y=floor}}
  camera.position.copy(want);camera.lookAt(tgt);}
  {const R=_sR.crossVectors(sunDir,_sY).normalize(),U=_sU.crossVectors(R,sunDir).normalize(),tx=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;const a=Math.round(pos.dot(R)/tx)*tx,b=Math.round(pos.dot(U)/tx)*tx,c=pos.dot(sunDir);_sP.copy(R).multiplyScalar(a).addScaledVector(U,b).addScaledVector(sunDir,c);sun.target.position.copy(_sP);sun.position.copy(_sP).addScaledVector(sunDir,100)}
  for(const c of clouds)c.position.x+=dt*1.2,c.position.x>900&&(c.position.x-=1800);sky.position.copy(camera.position);water.position.x=Math.round(camera.position.x/2)*2;water.position.z=Math.round(camera.position.z/2)*2;grassU.time.value=t;terrFX.tTime.value=t;swayU.value=t;water.material.uniforms.time.value=t*.6;grassU.pPos.value.copy(pos);grassU.camPos.value.copy(camera.position);
