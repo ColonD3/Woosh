@@ -1332,7 +1332,7 @@ function frame(){syncBend();if(!started)yaw+=.0009;if(document.body.classList.co
  if(!myOut)me.trail=[];if(!dead)updTrail(me,pos);me.tm.visible=!dead;net.tick(dt,t);
  // camera
  player.visible=!firstPerson&&!dead;
- if(firstPerson){const eye=new THREE.Vector3(pos.x,pos.y+.75,pos.z);camera.position.copy(eye);camPos.copy(eye);
+ if(firstPerson){const eye=new THREE.Vector3(pos.x,pos.y+1.5,pos.z);camera.position.copy(eye);camPos.copy(eye);
   camera.lookAt(eye.x+Math.sin(yaw)*Math.cos(pitch),eye.y-Math.sin(pitch),eye.z+Math.cos(yaw)*Math.cos(pitch));}else{
  {const ox=wrapC(pos.x)-pos.x,oz=wrapC(pos.z)-pos.z;if(ox||oz){pos.x+=ox;pos.z+=oz;camPos.x+=ox;camPos.z+=oz;camera.position.x+=ox;camera.position.z+=oz}}
  if(!camInit){camPos.set(pos.x,pos.y+1.3,pos.z);camInit=true}
