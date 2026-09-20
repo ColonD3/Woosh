@@ -381,7 +381,7 @@ const tg=new THREE.PlaneGeometry(S,S,N-1,N-1);tg.rotateX(-Math.PI/2);
  tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.setAttribute('lw',new THREE.BufferAttribute(lw,4));tg.computeVertexNormals();{const nn=tg.attributes.normal,e=STEP;for(let k=0;k<p.count;k++){const x=p.getX(k),z=p.getZ(k);const v=new THREE.Vector3(hAt(x-e,z)-hAt(x+e,z),2*e,hAt(x,z-e)-hAt(x,z+e)).normalize();nn.setXYZ(k,v.x,v.y,v.z)}}}
 const terrMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:0});
 const sty=(n,m,srgb)=>tex('stylized/'+n+'/'+m+'.jpg',srgb);
-const utex=n=>tex('under/'+n+'.jpg',1);const TU={uDi:{value:utex('excavated_soil_wall_diff')},uSt:{value:utex('rock_surface_diff')},uGr:{value:utex('tiger_rock_diff')},uDp:{value:utex('rock_face_04_diff')},pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:sty('ground_06','color',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
+const TU={uAt:{value:tex('under/atlas.jpg',1)},pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:sty('ground_06','color',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
  qG:{value:sty('moss_ground_02','normal')},qR:{value:sty('cliff_rocks_02','normal')},qS:{value:sty('sand_01','normal')},qW:{value:sty('snow_01','normal')},dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
  nG:{value:tex('leafy_grass_nor_gl.jpg')},nR:{value:tex('rock_face_nor_gl.jpg')},nS:{value:tex('coast_sand_01_nor_gl.jpg')},nW:{value:tex('snow_02_nor_gl.jpg')},avg:{value:new THREE.Vector4(.2458,.0953,.1815,.3868)}};
 terrMat.defines={NO_WRAP:''};const terrain=new THREE.Mesh(tg,terrMat);terrain.receiveShadow=true;
@@ -669,7 +669,10 @@ function unrle(r){let k=0;for(let i=0;i<r.length;i+=2){owner.fill(r[i],k,k+r[i+1
 const terrFX={tTime:{value:0},capP:{value:new THREE.Vector3(0,0,-99)},capC:{value:new THREE.Color()}};
 terrain.material.onBeforeCompile=sh=>{Object.assign(sh.uniforms,TU,terrFX);sh.uniforms.terr={value:terrTex};sh.uniforms.tS={value:S};
  sh.vertexShader='attribute vec4 lw;attribute vec4 ug;varying vec4 vUG;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvLW=lw;vUG=ug;vWP=(modelMatrix*vec4(transformed,1.)).xyz;vWN=normalize(mat3(modelMatrix)*objectNormal);');
- sh.fragmentShader=`uniform sampler2D uDi,uSt,uGr,uDp;varying vec4 vUG;uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;uniform vec4 avg;uniform float tS,tTime;uniform vec3 capP,capC;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;
+ sh.fragmentShader=`uniform sampler2D uAt;varying vec4 vUG;
+ vec3 atS(vec2 uv,vec2 o){vec2 f=fract(uv)*.49+.005;return textureGrad(uAt,o+f,dFdx(uv)*.49,dFdy(uv)*.49).rgb;}
+ vec3 triU(vec2 o,vec3 p,vec3 n,float sc){vec3 b=pow(abs(n),vec3(4.));b/=b.x+b.y+b.z;return atS(p.zy*sc,o)*b.x+atS(p.xz*sc,o)*b.y+atS(p.xy*sc,o)*b.z;}
+uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;uniform vec4 avg;uniform float tS,tTime;uniform vec3 capP,capC;varying vec4 vLW;varying vec3 vWP;varying vec3 vWN;
  float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
  float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
  float vn2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
@@ -687,7 +690,7 @@ terrain.material.onBeforeCompile=sh=>{Object.assign(sh.uniforms,TU,terrFX);sh.un
   vec3 col=gC*w.x+rockC*w.y+sC*w.z+wC*w.w;
   col*=mix(.82,1.12,m3)*mix(vec3(.96,1.,.9),vec3(1.05,1.,.94),m1);
   if(vColor.r>.15)col=mix(col,nt(pD,uv*.2)*vec3(1.08,1.,.9),smoothstep(.15,.7,vColor.r));if(vColor.g>.2)col=mix(col,mix(nt(pS,uv*.15),nt(pD,uv*.18),.5)*.85,smoothstep(.2,.8,vColor.g)*(1.-w.y));
-  {float ugs=vUG.x+vUG.y+vUG.z+vUG.w;if(ugs>.01){vec3 uc=vec3(0.);if(vUG.x>.01)uc+=triN(uDi,vWP,vWN,.28)*vUG.x*vec3(.95,.9,.85);if(vUG.y>.01)uc+=triN(uSt,vWP,vWN,.16)*vUG.y*vec3(.93,.95,1.);if(vUG.z>.01)uc+=triN(uGr,vWP,vWN,.18)*vUG.z;if(vUG.w>.01)uc+=triN(uDp,vWP,vWN,.2)*vUG.w*.8;
+  {float ugs=vUG.x+vUG.y+vUG.z+vUG.w;if(ugs>.01){vec3 uc=vec3(0.);if(vUG.x>.01)uc+=triU(vec2(0.,.5),vWP,vWN,.28)*vUG.x*vec3(.95,.9,.85);if(vUG.y>.01)uc+=triU(vec2(.5,.5),vWP,vWN,.16)*vUG.y*vec3(.93,.95,1.);if(vUG.z>.01)uc+=triU(vec2(0.,0.),vWP,vWN,.18)*vUG.z;if(vUG.w>.01)uc+=triU(vec2(.5,0.),vWP,vWN,.2)*vUG.w*.8;
    uc/=max(ugs,1.);uc*=mix(.8,1.12,fb2(vWP.xz*.08+vWP.y*.11));col=mix(col,uc,min(ugs,1.));}}
   diffuseColor.rgb=col*vec3(1.14,1.1,.9);
   vec2 u=(vWP.xz+tS*.5)/tS;vec4 t=texture2D(terr,u);float o=.8/240.;
@@ -1550,7 +1553,7 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
   if(y+r+2>hAt(x,z)){CV.maskRect(x-r-2,z-r-2,x+r+2,z+r+2);CV.maskTex.needsUpdate=true}
   for(const d of deco){let ch=false;d.list.forEach((q,i)=>{if(Math.hypot(wd(q[0],x),q[1]-y,wd(q[2],z))<r+.6&&!q.gone){q.gone=1;ch=true;d.im.setMatrixAt(i,new THREE.Matrix4().makeScale(0,0,0))}});if(ch)d.im.instanceMatrix.needsUpdate=true}};
  // chunks sit at the copy nearest the camera (the world wraps) + distance/depth culling
- let visT=0;CV.upd=(dt)=>{const cp=camera.position;if(CV.queue.length){const t1=performance.now();while(CV.queue.length&&performance.now()-t1<7){let bi=0,bd=1e9;for(let i=0;i<CV.queue.length;i++){const q=CV.queue[i];const d=Math.hypot(wd(-S/2+q[0]*CX+CX/2,cp.x),wd(-S/2+q[2]*CX+CX/2,cp.z));if(d<bd){bd=d;bi=i}}const q=CV.queue.splice(bi,1)[0];CV.mesh(q[0],q[1],q[2]);visT=0}}visT-=dt;const doVis=visT<=0;if(doVis)visT=.3;
+ let visT=0;CV.upd=(dt)=>{const cp=camera.position;if(CV.queue.length){const t1=performance.now();while(CV.queue.length&&performance.now()-t1<9){let bi=0,bd=1e9;for(let i=0;i<CV.queue.length;i++){const q=CV.queue[i];const d=Math.hypot(wd(-S/2+q[0]*CX+CX/2,cp.x),wd(-S/2+q[2]*CX+CX/2,cp.z),(-120+q[1]*CY+CY/2-cp.y)*1.5);if(d<bd){bd=d;bi=i}}const q=CV.queue.splice(bi,1)[0];CV.mesh(q[0],q[1],q[2]);visT=0}}visT-=dt;const doVis=visT<=0;if(doVis)visT=.3;
   for(const m of CV.chunks.values()){const o=m.userData.o;const px=o[0]+S*Math.round((cp.x-(o[0]+CX/2))/S),pz=o[2]+S*Math.round((cp.z-(o[2]+CX/2))/S);if(m.position.x!==px||m.position.z!==pz)m.position.set(px,o[1],pz);
    if(doVis){const hd=Math.hypot(px+CX/2-cp.x,pz+CX/2-cp.z);m.visible=m.userData.deep?hd<90&&Math.abs(o[1]+CY/2-cp.y)<70:hd<300}}}
  // water + grass ignore holes in the ground
