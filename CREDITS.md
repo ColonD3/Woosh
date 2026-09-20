@@ -7,3 +7,4 @@
 (models re-exported: textures resized to 1024 + webp)
 
 - Underground textures (assets/under): rock_surface, rock_face_04, tiger_rock, excavated_soil_wall, Poly Haven (CC0)
+- Music: "Until Again" (CC0), assets/music/theme.mp3
