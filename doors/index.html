@@ -1571,7 +1571,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const _ut=new THREE.Vector3();const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const _ut=new THREE.Vector3();const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 const PT={};let PFon=true;window.__pt=PT;
 function bc(n){try{localStorage.setItem('woosh_bc',n+'|'+Date.now())}catch(e){}}
 function bcd(n){try{localStorage.setItem('woosh_bc','done:'+n+'|'+Date.now())}catch(e){}}
@@ -1602,7 +1602,7 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
    let top=-99;const L=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(L)for(const b of L){if(b.hp<=0||!b.surf)continue;if(Math.hypot(wd(x,b.x),wd(z,b.z))<b.surf.r*.95&&b.surf.top>top)top=b.surf.top}
    return top>-98&&top-pos.y<.55};
   pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.x=ox;vel.x*=-.15}
-  pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.z=oz;vel.z*=-.15}}{bgT-=dt;if(bgT<0){bIndex();bgT=1.5}caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;solidPush(pos);if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
+  pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.z=oz;vel.z*=-.15}}{bgT-=dt;if(bgT<0){bIndex();bgT=1.5}caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;solidPush(pos);unTrap(pos);if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
  if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
 
@@ -1614,10 +1614,22 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
  // sticky legs: in caves, holding a direction against rock lets wooshi roll along it (walls, overhangs, ceilings)
  if((keys.Space||jumpTouch)&&sticky&&!dead){vel.set(stickyN.x,stickyN.y,stickyN.z).multiplyScalar(8.2);vel.y+=2.2;sticky=false;onGround=false;sfx.play('jump',.25,1.7)}
  if(il>0&&!dead&&!keys.Space&&!creative){const cx=ox0,cy=oy0+.55,cz=oz0;const f=SF(cx,cy,cz);
-  if(f>-.9){const g=SGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const moved=Math.hypot(pos.x-ox0,pos.z-oz0),want=speed*dt;
-   if(moved<want*.35)blockT+=dt;else blockT=0;const dl0=Math.hypot(dirX,dirZ)||1;const wx=ox0+dirX/dl0*.7,wz=oz0+dirZ/dl0*.7;const wallAhead=SF(wx,oy0+.35,wz)>0||SF(wx,oy0+.85,wz)>0;if(!sticky&&blockT>.07&&wallAhead)sticky=true;else if(sticky&&ny>.985&&!wallAhead&&!ug&&onGround)sticky=false;if(sticky){stickyN.set(nx,ny,nz);_dv.set(dirX,0,dirZ).normalize().applyQuaternion(camQ);let tx=_dv.x,ty=_dv.y+(ny<.9&&camUpV.y>.9?.85:0),tz=_dv.z;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}const tl=Math.hypot(tx,ty,tz)||1;const sp=4.2;
-    let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;for(let k=0;k<3;k++){const f2=SF(px,py,pz);const g2=SGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;const mv=(.5+f2);px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv}
-    if(SF(px,py,pz)<-.2){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55])}else sticky=false}}else sticky=false}else sticky=false
+  if(f>-1.7){const g=SGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;
+   const dl0=Math.hypot(dirX,dirZ)||1,ax=dirX/dl0,az=dirZ/dl0;
+   let wallAhead=false,wn=1;
+   for(const dd of[.45,.8])for(const hh of[.2,.6,1.0]){const wx=ox0+ax*dd,wz=oz0+az*dd;if(SF(wx,oy0+hh,wz)>-.15){wallAhead=true;const gg=SGrad(wx,oy0+hh,wz);const l3=Math.hypot(gg[0],gg[1],gg[2])||1;const q=-gg[1]/l3;if(q<wn)wn=q}}
+   if(!sticky){if(wallAhead&&wn<.78){sticky=true;stickLost=0}}
+   else{if(wallAhead||ny<.9)stickLost=0;else stickLost+=dt;if(stickLost>.22&&onGround&&!ug&&ny>.96)sticky=false}
+   if(sticky){stickyN.set(nx,ny,nz);_dv.set(dirX,0,dirZ).normalize().applyQuaternion(camQ);
+    const sp=(sprint?5.9:4.4);let done=false;
+    for(const bias of[(ny<.94?1.05:0),.45,0]){
+     let tx=_dv.x,ty=_dv.y+bias,tz=_dv.z;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}
+     const tl=Math.hypot(tx,ty,tz)||1;
+     let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;
+     for(let k=0;k<6;k++){const f2=SF(px,py,pz);const g2=SGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;let mv=(f2+.5)/l2;if(mv>.4)mv=.4;else if(mv<-.4)mv=-.4;px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv;if(Math.abs(mv)<.01)break}
+     if(SF(px,py,pz)<-.42&&SF(px,py+.5,pz)<-.38&&SF(px,py+.95,pz)<-.3){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;done=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55]);break}}
+    if(!done)sticky=false}}else{sticky=false;stickLost=0}}else{sticky=false;stickLost=0}
+ if(sticky)unTrap(pos);
  if(caveM&&il>0&&!dead){if(Math.hypot(pos.x-ox0,pos.y-oy0,pos.z-oz0)<speed*dt*.12)stuckT+=dt;else stuckT=0;
   if(stuckT>.3){stuckT=0;const c=[pos.x,pos.y+.55,pos.z];const g=cvGrad(...c);const gl=Math.hypot(...g)||1;const dl=Math.hypot(dirX,dirZ)||1;
    for(const [ax,ay,az] of [[-g[0]/gl*.3+dirX/dl*.2,.35,-g[2]/gl*.3+dirZ/dl*.2],[0,.6,0],[-g[0]/gl*.5,-g[1]/gl*.5,-g[2]/gl*.5],[dirX/dl*.4,.2,dirZ/dl*.4],[-dirX/dl*.4,.4,-dirZ/dl*.4]]){if(CV.F(c[0]+ax,c[1]+ay,c[2]+az)<-.3&&CV.F(c[0]+ax,c[1]+ay+.5,c[2]+az)<0){pos.x+=ax;pos.y+=ay;pos.z+=az;vel.set(0,0,0);break}}}}else stuckT=0}
@@ -1918,6 +1930,12 @@ function bF(x,y,z){const a=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(
   const cy=Math.min(Math.max(y,sf.base+.15),Math.max(sf.base+.15,sf.top-.25));const v=sf.r*.92-Math.hypot(dx,y-cy,dz);if(v>m)m=v}return m}
 function SF(x,y,z){const a=CV.F(x,y,z),b=bF(x,y,z);return a>b?a:b}
 function SGrad(x,y,z){const e=.12,f=SF(x,y,z);return[(SF(x+e,y,z)-f)/e,(SF(x,y+e,z)-f)/e,(SF(x,y,z+e)-f)/e]}
+function unTrap(p){const emb=()=>Math.max(SF(p.x,p.y+.55,p.z)+.4,SF(p.x,p.y+1.05,p.z)+.36);if(emb()<=0)return false;
+ const g=SGrad(p.x,p.y+.8,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;
+ const cands=[[-g[0]/gl,-g[1]/gl,-g[2]/gl],[0,1,0],[0,-1,0]];
+ for(const d of cands)for(let st=.15;st<=3.2;st+=.15){const sx=p.x+d[0]*st,sy=p.y+d[1]*st,sz=p.z+d[2]*st;
+  if(SF(sx,sy+.55,sz)<-.45&&SF(sx,sy+1.05,sz)<-.4){p.set(sx,sy,sz);vel.set(0,0,0);return true}}
+ return false}
 function solidPush(p){for(let it=0;it<3;it++){let hit=false;
  for(const[hy,r]of[[.55,.4],[1.05,.36]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;
   const g=SGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;let nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;
