@@ -1604,7 +1604,7 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
   vel.x+=stickyN.x*7*(1-bn);vel.z+=stickyN.z*7*(1-bn);vel.y=Math.max(vel.y,0)+8.6*bn+6.4*(1-bn);
   if(sprint&&il>0){vel.x*=1.18;vel.z*=1.18}
   noStick=.3;onGround=false;sfx.play('jump',.2,1.8);puff(pos.x,pos.y,pos.z,8,2,[.9,.88,.78]);squash=-.25}
- vel.y-=28*dt;vel.y=Math.max(vel.y,-40);
+ const gdy=-28*dt;vel.y+=gdy;vel.y=Math.max(vel.y,-40);
  if(onGround&&noStick<=0)vel.addScaledVector(stickyN,-14*dt);
  // steer: input bends onto the surface we are touching. the part pushing INTO a steep face becomes climbing it.
  // runs after gravity on purpose - while you are on something, your tangential motion is commanded, so gravity
@@ -1617,13 +1617,17 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
   const Tx=tl>1e-4?tx/tl*sp:0,Ty=tl>1e-4?ty/tl*sp:0,Tz=tl>1e-4?tz/tl*sp:0;
   const vn=vel.x*n.x+vel.y*n.y+vel.z*n.z;let vx=vel.x-n.x*vn,vy=vel.y-n.y*vn,vz=vel.z-n.z*vn;
   const a=Math.min(1,dt*(stuckNow?22:2.6));vx+=(Tx-vx)*a;vy+=(Ty-vy)*a;vz+=(Tz-vz)*a;
-  vel.set(vx+n.x*vn,vy+n.y*vn,vz+n.z*vn)}
+  vel.set(vx+n.x*vn,vy+n.y*vn,vz+n.z*vn);
+  // grip: gravity still pulls you along the face unless you are actively pressing into it.
+  // press in -> you climb and hold. let go or aim away -> you slide and fall down like normal.
+  if(stuckNow&&n.y<.985){const grip=Math.min(1,Math.max(0,-dn)*1.4);const gn=gdy*n.y;
+   vel.x+=(0-n.x*gn)*(1-grip);vel.y+=(gdy-n.y*gn)*(1-grip);vel.z+=(0-n.z*gn)*(1-grip)}}
  {const nx2=pos.x+vel.x*dt,nz2=pos.z+vel.z*dt;if(!fenceBlocks(nx2,nz2)){pos.x=nx2;pos.z=nz2}else{vel.x*=-.1;vel.z*=-.1}}
  pos.y+=vel.y*dt;
  // one contact solve for terrain + rock + cave wall
  {const hit=solveContacts(pos,3);
   if(!hit&&wasG&&noStick<=0){const sx=pos.x,sy=pos.y,sz=pos.z;let ok=false;
-   for(let d=.08;d<=.55;d+=.09){pos.set(sx-stickyN.x*d,sy-stickyN.y*d,sz-stickyN.z*d);if(solveContacts(pos,3)){ok=true;break}}
+   for(let d=.08;d<=.36;d+=.09){pos.set(sx-stickyN.x*d,sy-stickyN.y*d,sz-stickyN.z*d);if(solveContacts(pos,3)){ok=true;break}}
    if(!ok)pos.set(sx,sy,sz)}}
  if(!ug)pushOut(pos);
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
