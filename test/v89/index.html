@@ -531,9 +531,8 @@ const tg=new THREE.PlaneGeometry(S,S,N-1,N-1);tg.rotateX(-Math.PI/2);
  tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.setAttribute('lw',new THREE.BufferAttribute(lw,4));tg.computeVertexNormals();{const nn=tg.attributes.normal,e=STEP;for(let k=0;k<p.count;k++){const x=p.getX(k),z=p.getZ(k);const v=new THREE.Vector3(hAt(x-e,z)-hAt(x+e,z),2*e,hAt(x,z-e)-hAt(x,z+e)).normalize();nn.setXYZ(k,v.x,v.y,v.z)}}}
 const terrMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:0});
 const sty=(n,m,srgb)=>tex('stylized/'+n+'/'+m+'.jpg',srgb);
-const PBRC={};const pbr=n=>{if(!PBRC[n]){const o=tex('pbr/'+n+'/orh.webp');PBRC[n]={map:tex('pbr/'+n+'/color.webp',1),normalMap:tex('pbr/'+n+'/normal.webp'),roughnessMap:o,aoMap:o}}return PBRC[n]};const pbrT=(n,k)=>tex('pbr/'+n+'/'+k+'.webp',k==='color'?1:0);
-const TU={uAt:{value:tex('under/atlas.jpg',1)},pG1:{value:pbrT('grass002','color')},pG2:{value:pbrT('grass001','color')},pD:{value:tex('pbr/ground002/color.webp',1)},pR:{value:pbrT('cliff003','color')},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
- qG:{value:pbrT('grass002','normal')},qR:{value:pbrT('cliff003','normal')},qS:{value:sty('sand_01','normal')},qW:{value:sty('snow_01','normal')},dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
+const TU={uAt:{value:tex('under/atlas.jpg',1)},pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:tex('pbr/ground002/color.webp',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
+ qG:{value:sty('moss_ground_02','normal')},qR:{value:sty('cliff_rocks_02','normal')},qS:{value:sty('sand_01','normal')},qW:{value:sty('snow_01','normal')},dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
  nG:{value:tex('leafy_grass_nor_gl.jpg')},nR:{value:tex('rock_face_nor_gl.jpg')},nS:{value:tex('coast_sand_01_nor_gl.jpg')},nW:{value:tex('snow_02_nor_gl.jpg')},avg:{value:new THREE.Vector4(.2458,.0953,.1815,.3868)},gdO:{value:tex('pbr/ground002/orh.webp')},uSun:{value:sunDir},uPom:{value:QP.get('pom')==='0'?0:1}};
 terrMat.defines={NO_WRAP:''};const terrain=new THREE.Mesh(tg,terrMat);terrain.receiveShadow=true;
 function tile9(m){m.material.defines={...(m.material.defines||{}),NO_WRAP:''};for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const c=new THREE.Mesh(m.geometry,m.material);c.position.set(m.position.x+a*S,m.position.y,m.position.z+b*S);c.receiveShadow=m.receiveShadow;c.renderOrder=m.renderOrder;scene.add(c)}}
@@ -1445,7 +1444,7 @@ function setBoulder(p){if(p.cr){const keep=Math.ceil(p.cr.length*p.hp/p.hp0);p.c
 function nearestBoulder(){let b=-1,bd=1.4;for(let i=0;i<boulders.length;i++){const p=boulders[i];if(p.hp<=0)continue;if(p.y!=null&&Math.abs(p.y-pos.y)>3.5)continue;if(p.ug){const dx=wd(pos.x,p.x),dy=pos.y+.8-(p.y+p.s*.4),dz=wd(pos.z,p.z),L=Math.hypot(dx,dy,dz)||1,r=p.surf.r+.3;if(CV.F(p.x+dx/L*r,p.y+p.s*.4+dy/L*r,p.z+dz/L*r)>0)continue}const d=Math.hypot(wd(p.x,pos.x),wd(p.z,pos.z))-(p.surf?p.surf.r:1);if(d<bd){bd=d;b=i}}return b}
 // placed rocks (build mode with the rock slot): random painted shapes
 const ROCK_SHAPES=[13,15,17,18,20,22,24,29,31,33,38,40];
-function makeRock(r){const g=new THREE.Group();packObjs('rocks70').then(objs=>{for(const q of objs[ROCK_SHAPES[r.m%ROCK_SHAPES.length]]){const mat=prepMat(q.mat,false);{const P=pbr('cliff003');mat.normalMap=P.normalMap;mat.normalScale=new THREE.Vector2(.9,.9);mat.roughnessMap=P.roughnessMap;mat.roughness=1;mat.needsUpdate=true}let mm=mat;if(r.gr){mm=mat.clone();mm.color=new THREE.Color('#c07a5c');if(mm.onBeforeCompile!==mat.onBeforeCompile)mm.onBeforeCompile=mat.onBeforeCompile}const m=new THREE.Mesh(q.geo,mm);m.castShadow=m.receiveShadow=true;g.add(m)}
+function makeRock(r){const g=new THREE.Group();packObjs('rocks70').then(objs=>{for(const q of objs[ROCK_SHAPES[r.m%ROCK_SHAPES.length]]){const mat=prepMat(q.mat,false);let mm=mat;if(r.gr){mm=mat.clone();mm.color=new THREE.Color('#c07a5c');if(mm.onBeforeCompile!==mat.onBeforeCompile)mm.onBeforeCompile=mat.onBeforeCompile}const m=new THREE.Mesh(q.geo,mm);m.castShadow=m.receiveShadow=true;g.add(m)}
   if(r.cp){const[px,py,pz,nx,ny,nz]=r.cp;g.updateMatrixWorld(true);let mn=1e9;const v=new THREE.Vector3();g.traverse(o=>{if(!o.isMesh)return;const P=o.geometry.attributes.position;for(let i=0;i<P.count;i+=2){v.fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld);const d=(v.x-px)*nx+(v.y-py)*ny+(v.z-pz)*nz;if(d<mn)mn=d}});
    const sh=-mn-(ny>.7?.03:.01);g.position.x+=nx*sh;g.position.y+=ny*sh;g.position.z+=nz*sh;const dy=g.position.y-r.y;r.x=g.position.x;r.y=g.position.y;r.z=g.position.z;if(r.surf){r.surf.x=r.x;r.surf.z=r.z;r.surf.base+=dy;r.surf.top+=dy}r.cp=null}});
  g.position.set(r.x,r.y,r.z);g.rotation.y=r.ry;g.scale.setScalar(r.s);return g}
@@ -1474,9 +1473,9 @@ function boulderList(){return boulders.map((p,i)=>p.hp<p.hp0?[i,p.hp]:null).filt
 function applyBoulders(l){for(const[i,hp]of l||[]){const p=boulders[i];if(p){p.hp=hp;setBoulder(p)}}}
 
 const B={doors:new Map(),walls:new Map(),rocks:new Map(),cookers:new Map(),chests:new Map(),drills:new Map(),mixers:new Map(),nid:1,mode:false,start:null,ghostW:null,ghostD:null,marker:null};
-const wallTex=pbr('stonewall003'),plankTex=pbr('planks003');
-const concMat=new THREE.MeshStandardMaterial({map:sty('concrete_wall_01','color',1),normalMap:sty('concrete_wall_01','normal'),roughness:.9,color:'#e9e4da'}),ironMat=new THREE.MeshStandardMaterial({...pbr('metal01'),color:'#c4ccd2',roughness:.9,metalness:.75});
-const wallMat=new THREE.MeshStandardMaterial({...wallTex,roughness:1,color:'#f1e6d6'}),plankMat=new THREE.MeshStandardMaterial({...plankTex,roughness:1,color:'#e9c9a2'}),frameMat=new THREE.MeshStandardMaterial({...plankTex,roughness:1,color:'#b98a5e'});
+const wallTex={map:sty('cliff_rocks_04','color',1),normalMap:sty('cliff_rocks_04','normal')},plankTex={map:sty('wood_planks_01','color',1),normalMap:sty('wood_planks_01','normal')};
+const concMat=new THREE.MeshStandardMaterial({map:sty('concrete_wall_01','color',1),normalMap:sty('concrete_wall_01','normal'),roughness:.9,color:'#e9e4da'}),ironMat=new THREE.MeshStandardMaterial({color:'#aab2b9',roughness:.35,metalness:.75});
+const wallMat=new THREE.MeshStandardMaterial({...wallTex,roughness:.92,color:'#f1e6d6'}),plankMat=new THREE.MeshStandardMaterial({...plankTex,roughness:.85,color:'#e9c9a2'}),frameMat=new THREE.MeshStandardMaterial({...plankTex,roughness:.85,color:'#b98a5e'});
 const ghostSnap=new THREE.MeshBasicMaterial({color:'#7fd8ff',transparent:true,opacity:.55,depthWrite:false}),ghostOK=new THREE.MeshBasicMaterial({color:'#9dff8a',transparent:true,opacity:.38,depthWrite:false}),ghostNo=new THREE.MeshBasicMaterial({color:'#ff7a6a',transparent:true,opacity:.38,depthWrite:false});
 const WALL_H=2.7,WALL_T=.42,DOOR_W=1.5,REACH=9,ROCK_PER_M=1/1.5;
 const wallCost=L=>Math.max(1,Math.ceil(L*ROCK_PER_M));
@@ -1519,7 +1518,7 @@ function detectHouses(){const pts=[],key=(x,z)=>{for(let i=0;i<pts.length;i++)if
   if(ok){const L=[];let n=b;while(n!==undefined){L.push(pts[n]);if(n===a)break;n=par.get(n)}d.loop=L.reverse()}else d.loop=null;
   d.house=ok;d.factory=ok&&d.iron;if(ok&&!was&&started){ui.toast(d.iron?'its a FACTORY!! attach chests + a cooker to its walls':'its a house!! the door works now');sfx.play('capture',.5,1.2);puff(d.x,hAt(d.x,d.z)+1.5,d.z,40,4,[1,.9,.5])}}
  for(const d of B.doors.values()){if(d.roofMesh&&(!d.house||!d.roof)){scene.remove(d.roofMesh);d.roofMesh=null}if(d.house&&d.roof&&!d.roofMesh){d.roofMesh=makeRoof(d);scene.add(d.roofMesh)}}}
-const metalRoofMat=new THREE.MeshStandardMaterial({...pbr('metal01'),roughness:.85,metalness:.55,side:THREE.DoubleSide,color:'#c9d2d8'});
+const metalRoofMat=new THREE.MeshStandardMaterial({map:sty('roof_tiles_01','color',1),normalMap:sty('roof_tiles_01','normal'),roughness:.6,metalness:.3,side:THREE.DoubleSide,color:'#c9d2d8'});
 const roofMat=new THREE.MeshStandardMaterial({map:sty('hay_roof_01','color',1),normalMap:sty('hay_roof_01','normal'),roughness:.95,side:THREE.DoubleSide,color:'#f4e3c0'});
 function roofArea(d){const P=d.loop||[];let a=0;for(let i=0;i<P.length;i++){const p=P[i],q=P[(i+1)%P.length];a+=p[0]*q[1]-q[0]*p[1]}return Math.abs(a/2)}
 function roofCost(d){const A=roofArea(d);return d.iron?{rebar:Math.max(4,Math.ceil(A/4)),concrete:Math.max(2,Math.ceil(A/6))}:{branch:Math.max(3,Math.ceil(A/4)),mud:Math.max(2,Math.ceil(A/8))}}
@@ -1910,7 +1909,7 @@ document.getElementById('nodeX').onclick=()=>openNodes(null);
 addEventListener('keydown',e=>{if(e.code==='Escape'&&nodeDoor){if(wireFrom){wireFrom=null;renderNodes()}else openNodes(null);e.stopPropagation()}},true);
 
 // ---------- caves: shells + hanging vines ----------
-const caveMat=new THREE.MeshStandardMaterial({...pbr('cliff006'),roughness:1,color:'#cfc6bd',side:THREE.DoubleSide});caveMat.map.repeat.set(5,2);caveMat.normalMap.repeat.set(5,2);caveMat.roughnessMap.repeat.set(5,2);
+const caveMat=new THREE.MeshStandardMaterial({map:sty('cliff_rocks_02','color',1),normalMap:sty('cliff_rocks_02','normal'),roughness:.95,color:'#cfc6bd',side:THREE.DoubleSide});caveMat.map.repeat.set(5,2);caveMat.normalMap.repeat.set(5,2);
 const vineMat=new THREE.MeshStandardMaterial({color:'#5f9a3a',roughness:.8,side:THREE.DoubleSide});
 vineMat.onBeforeCompile=sh=>{sh.uniforms.time=swayU;sh.vertexShader='uniform float time;attribute float vw;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.x+=sin(time*1.3+position.z*2.)*vw*.25;transformed.z+=cos(time*1.1+position.x*2.)*vw*.2;')};vineMat.customProgramCacheKey=()=>'vine';
 function caveShell(c){const cx=c.mx,cz=c.mz;c.strands=[];c.top=hAt(cx,cz)+.2;
@@ -2134,7 +2133,7 @@ function updShrooms(dt){updGlow(dt);const now=Date.now();for(let i=0;i<SHROOMS.l
 function tryPunch(){if(dead||B.mode||overloaded())return false;const d=new THREE.Vector3();camera.getWorldDirection(d);let best=null,bd=2.4;for(const[id,r]of remotes){const dx=wd(r.x,pos.x),dz=wd(r.z,pos.z),dist=Math.hypot(dx,dz);if(dist>bd)continue;if((dx*d.x+dz*d.z)/(dist||1)<.3)continue;bd=dist;best=[id,dx/(dist||1),dz/(dist||1)]}if(!best)return false;act({a:'punch',t:best[0],dx:best[1],dz:best[2]});sfx.play('bonk',.4,1.5);me.g.userData.slap=1;return true}
 
 // ---------- cooker ----------
-const cookStone=new THREE.MeshStandardMaterial({...pbr('stonefloor005'),roughness:1,color:'#d9cdbd'});
+const cookStone=new THREE.MeshStandardMaterial({map:sty('cliff_rocks_04','color',1),normalMap:sty('cliff_rocks_04','normal'),roughness:.9,color:'#d9cdbd'});
 function makeCooker(c){const g=new THREE.Group();g.position.set(c.x,hAt(c.x,c.z)-.1,c.z);g.rotation.y=c.ry;
  const base=new THREE.Mesh(new THREE.BoxGeometry(1.5,.5,1.3),cookStone);base.position.y=.25;const dome=new THREE.Mesh(new THREE.SphereGeometry(.72,20,12,0,Math.PI*2,0,Math.PI/2),cookStone);dome.position.y=.5;dome.scale.set(1,1.05,.9);
  const mouth=new THREE.Mesh(new THREE.CircleGeometry(.3,16,0,Math.PI),new THREE.MeshBasicMaterial({color:'#1b1310'}));mouth.position.set(0,.5,.66);
