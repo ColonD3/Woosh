@@ -304,3 +304,13 @@ No more claimed land. Inspired by MC, but its own thing. The DOOR is the heart o
 - authored moments: ruins, old campfire, log bridge, paths that lead somewhere, mossy rock piles (~10)
 - time-of-day moods: real golden hour, overcast days, rain + wet ground
 - transitions: sleep fade, spawn fade-in, menu flies into game
+
+## Sept 20 (v51-v77)
+- [done] look pass: grass shadows, god rays, muted olive/sage grade, softer sky + water
+- [done] animations: tree topple + impact, chop wobble, boulder jolt + chunks
+- [done] 6 biomes + authored landmarks (cairns, fire rings, stone circles, fallen logs, ruins)
+- [done] sound pass: per-surface steps, cave reverb, wind, birds/crickets, layered hits
+- [done] mine sand/mountain rock, scoop mud+sand, /give, world thumbnails
+- [done] rocks + cliff slabs solid + minable, mesh-fitted sphere collision, stick-to-any-surface climbing
+- [done] THE FREEZE: const reassignment in tree wobble killed the render loop (v74); loop now error-proof
+- [next] see HANDOFF.md "Pick up here"
