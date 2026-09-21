@@ -1045,7 +1045,7 @@ const remotes=new Map();const _rp=new THREE.Vector3();
 function myStep(h){if(onGround&&Math.hypot(vel.x,vel.z)>1.1)sfx.tap(h)}
 function remoteStep(av){return h=>{const p=av.g.position,lp=av._lp||(av._lp=p.clone()),now=performance.now();const moved=Math.hypot(p.x-lp.x,p.z-lp.z)/Math.max(.016,(now-(av._lt||now-100))/1000);lp.copy(p);av._lt=now;if(moved<1.1)return;const d=camera.position.distanceTo(p);if(d<14)sfx.tap(h,Math.max(0,1-d/14)*.7)}}
 function upsertRemote(id,st){let r=remotes.get(id);if(!r){r={av:makeAvatar(st.c),x:st.x,y:st.y,z:st.z,f:st.f};r.av.onStep=remoteStep(r.av);remotes.set(id,r)}
- if(r.av.hex!==st.c){r.av.dispose();r.av=makeAvatar(st.c);r.av.onStep=remoteStep(r.av)}r.tx=st.x;r.ty=st.y;r.tz=st.z;r.tf=st.f;r.out=st.o;
+ if(r.av.hex!==st.c){r.av.dispose();r.av=makeAvatar(st.c);r.av.onStep=remoteStep(r.av)}r.tx=st.x;r.ty=st.y;r.tz=st.z;r.tf=st.f;r.out=st.o;if(st.n)r.n=st.n;if(st.c)r.c=st.c;
  const vis=st.a!==false;if(!vis&&r.av.g.visible)r.av.trail=[];r.av.g.visible=r.av.tm.visible=vis;if(!vis){r.x=st.x;r.y=st.y;r.z=st.z}}
 function dropRemote(id){const r=remotes.get(id);if(r){r.av.dispose();remotes.delete(id)}}
 const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:'tiger',states:new Map(),
@@ -2241,10 +2241,13 @@ function drawMapBase(){const g=mapBase.getContext('2d'),im=g.createImageData(N,N
 const w2m=(x,z,sz)=>[(wrapC(x)+S/2)/S*sz,(wrapC(z)+S/2)/S*sz];
 const WP_COL=['#ff5a2e','#3aa7ff','#ffd23a','#6fd46a','#c77dff','#ffffff'];let WPS=[];let wpCol=0;
 function saveWps(){if(W.cur)W.cur.wps=WPS;try{W.save()}catch(e){}}
+// other players on the maps: their colour, which way they face, and their name
+function mapPlayer(g,x,y,r,k,label){const col=r.c||'#3aa7ff';g.save();g.translate(x,y);g.rotate(Math.PI-(r.f||0));g.fillStyle=col;g.strokeStyle='#fff8eb';g.lineWidth=2*k;g.beginPath();g.moveTo(0,-11*k);g.lineTo(7*k,8*k);g.lineTo(0,3.5*k);g.lineTo(-7*k,8*k);g.closePath();g.fill();g.stroke();g.restore();
+ if(label&&r.n){g.font=`600 ${Math.round(13*k)}px Fredoka,system-ui`;g.lineWidth=3.5*k;g.strokeStyle='rgba(20,30,20,.85)';g.fillStyle='#fffaf0';g.strokeText(r.n,x+11*k,y+4*k);g.fillText(r.n,x+11*k,y+4*k)}}
 function drawMap(){const c=$('mapc'),g=c.getContext('2d'),sz=c.width;g.imageSmoothingEnabled=true;g.drawImage(mapBase,0,0,sz,sz);
  g.strokeStyle='rgba(255,248,235,.9)';g.lineWidth=3;for(const d of B.doors.values()){if(!d.loop)continue;g.beginPath();d.loop.forEach((p,i)=>{const[x,y]=w2m(p[0],p[1],sz);i?g.lineTo(x,y):g.moveTo(x,y)});g.closePath();g.fillStyle=d.factory?'rgba(170,180,190,.8)':'rgba(230,190,120,.8)';g.fill();g.stroke()}
  for(const w of WPS){const[x,y]=w2m(w.x,w.z,sz);g.fillStyle=w.c;g.strokeStyle='#1d2a22';g.lineWidth=2;g.beginPath();g.arc(x,y,8,0,7);g.fill();g.stroke();g.font='600 15px Fredoka,system-ui';g.fillStyle='#fffaf0';g.strokeStyle='rgba(20,30,20,.8)';g.lineWidth=4;g.strokeText(w.n,x+12,y+5);g.fillText(w.n,x+12,y+5)}
- for(const r of remotes.values()){const[x,y]=w2m(r.x,r.z,sz);g.fillStyle='#3aa7ff';g.beginPath();g.arc(x,y,7,0,7);g.fill()}
+ for(const r of remotes.values()){if(r.av&&r.av.g&&!r.av.g.visible)continue;const[x,y]=w2m(r.x,r.z,sz);mapPlayer(g,x,y,r,1.1,true)}
  const[px,py]=w2m(pos.x,pos.z,sz);g.save();g.translate(px,py);g.rotate(-yaw+Math.PI);g.fillStyle='#ff5a2e';g.strokeStyle='#fff8eb';g.lineWidth=2.5;g.beginPath();g.moveTo(0,-12);g.lineTo(8,9);g.lineTo(0,4);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore()}
 function renderWpList(){const el=$('wplist');el.innerHTML='<b>waypoints</b><p class="mdesc">B adds one where you stand · click the map to add one there</p>';for(const w of WPS){const r=document.createElement('div');r.className='wp';const d=Math.hypot(wd(w.x,pos.x),wd(w.z,pos.z));r.innerHTML=`<i style="background:${w.c}"></i><span>${esc(w.n)}<br><small>${Math.round(d)}m away</small></span><button class="x">✕</button>`;r.querySelector('button').onclick=()=>{WPS=WPS.filter(q=>q!==w);saveWps();rebuildWpMarkers();renderWpList();drawMap()};el.appendChild(r)}
  const cl=document.createElement('button');cl.className='g';cl.textContent='close (M)';cl.onclick=()=>openMap(false);el.appendChild(cl)}
@@ -2264,7 +2267,7 @@ function drawMini(){const c=$('minimap'),g=c.getContext('2d'),sz=c.width,R=60;g.
  const sc=sz/(2*R),mpp=N/S;const px=(wrapC(pos.x)+S/2)*mpp,pz=(wrapC(pos.z)+S/2)*mpp;
  g.translate(sz/2,sz/2);g.scale(sc/mpp,sc/mpp);for(const ox of[-N,0,N])for(const oz of[-N,0,N])g.drawImage(mapBase,-px+ox,-pz+oz);g.restore();
  for(const w of WPS){let dx=wd(w.x,pos.x),dz=wd(w.z,pos.z);const d=Math.hypot(dx,dz);if(d>R*.92){dx*=R*.92/d;dz*=R*.92/d}g.fillStyle=w.c;g.beginPath();g.arc(sz/2+dx*sc,sz/2+dz*sc,6,0,7);g.fill()}
- for(const r of remotes.values()){const dx=wd(r.x,pos.x),dz=wd(r.z,pos.z);if(Math.hypot(dx,dz)<R){g.fillStyle='#3aa7ff';g.beginPath();g.arc(sz/2+dx*sc,sz/2+dz*sc,6,0,7);g.fill()}}
+ for(const r of remotes.values()){if(r.av&&r.av.g&&!r.av.g.visible)continue;let dx=wd(r.x,pos.x),dz=wd(r.z,pos.z);const d=Math.hypot(dx,dz),edge=d>R*.9;if(edge){dx*=R*.9/d;dz*=R*.9/d}g.globalAlpha=edge?.75:1;mapPlayer(g,sz/2+dx*sc,sz/2+dz*sc,r,edge?.75:.95,!edge);g.globalAlpha=1}
  g.save();g.translate(sz/2,sz/2);g.rotate(-yaw+Math.PI);g.fillStyle='#ff5a2e';g.strokeStyle='#fff8eb';g.lineWidth=3;g.beginPath();g.moveTo(0,-14);g.lineTo(10,11);g.lineTo(0,5);g.lineTo(-10,11);g.closePath();g.fill();g.stroke();g.restore()}
 function updMaps(dt){updWps();if(miniOn&&started){miniT-=dt;if(miniT<=0){miniT=.12;if(!drawMini._b){drawMapBase();drawMini._b=1}drawMini()}}if(mapOpen){drawMap._t=(drawMap._t||0)-dt;if(drawMap._t<=0){drawMap._t=.2;drawMap()}}}
 $('mapc').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*S-S/2,z=(e.clientY-r.top)/r.height*S-S/2;newWp(x,z)});
