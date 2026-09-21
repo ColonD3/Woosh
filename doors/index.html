@@ -1620,8 +1620,14 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
   vel.set(vx+n.x*vn,vy+n.y*vn,vz+n.z*vn);
   // grip: gravity still pulls you along the face unless you are actively pressing into it.
   // press in -> you climb and hold. let go or aim away -> you slide and fall down like normal.
-  if(stuckNow&&n.y<.985){const grip=Math.min(1,Math.max(0,-dn)*1.4);const gn=gdy*n.y;
-   vel.x+=(0-n.x*gn)*(1-grip);vel.y+=(gdy-n.y*gn)*(1-grip);vel.z+=(0-n.z*gn)*(1-grip)}}
+  const idle=dm<.05;
+  if(stuckNow&&n.y<.985&&!idle){const grip=Math.min(1,Math.max(0,-dn)*1.4);const gn=gdy*n.y;
+   vel.x+=(0-n.x*gn)*(1-grip);vel.y+=(gdy-n.y*gn)*(1-grip);vel.z+=(0-n.z*gn)*(1-grip)}
+  // hands off the stick -> full grip. no creep, no slow slide off a ledge while you stand there.
+  if(stuckNow&&idle){const v2=vel.x*n.x+vel.y*n.y+vel.z*n.z;let ax=vel.x-n.x*v2,ay=vel.y-n.y*v2,az=vel.z-n.z*v2;
+   const damp=Math.exp(-dt*16);ax*=damp;ay*=damp;az*=damp;
+   if(ax*ax+ay*ay+az*az<.0025){ax=0;ay=0;az=0}
+   vel.set(ax+n.x*v2,ay+n.y*v2,az+n.z*v2)}}
  {const nx2=pos.x+vel.x*dt,nz2=pos.z+vel.z*dt;if(!fenceBlocks(nx2,nz2)){pos.x=nx2;pos.z=nz2}else{vel.x*=-.1;vel.z*=-.1}}
  pos.y+=vel.y*dt;
  // one contact solve for terrain + rock + cave wall
