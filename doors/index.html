@@ -321,6 +321,8 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 {
 const TOUCH = matchMedia('(pointer:coarse)').matches;
 const QP=new URLSearchParams(location.search);
+// test/tuning flags survive opening or joining a world (those reload the page with a new query)
+const KEEP=()=>{let o='';for(const n of['bench','dev','pom','look','camtilt','camthick','rays','gshadow','anim','post','bake','bloom','water','sky'])if(QP.has(n))o+='&'+n+(QP.get(n)?'='+encodeURIComponent(QP.get(n)):'');return o};
 // ---------- noise ----------
 let seed=1337; const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
 const P=new Uint8Array(512);{const p=[...Array(256).keys()];for(let i=255;i>0;i--){const j=Math.floor(rnd()*(i+1));[p[i],p[j]]=[p[j],p[i]]}for(let i=0;i<512;i++)P[i]=p[i&255]}
@@ -1073,7 +1075,7 @@ const net={mode:'solo',peer:null,conns:new Map(),hostConn:null,myId:'host',name:
    c.on('close',()=>{this.conns.delete(c.peer);this.states.delete(c.peer);game.remove(c.peer);dropRemote(c.peer);ui.toast('someone left')})})},
  join(code){this.mode='client';this.peer=window.PEER_OPTS?new Peer(window.PEER_OPTS):new Peer();ui.status('connecting…');
   this.peer.on('open',id=>{this.myId=id;const c=this.peer.connect('wdoors-'+code,{reliable:true});this.hostConn=c;c.on('open',()=>c.send({t:'hello'}));
-   c.on('data',d=>{if(clientMsg(d))return;if(d.t==='welcome'){if(d.size&&d.size!==SZ){location.search='?size='+d.size+'&join='+code+'&autojoin=1';return}this.welcomed=true;if(d.mode){MODE=d.mode;updScores()}myIdx=d.i;me.dispose();me=makeAvatar(d.c);me.onStep=myStep;swapMe();ui.status('connected to <b>'+code+'</b>',true);W.remember(code)}
+   c.on('data',d=>{if(clientMsg(d))return;if(d.t==='welcome'){if(d.size&&d.size!==SZ){location.search='?size='+d.size+'&join='+code+'&autojoin=1'+KEEP();return}this.welcomed=true;if(d.mode){MODE=d.mode;updScores()}myIdx=d.i;me.dispose();me=makeAvatar(d.c);me.onStep=myStep;swapMe();ui.status('connected to <b>'+code+'</b>',true);W.remember(code)}
     else if(d.t==='full')ui.status('that world is full (8 players)');
     else if(d.t==='grid'){unrle(d.g);paintGrid()}
     else if(d.t==='spawn')onSpawn(d.x,d.z);
@@ -1785,7 +1787,7 @@ const W={cur:null,n:0,lastSave:0,
   if(document.hidden||hostMode)hostWorldTick(.05);
   if(++this.n%100===0){this.save();if(this.n%600===100||!this.thumb(this.cur.id))this.snapWant=true}
   if(hostMode&&this.n%10===0){const s=Math.round((Date.now()-this.lastSave)/1000);const k=net.conns.size;document.getElementById('hmtxt').textContent=`${this.cur.name} · code ${this.cur.code} · ${k} player${k===1?'':'s'} online · saved ${s}s ago`}},
- open(id,d){d=d||this.ls('wdoors_w_'+id);if(!d){ui.status('that world save is missing');return}if((d.size||'s')!==SZ){location.search='?size='+(d.size||'s')+'&open='+id;return}
+ open(id,d){d=d||this.ls('wdoors_w_'+id);if(!d){ui.status('that world save is missing');return}if((d.size||'s')!==SZ){location.search='?size='+(d.size||'s')+'&open='+id+KEEP();return}
   setName();MODE=d.mode||'classic';this.cur={id,code:d.code,name:d.name,mode:MODE,created:d.created};
   net.startLocal(d.code);started=true;
   const p=game.P.get(net.myId);const hi=p.idx;const tmp=new Uint8Array(G*G);
