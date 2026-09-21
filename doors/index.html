@@ -531,9 +531,9 @@ const tg=new THREE.PlaneGeometry(S,S,N-1,N-1);tg.rotateX(-Math.PI/2);
  tg.setAttribute('color',new THREE.BufferAttribute(col,3));tg.setAttribute('lw',new THREE.BufferAttribute(lw,4));tg.computeVertexNormals();{const nn=tg.attributes.normal,e=STEP;for(let k=0;k<p.count;k++){const x=p.getX(k),z=p.getZ(k);const v=new THREE.Vector3(hAt(x-e,z)-hAt(x+e,z),2*e,hAt(x,z-e)-hAt(x,z+e)).normalize();nn.setXYZ(k,v.x,v.y,v.z)}}}
 const terrMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.93,metalness:0});
 const sty=(n,m,srgb)=>tex('stylized/'+n+'/'+m+'.jpg',srgb);
-const TU={uAt:{value:tex('under/atlas.jpg',1)},pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:sty('ground_06','color',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
+const TU={uAt:{value:tex('under/atlas.jpg',1)},pG1:{value:sty('moss_ground_02','color',1)},pG2:{value:sty('grass_03','color',1)},pD:{value:tex('pbr/ground002/color.webp',1)},pR:{value:sty('cliff_rocks_02','color',1)},pS:{value:sty('sand_01','color',1)},pW:{value:sty('snow_01','color',1)},
  qG:{value:sty('moss_ground_02','normal')},qR:{value:sty('cliff_rocks_02','normal')},qS:{value:sty('sand_01','normal')},qW:{value:sty('snow_01','normal')},dG:{value:tex('leafy_grass_diff.jpg',1)},dR:{value:(()=>{const t=TL.load('models/Rocks_Diffuse.jpg');t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=aniso;return t})()},dS:{value:tex('coast_sand_01_diff.jpg',1)},dW:{value:tex('snow_02_diff.jpg',1)},
- nG:{value:tex('leafy_grass_nor_gl.jpg')},nR:{value:tex('rock_face_nor_gl.jpg')},nS:{value:tex('coast_sand_01_nor_gl.jpg')},nW:{value:tex('snow_02_nor_gl.jpg')},avg:{value:new THREE.Vector4(.2458,.0953,.1815,.3868)},gdC:{value:tex('pbr/ground002/color.webp',1)},gdN:{value:tex('pbr/ground002/normal.webp')},gdO:{value:tex('pbr/ground002/orh.webp')},uSun:{value:sunDir},uPom:{value:QP.get('pom')==='0'?0:1}};
+ nG:{value:tex('leafy_grass_nor_gl.jpg')},nR:{value:tex('rock_face_nor_gl.jpg')},nS:{value:tex('coast_sand_01_nor_gl.jpg')},nW:{value:tex('snow_02_nor_gl.jpg')},avg:{value:new THREE.Vector4(.2458,.0953,.1815,.3868)},gdO:{value:tex('pbr/ground002/orh.webp')},uSun:{value:sunDir},uPom:{value:QP.get('pom')==='0'?0:1}};
 terrMat.defines={NO_WRAP:''};const terrain=new THREE.Mesh(tg,terrMat);terrain.receiveShadow=true;
 function tile9(m){m.material.defines={...(m.material.defines||{}),NO_WRAP:''};for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const c=new THREE.Mesh(m.geometry,m.material);c.position.set(m.position.x+a*S,m.position.y,m.position.z+b*S);c.receiveShadow=m.receiveShadow;c.renderOrder=m.renderOrder;scene.add(c)}}
 const water=new Water(new THREE.PlaneGeometry(700,700,350,350),{textureWidth:TOUCH?256:512,textureHeight:TOUCH?256:512,waterNormals:tex('waternormals.jpg'),
@@ -897,7 +897,7 @@ uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;u
  vec3 nt(sampler2D t,vec2 uv){float n=smoothstep(.3,.7,vn2(uv*.11));vec2 r=mat2(.8,-.6,.6,.8)*uv*.73+vec2(.37,.11);return mix(texture2D(t,uv).rgb,texture2D(t,r).rgb,n);}
  vec3 ntn(sampler2D t,vec2 uv){float n=smoothstep(.3,.7,vn2(uv*.11));vec2 r=mat2(.8,-.6,.6,.8)*uv*.73+vec2(.37,.11);vec3 a=texture2D(t,uv).xyz*2.-1.,b=texture2D(t,r).xyz*2.-1.;b.xy=mat2(.8,.6,-.6,.8)*b.xy;return mix(a,b,n);}
  vec3 triN(sampler2D t,vec3 p,vec3 n,float sc){vec3 b=pow(abs(n),vec3(4.));b/=b.x+b.y+b.z;return nt(t,p.zy*sc)*b.x+nt(t,p.xz*sc)*b.y+nt(t,p.xy*sc)*b.z;}
- uniform sampler2D gdC,gdN,gdO;uniform vec3 uSun;uniform float uPom;
+ uniform sampler2D gdO;uniform vec3 uSun;uniform float uPom;
  // parallax occlusion: march the height map along the view ray so crevices really hide what is behind them
  vec2 pomUV(vec2 uv,vec3 Vt,float hs,float fade){vec2 dx=dFdx(uv),dy=dFdy(uv);
   float n=mix(26.,8.,clamp(Vt.z,0.,1.));float ls=1./n;vec2 d=Vt.xy/max(Vt.z,.18)*hs*fade*ls;
@@ -926,7 +926,7 @@ uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;u
    vec4 go=texture2D(gdO,guv);
    // height blend: dirt takes the low spots first, so the edge follows the stones instead of a soft smear
    float hb=smoothstep(0.,1.,clamp(pm*1.7-.35+(go.b-.5)*1.1,0.,1.));
-   vec3 dc=texture2D(gdC,guv).rgb*mix(.55,1.,go.r)*vec3(1.05,1.,.92);
+   vec3 dc=texture2D(pD,guv).rgb*mix(.55,1.,go.r)*vec3(1.05,1.,.92);
    if(fade>.01){vec3 Lt=vec3(dot(uSun,Tu),dot(uSun,Tv),dot(uSun,Nw));dc*=mix(1.,pomShadow(guv,Lt,.04,go.b),fade);}
    col=mix(col,dc,hb);gUV=guv;gM=hb;gRg=go.g;}if(vColor.g>.2)col=mix(col,mix(nt(pS,uv*.15),nt(pD,uv*.18),.5)*.85,smoothstep(.2,.8,vColor.g)*(1.-w.y));
   {float ugs=vUG.x+vUG.y+vUG.z+vUG.w;if(ugs>.01){vec3 uc=vec3(0.);if(vUG.x>.01)uc+=triU(vec2(0.,.5),vWP,vWN,.28)*vUG.x*vec3(.95,.9,.85);if(vUG.y>.01)uc+=triU(vec2(.5,.5),vWP,vWN,.16)*vUG.y*vec3(.93,.95,1.);if(vUG.z>.01)uc+=triU(vec2(0.,0.),vWP,vWN,.18)*vUG.z;if(vUG.w>.01)uc+=triU(vec2(.5,0.),vWP,vWN,.2)*vUG.w*.8;
@@ -945,7 +945,7 @@ uniform sampler2D terr,dG,dR,dS,dW,nG,nR,nS,nW,pG1,pG2,pD,pR,pS,pW,qG,qR,qS,qW;u
  .replace('void main() {','void main() {\n vec3 terrEm=vec3(0.);vec2 gUV=vec2(0.);float gM=0.,gRg=1.;')
  .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
  {vec2 uv=vWP.xz;vec4 w=vLW/max(vLW.x+vLW.y+vLW.z+vLW.w,1e-3);
-  vec3 tn=vec3(0.,0.,1.)*.001;if(w.x>.01)tn+=ntn(qG,uv*.16)*w.x;if(w.y>.01)tn+=ntn(qR,uv*.07)*w.y;if(w.z>.01)tn+=ntn(qS,uv*.12)*w.z;if(w.w>.01)tn+=ntn(qW,uv*.1)*w.w;if(gM>.01){vec3 gn=texture2D(gdN,gUV).xyz*2.-1.;gn.y=-gn.y;gn.xy*=1.6;tn=mix(tn,gn,gM);}
+  vec3 tn=vec3(0.,0.,1.)*.001;if(w.x>.01)tn+=ntn(qG,uv*.16)*w.x;if(w.y>.01)tn+=ntn(qR,uv*.07)*w.y;if(w.z>.01)tn+=ntn(qS,uv*.12)*w.z;if(w.w>.01)tn+=ntn(qW,uv*.1)*w.w;if(gM>.01){float e=1./1024.,hc=texture2D(gdO,gUV).b,hx=texture2D(gdO,gUV+vec2(e,0.)).b,hy=texture2D(gdO,gUV+vec2(0.,e)).b;vec3 gn=normalize(vec3((hc-hx)*12.,-(hc-hy)*12.,1.));tn=mix(tn,gn,gM);}
   tn.xy*=.6;vec3 N=normalize(vWN);vec3 T=normalize(vec3(1.,0.,0.)-N*N.x);vec3 B=normalize(cross(T,N));
   vec3 nw=normalize(T*tn.x+B*-tn.y+N*max(tn.z,.2));normal=normalize((viewMatrix*vec4(nw,0.)).xyz);}`)};
 grassU.terr={value:terrTex};
