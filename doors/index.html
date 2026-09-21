@@ -1571,7 +1571,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0,noStick=0,fallV=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const _ut=new THREE.Vector3();const steerN=new THREE.Vector3(0,1,0);const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0,noStick=0,fallV=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const CAMTHICK=(parseFloat(QP.get('camthick'))||1.8);const _ut=new THREE.Vector3();const steerN=new THREE.Vector3(0,1,0);const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 const PT={};let PFon=true;window.__pt=PT;
 function bc(n){try{localStorage.setItem('woosh_bc',n+'|'+Date.now())}catch(e){}}
 function bcd(n){try{localStorage.setItem('woosh_bc','done:'+n+'|'+Date.now())}catch(e){}}
@@ -1664,6 +1664,13 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
  const want=new THREE.Vector3(),_vp=camUpV.y<.95?Math.max(vPitch,.12):vPitch,_od=_cd.set(Math.sin(vYaw)*Math.cos(_vp),-Math.sin(_vp),Math.cos(vYaw)*Math.cos(_vp)).applyQuaternion(camQ);want.set(tgt.x-_od.x*dist,tgt.y-_od.y*dist,tgt.z-_od.z*dist);
  if(caveM){for(let k=0;k<12&&CV.F(tgt.x,tgt.y,tgt.z)>-.45;k++){const g=cvGrad(tgt.x,tgt.y,tgt.z);const gl=Math.hypot(g[0],g[1],g[2])||1;tgt.x-=g[0]/gl*.2;tgt.y-=g[1]/gl*.2;tgt.z-=g[2]/gl*.2}want.set(tgt.x-_od.x*dist,tgt.y-_od.y*dist,tgt.z-_od.z*dist)}
  {const dx=want.x-tgt.x,dy=want.y-tgt.y,dz=want.z-tgt.z,L=Math.hypot(dx,dy,dz);let t=.2;while(t<L){const px=tgt.x+dx/L*t,py=tgt.y+dy/L*t,pz=tgt.z+dz/L*t;const d=-SF(px,py,pz);if(d<.4){t=Math.max(.2,t-.3);break}t+=Math.max(.08,d*.6)}t=Math.min(t,L);
+  // see-through: if the spot at full distance is open air and whatever is in the way is thin,
+  // stay out there and let the camera clip through it instead of shoving up against the player.
+  if(t<L-.15){const fx2=tgt.x+dx,fy2=tgt.y+dy,fz2=tgt.z+dz;
+   if(SF(fx2,fy2,fz2)<-.45&&fy2>surfAt(fx2,fz2)+.45){let thick=0;
+    for(let u=t;u<L;u+=.4){const qx=tgt.x+dx/L*u,qy=tgt.y+dy/L*u,qz=tgt.z+dz/L*u;
+     if(SF(qx,qy,qz)>-.25||qy<surfAt(qx,qz)+.15)thick+=.4;}
+    if(thick<CAMTHICK)t=L}}
   if(t<camT){const k=camT+(t-camT)*(1-Math.exp(-dt*16));const px=tgt.x+dx/L*k,py=tgt.y+dy/L*k,pz=tgt.z+dz/L*k;camT=SF(px,py,pz)>-.25?t:k}else camT+=(t-camT)*(1-Math.exp(-dt*2.2));camT=Math.min(camT,L);want.set(tgt.x+dx/L*camT,tgt.y+dy/L*camT,tgt.z+dz/L*camT)}
  {const sideWant=(ix||0)*-.028*(sprint?1.5:1);camRoll+=(sideWant-camRoll)*(1-Math.exp(-dt*4));camBob*=Math.exp(-dt*6);camDrift+=dt*.35;}
  {const idle=il<.01&&onGround?1:0;const dz=Math.sin(camDrift)*.05*idle,dy=Math.cos(camDrift*.77)*.04*idle;want.x+=dz*camUpV.z;want.y+=dy+camBob;want.z+=dz*camUpV.x;}
