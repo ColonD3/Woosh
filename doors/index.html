@@ -1572,7 +1572,11 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
  let g=0;if(creative&&!dead){const fl=(keys.ControlLeft?30:14);const cp2=Math.cos(pitch);const up=(keys.Space?1:0)-(keys.ShiftLeft||keys.ShiftRight?1:0);vel.set(dirX*fl,up*fl,dirZ*fl);pos.addScaledVector(vel,dt);onGround=false;g=pos.y-5;caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2}else{
  if((keys.Space||jumpTouch)&&onGround&&!dead){vel.y=8.6;if(sprint&&il>0){vel.x*=1.18;vel.z*=1.18}sfx.play('jump',.2,1.8);onGround=false;puff(pos.x,pos.y,pos.z,8,2,[.9,.88,.78]);squash=-.25}
  vel.y-=28*dt;vel.y=Math.max(vel.y,-40);
- const ox0=pos.x,oz0=pos.z,oy0=pos.y;{const ox=pos.x,oz=pos.z;pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)){pos.x=ox;vel.x*=-.3}pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)){pos.z=oz;vel.z*=-.3}}{bgT-=dt;if(bgT<0){bIndex();bgT=1.5}caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;solidPush(pos);if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
+ const ox0=pos.x,oz0=pos.z,oy0=pos.y;{const ox=pos.x,oz=pos.z;const stepOK=(x,z)=>{if(!blockedBy(x,pos.y,z))return true;
+   let top=-99;const L=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(L)for(const b of L){if(b.hp<=0||!b.surf)continue;if(Math.hypot(wd(x,b.x),wd(z,b.z))<b.surf.r*.95&&b.surf.top>top)top=b.surf.top}
+   return top>-98&&top-pos.y<.55};
+  pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.x=ox;vel.x*=-.15}
+  pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.z=oz;vel.z*=-.15}}{bgT-=dt;if(bgT<0){bIndex();bgT=1.5}caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;solidPush(pos);if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
  if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
 
@@ -1886,7 +1890,16 @@ function bF(x,y,z){const a=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(
  for(const b of a){if(b.hp<=0)continue;const sf=b.surf;const dx=wd(x,b.x),dz=wd(z,b.z);const cy=Math.min(Math.max(y,sf.base+.15),Math.max(sf.base+.15,sf.top-.25));const v=sf.r*.92-Math.hypot(dx,y-cy,dz);if(v>m)m=v}return m}
 function SF(x,y,z){const a=CV.F(x,y,z),b=bF(x,y,z);return a>b?a:b}
 function SGrad(x,y,z){const e=.12,f=SF(x,y,z);return[(SF(x+e,y,z)-f)/e,(SF(x,y+e,z)-f)/e,(SF(x,y,z+e)-f)/e]}
-function solidPush(p){for(let it=0;it<3;it++){let hit=false;for(const[hy,r]of[[.55,.4],[1.05,.36]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;const g=SGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;const push=Math.min(.32,(f+r)/Math.max(.5,gl));if(SF(p.x-nx*r*1.05,y-ny*r*1.05,p.z-nz*r*1.05)>0)continue;p.x+=nx*push;p.y+=ny*push*.7;p.z+=nz*push;hit=true}if(!hit)break}}
+function solidPush(p){for(let it=0;it<3;it++){let hit=false;
+ for(const[hy,r]of[[.55,.4],[1.05,.36]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;
+  const g=SGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;let nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;
+  const hl=Math.hypot(nx,nz);if(hl>.12){nx/=hl;nz/=hl;ny=0}else{ny=ny>0?1:-1;nx=nz=0}
+  const push=Math.min(.28,(f+r)/Math.max(.5,gl));
+  if(SF(p.x-nx*r*1.05,y-ny*r*1.05,p.z-nz*r*1.05)>0)continue;
+  p.x+=nx*push;p.z+=nz*push;if(ny)p.y+=ny*push*.5;hit=true}
+ if(!hit)break}}
+// solid check used to block walking into a rock (instead of sliding through it)
+function blockedBy(x,y,z){return bF(x,y+.55,z)>-.3||bF(x,y+1.05,z)>-.3}
 function cvGrad(x,y,z){const e=.12,f=CV.F(x,y,z);return[(CV.F(x+e,y,z)-f)/e,(CV.F(x,y+e,z)-f)/e,(CV.F(x,y,z+e)-f)/e]}
 function cvFloor(x,y,z){// highest solid surface from knee height (step-up .7) down to 2.4 below; null = a wall at knee height
  const top=y+.7;if(CV.F(x,top,z)>0)return null;for(let d=.06;d<3.1;d+=.08){const yy=top-d;if(CV.F(x,yy,z)>0){let a=yy+.08,b=yy;for(let k=0;k<5;k++){const m=(a+b)/2;if(CV.F(x,m,z)>0)b=m;else a=m}return a}}return -1e9}
