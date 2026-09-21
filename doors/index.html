@@ -1117,6 +1117,23 @@ const sfx={ctx:null,buf:{},muted:false,gain:null,
   const src=this.ctx.createBufferSource();src.buffer=nb;src.loop=true;const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
   const wg=this.ctx.createGain();wg.gain.value=.05;src.connect(f).connect(wg).connect(this.gain);src.start();this.wind=wg;this.windF=f;
   {const c=this.ctx,L=Math.floor(c.sampleRate*1.1),ir=c.createBuffer(1,L,c.sampleRate);const d=ir.getChannelData(0);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,3);const cv=c.createConvolver();cv.buffer=ir;this.cvN=cv;this.rv=c.createGain();this.rv.gain.value=0;this.rvOn=false}},
+ hit(v=1){const c=this.ctx;if(!c||this.muted)return;const t=c.currentTime;
+  if(!this.nz){const L=Math.floor(c.sampleRate*.25),b=c.createBuffer(1,L,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<L;i++)d[i]=Math.random()*2-1;this.nz=b}
+  // crack: short noise transient, gone in 60ms
+  const n=c.createBufferSource();n.buffer=this.nz;n.playbackRate.value=.9+Math.random()*.3;
+  const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(2600,t);bp.frequency.exponentialRampToValueAtTime(900,t+.07);bp.Q.value=.9;
+  const ng=c.createGain();ng.gain.setValueAtTime(.0001,t);ng.gain.exponentialRampToValueAtTime(.5*v,t+.004);ng.gain.exponentialRampToValueAtTime(.0004,t+.075);
+  n.connect(bp).connect(ng).connect(this.gain);n.start(t);n.stop(t+.12);
+  // thud: the weight under it
+  const o=c.createOscillator(),og=c.createGain();o.type='sine';
+  o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(58,t+.13);
+  og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.42*v,t+.006);og.gain.exponentialRampToValueAtTime(.0004,t+.16);
+  o.connect(og).connect(this.gain);o.start(t);o.stop(t+.18);
+  // a little bite on top so it reads as a hit and not a bump
+  const s2=c.createOscillator(),sg=c.createGain();s2.type='square';
+  s2.frequency.setValueAtTime(520,t);s2.frequency.exponentialRampToValueAtTime(210,t+.05);
+  sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.1*v,t+.004);sg.gain.exponentialRampToValueAtTime(.0003,t+.06);
+  s2.connect(sg).connect(this.gain);s2.start(t);s2.stop(t+.08)},
  chirp(){const c=this.ctx,t=c.currentTime,n=2+Math.floor(Math.random()*4),f0=2200+Math.random()*2200,pan=c.createStereoPanner();pan.pan.value=Math.random()*1.6-.8;pan.connect(this.gain);for(let k=0;k<n;k++){const o=c.createOscillator(),g=c.createGain(),t0=t+k*(.09+Math.random()*.06);o.frequency.setValueAtTime(f0*(1+Math.random()*.2),t0);o.frequency.exponentialRampToValueAtTime(f0*(.6+Math.random()*.9),t0+.07);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.018,t0+.01);g.gain.exponentialRampToValueAtTime(.0005,t0+.08);o.connect(g).connect(pan);o.start(t0);o.stop(t0+.1)}},
  crick(){const c=this.ctx,t=c.currentTime,o=c.createOscillator(),g=c.createGain(),pan=c.createStereoPanner();pan.pan.value=Math.random()*1.6-.8;o.frequency.value=4300+Math.random()*500;g.gain.value=0;for(let k=0;k<6;k++){const t0=t+k*.045;g.gain.setValueAtTime(.007,t0);g.gain.setValueAtTime(0,t0+.022)}o.connect(g).connect(pan).connect(this.gain);o.start(t);o.stop(t+.3)},
  play(n,vol=.5,rate=1){const b=this.buf[n];if(!b||!this.ctx)return;const s=this.ctx.createBufferSource();s.buffer=b;s.playbackRate.value=rate*(.93+Math.random()*.14);
@@ -2067,7 +2084,7 @@ const CHAR={key:'wdoors_char',load(){try{return JSON.parse(localStorage.getItem(
  save(){if(!started||dead)return;try{localStorage.setItem(this.key,JSON.stringify({inv:{...inv},stats:{hp:ST.hp,food:ST.food,stam:ST.stam},t:Date.now()}))}catch(e){}},
  apply(){const c=this.load();if(!c)return false;for(const k in inv)inv[k]=c.inv[k]|0;if(c.stats){ST.hp=c.stats.hp;ST.food=c.stats.food;ST.stam=c.stats.stam??100}renderInv();renderStats&&renderStats();return true}};
 setInterval(()=>CHAR.save(),5000);setInterval(()=>{if(net.mode==='host')bcast({t:'tod',v:DAY.t})},8000);addEventListener('beforeunload',()=>CHAR.save());
-function hurt(n,why){if(creative||dead||!started||MODE==='peaceful'||n<=0)return;if(inv.armor>0)n=Math.max(1,Math.round(n*.6));ST.hp=Math.max(0,ST.hp-n);lastHurt=performance.now();wooFx.hurt=1;{const v=$('hurtV');v.classList.add('on');requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.remove('on')))}sfx.play('bonk',.5,.8);shake=.3;if(ST.hp<=0)die(why);renderStats()}
+function hurt(n,why){if(creative||dead||!started||MODE==='peaceful'||n<=0)return;if(inv.armor>0)n=Math.max(1,Math.round(n*.6));ST.hp=Math.max(0,ST.hp-n);lastHurt=performance.now();wooFx.hurt=1;{const v=$('hurtV');v.classList.add('on');requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.remove('on')))}sfx.hit(Math.min(1.25,.7+n*.09));shake=.3+Math.min(.25,n*.03);if(ST.hp<=0)die(why);renderStats()}
 function die(why){if(dead)return;dead=true;deathT=3;{const keep=.25+Math.random()*.25;for(const k in inv)if(k!=='pick'&&k!=='itool')inv[k]=Math.floor(inv[k]*keep)}renderInv();sfx.play('death',.7);puff(pos.x,pos.y+.5,pos.z,30,5,[1,.5,.4]);$('deathwhy').textContent=why||'';$('deathui').hidden=false;document.exitPointerLock?.()}
 function respawn(){const f=$('fade');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),450);dead=false;ug=false;if(!inv.pick&&!inv.itool){inv.pick=1;ui.toast('here, have a stone tool')}renderInv();$('deathui').hidden=true;ST.hp=20;ST.food=Math.max(ST.food,12);ST.stam=100;let x,z;if(mySpawn){[x,z]=mySpawn}else{for(let t=0;t<200;t++){x=(Math.random()-.5)*60;z=(Math.random()-.5)*60;if(hAt(x,z)>1.3)break}}pos.set(x,hAt(x,z)+.5,z);vel.set(0,0,0);camInit=false;renderStats();if(!TOUCH)cv.requestPointerLock?.()}
 let regen=0;function eatGlow(){if(!inv.glow)return;inv.glow--;ST.food=Math.min(20,ST.food+3);ST.hp=Math.min(20,ST.hp+2);regen+=5;renderInv();renderStats();sfx.play('pick',.5,1.2);puff(pos.x,pos.y+1,pos.z,14,1.8,[.5,.85,1]);ui.toast('glowy · healing up')}
