@@ -470,7 +470,12 @@ function wayAt(x,z){const i=Math.round((x+S/2)/STEP),j=Math.round((z+S/2)/STEP);
 THREE.ShaderChunk.common='#define WORLD_S '+S.toFixed(1)+'\n'+THREE.ShaderChunk.common;
 function L(h){return new THREE.Color(h)}
 function smooth(a,b,x){const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)}
-const rockSurf=[];function surfAt(x,z,y){let h=hAt(x,z);const h0=h;if(CV.C&&((y!=null&&y<h0-1.2)||CV.C(x,h0,z)<2)){const top=y==null?h0+.3:Math.min(y+.8,h0+.3);let fy=null;for(let d=0;d<(y==null?60:5);d+=.2){if(CV.F(x,top-d,z)>0){fy=top-d;break}}if(fy!==null){let a=fy+.2,b=fy;for(let k=0;k<4;k++){const m=(a+b)/2;if(CV.F(x,m,z)>0)b=m;else a=m}h=a}else if(y!=null)return y-5;if(y!=null&&y<h0-1.2)return h}for(const r of rockSurf){const dx=wd(x,r.x),dz=wd(z,r.z),d2=(dx*dx+dz*dz)/(r.r*r.r);if(d2<1){const ry=r.base+(r.top-r.base)*Math.pow(1-d2,.3);if(y!=null&&y<ry-1.1&&y<r.top-1.1)continue;if(ry>h)h=ry}}return h}
+const rockSurf=[];function surfAt(x,z,y){let h=hAt(x,z);const h0=h;if(CV.C&&((y!=null&&y<h0-1.2)||CV.C(x,h0,z)<2)){const top=y==null?h0+.3:Math.min(y+.8,h0+.3);let fy=null;for(let d=0;d<(y==null?60:5);d+=.2){if(CV.F(x,top-d,z)>0){fy=top-d;break}}if(fy!==null){let a=fy+.2,b=fy;for(let k=0;k<4;k++){const m=(a+b)/2;if(CV.F(x,m,z)>0)b=m;else a=m}h=a}else if(y!=null)return y-5;if(y!=null&&y<h0-1.2)return h}for(const r of rockSurf){const dx=wd(x,r.x),dz=wd(z,r.z),d2=(dx*dx+dz*dz)/(r.r*r.r);if(d2>=1)continue;
+  let ry;
+  if(r.sph){ry=-1e9;for(const q of r.sph){const ax=wd(x,r.px+q[0]),az=wd(z,r.pz+q[2]);const hh=q[3]*q[3]-ax*ax-az*az;if(hh>0){const t=r.py+q[1]+Math.sqrt(hh);if(t>ry)ry=t}}if(ry<-1e8)continue}
+  else ry=r.base+(r.top-r.base)*Math.pow(1-d2,.3);
+  if(y!=null&&y<ry-1.1&&y<r.top-1.1)continue;
+  if(ry>h)h=ry}return h}
 function hAt(x,z){let gx=(wrapC(x)+S/2)/STEP,gz=(wrapC(z)+S/2)/STEP;gx=Math.min(N-1.001,Math.max(0,gx));gz=Math.min(N-1.001,Math.max(0,gz));
   const i=Math.floor(gx),j=Math.floor(gz),fx=gx-i,fz=gz-j;const a=H[j*N+i],b=H[j*N+i+1],c=H[(j+1)*N+i],d=H[(j+1)*N+i+1];
   return (a+(b-a)*fx)*(1-fz)+(c+(d-c)*fx)*fz}
@@ -653,6 +658,26 @@ async function place(names,list,{tint,shadow=true,recv=true,layer}={}){const mod
    sub.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(p.rx||0,p.ry,p.rz||0);dummy.scale.setScalar(p.s);dummy.updateMatrix();im.setMatrixAt(i,dummy.matrix);(p.refs||(p.refs=[])).push([im,i]);
     if(tint&&part.mat.userData.leafy)im.setColorAt(i,p.c||L('#ffffff'))});
    im.castShadow=shadow;im.receiveShadow=recv&&!part.noRecv;if(layer)im.layers.set(layer);im.frustumCulled=false;scene.add(im)}})}
+const SPH=new Map();
+async function modelSpheres(name){if(SPH.has(name))return SPH.get(name);let out=[];
+ try{const parts=await kit(name);const pts=[];
+  for(const p of parts){const pos=p.geo.attributes.position;const step=Math.max(1,Math.floor(pos.count/700));for(let i=0;i<pos.count;i+=step)pts.push([pos.getX(i),pos.getY(i),pos.getZ(i)])}
+  if(pts.length>8){let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9;
+   for(const q of pts){x0=Math.min(x0,q[0]);y0=Math.min(y0,q[1]);z0=Math.min(z0,q[2]);x1=Math.max(x1,q[0]);y1=Math.max(y1,q[1]);z1=Math.max(z1,q[2])}
+   const N2=3,cells=new Map();
+   for(const q of pts){const i=Math.min(N2-1,Math.floor((q[0]-x0)/((x1-x0)||1)*N2)),j=Math.min(N2-1,Math.floor((q[1]-y0)/((y1-y0)||1)*N2)),k=Math.min(N2-1,Math.floor((q[2]-z0)/((z1-z0)||1)*N2));
+    const key=i*100+j*10+k;let a=cells.get(key);if(!a)cells.set(key,a=[]);a.push(q)}
+   for(const a of cells.values()){if(a.length<4)continue;let cx=0,cy=0,cz=0;for(const q of a){cx+=q[0];cy+=q[1];cz+=q[2]}cx/=a.length;cy/=a.length;cz/=a.length;
+    let r=0;for(const q of a)r+=Math.hypot(q[0]-cx,q[1]-cy,q[2]-cz);r=r/a.length*1.05;
+    if(r>1e-3)out.push([cx,cy,cz,r])}}
+ }catch(e){}
+ SPH.set(name,out);return out}
+// attach world-space spheres to each placed rock so collision follows the real shape
+async function fitShapes(names,list){const sets=await Promise.all(names.map(modelSpheres));
+ for(const p of list){const sp=sets[p.m%names.length];if(!sp||!sp.length||!p.surf)continue;const c=Math.cos(p.ry||0),si=Math.sin(p.ry||0);
+  p.sph=sp.map(([x,y,z,r])=>[(x*c+z*si)*p.s,y*p.s,(-x*si+z*c)*p.s,r*p.s]);p.surf.sph=p.sph;p.surf.px=p.x;p.surf.py=p.y;p.surf.pz=p.z;
+  let top=-1e9,rad=0;for(const q of p.sph){top=Math.max(top,q[1]+q[3]);rad=Math.max(rad,Math.hypot(q[0],q[2])+q[3])}
+  if(isFinite(top)){p.surf.top=p.y+top;p.surf.r=p.surf.r0=rad*.95}}}
 const pick=a=>a[Math.floor(rnd()*a.length)];
 const GREENS=['#4f9a35','#5fae3a','#3f8a2f','#72b940'].map(L),AUTUMN=['#e8541f','#d63c1f','#f08a1f','#e3661a','#c9361c'].map(L);
 function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length<n;t++){const x=(rnd()*2-1)*EDGE*.9,z=(rnd()*2-1)*EDGE*.9,h=hAt(x,z);if(wayAt(x,z)<.2&&!caveAt(x,z,1)&&test(x,z,h))out.push({x,z,y:h,ry:rnd()*6.283})}return out}
@@ -673,7 +698,7 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  const rocks=scatter(10,(x,z,h)=>h>.9&&h<13&&Math.hypot(x,z)>8&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<3));
  const BIG=[[42,1.52/1.31],[44,1.46/1.09],[45,1.6/1.13],[47,1.5/1.75],[51,1.49/1.65],[52,1.58/1.38],[55,1.75/1.75],[58,2.66/1.34],[64,2.64/2.23],[66,2.02/1.92],[68,2.65/1.49],[69,3.88/2.1]];
  rocks.forEach(p=>{p.m=Math.floor(rnd()*BIG.length);const H=rnd()<.12?1.4+rnd()*.8:.5+rnd()*.6;p.s=H;p.y-=.18*H;p.rx=(rnd()-.5)*.15;p.rz=(rnd()-.5)*.15;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H,r:BIG[p.m][1]*H*.5};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;p.hp=p.hp0=Math.round(3+H*3);{const r=rnd();p.gem=r<.012?'auore':r<.10?'cuore':r<.24?'coal':r<.44?'ore':null}});boulders.push(...rocks);
- place(BIG.map(b=>'pack:rocks70#'+b[0]),rocks);
+ place(BIG.map(b=>'pack:rocks70#'+b[0]),rocks).then(()=>fitShapes(BIG.map(b=>'pack:rocks70#'+b[0]),rocks));
  // landmark boulders + cliff spires on slopes and ridges
 
  // iron ore: dark rock with orange crystals, in rocky/mountain ground; some tucked under cliff arches ("caves")
@@ -689,8 +714,9 @@ function scatter(n,test,tries=n*20){const out=[];for(let t=0;t<tries&&out.length
  // cave mouths: cliff arch pieces leaning over a couple of ore veins
  for(const p of ores.filter((_,i)=>i%4===0)){const a=rnd()*6.283;for(const side of[-1,1]){const x=p.x+Math.cos(a+side*1.2)*2.6,z=p.z+Math.sin(a+side*1.2)*2.6;caveBits.push({x,z,y:hAt(x,z)-.6,ry:a+side,m:1,s:4.2+rnd()});}}
  const caveBits0=caveBits;const LM=[[0,.9],[1,1.2],[4,.95],[5,2.2],[6,1.25]];const marks=scatter(6,(x,z,h)=>h>3&&h<15&&slopeAt(x,z)>.25&&Math.hypot(x,z)>14&&!trees.some(q=>Math.hypot(q.x-x,q.z-z)<5));
- caveBits0.forEach(c=>{c.cave=1});marks.push(...caveBits0);marks.forEach(p=>{if(p.cave){p.m=1;const H=p.s;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:1.2*H*.42});return}p.m=Math.floor(rnd()*LM.length);const H=[7,5,4,3,4][p.m]*(.7+rnd()*.6);p.s=H;p.y-=.25*H;rockSurf.push({x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:LM[p.m][1]*H*.42})});
- place(LM.map(l=>'pack:rockscliffs#'+l[0]),marks);
+ caveBits0.forEach(c=>{c.cave=1});marks.push(...caveBits0);marks.forEach(p=>{if(p.cave){p.m=1;const H=p.s;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:1.2*H*.42};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf;return}p.m=Math.floor(rnd()*LM.length);const H=[7,5,4,3,4][p.m]*(.7+rnd()*.6);p.s=H;p.y-=.25*H;const sf={x:p.x,z:p.z,base:p.y,top:p.y+H*.9,r:LM[p.m][1]*H*.42};sf.r0=sf.r;rockSurf.push(sf);p.surf=sf});
+ place(LM.map(l=>'pack:rockscliffs#'+l[0]),marks).then(()=>fitShapes(LM.map(l=>'pack:rockscliffs#'+l[0]),marks));
+ window.__marksDbg={n:marks.length,withSurf:marks.filter(p=>p.surf).length,sizes:marks.map(p=>+(p.s||0).toFixed(1))};
  for(const p of marks){if(!p.surf)continue;p.surf.r0=p.surf.r0||p.surf.r;p.hp=p.hp0=Math.round(5+(p.s||1)*2.5);const r=rnd();p.gem=r<.02?'auore':r<.12?'cuore':r<.3?'coal':r<.5?'ore':null;boulders.push(p)}
  // grass tufts hugging rocks and tree roots (like the reference shots)
  const tufts=[];for(const r of [...rocks,...marks,...trees.map(t=>({x:t.x,z:t.z,s:1.2}))]){const n=2+Math.floor(rnd()*4);for(let i=0;i<n;i++){const a=rnd()*6.283,d=(.55+rnd()*.5)*Math.max(1,(r.s||1)*.6),x=r.x+Math.cos(a)*d,z=r.z+Math.sin(a)*d,h=hAt(x,z);if(h<1)continue;tufts.push({x,z,y:h-.02,ry:rnd()*6.283,m:Math.floor(rnd()*3),s:.35+rnd()*.35,c:L(pick(['#ffffff','#e9eec8','#f4e7b8']))})}}
@@ -1536,7 +1562,7 @@ document.getElementById('craftX').onclick=()=>openCraft(false);document.getEleme
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.repeat||!started)return;if(e.code==='KeyG')setBuildMode(!B.mode);if(e.code==='KeyF'){const m=document.getElementById('craftmenu');const nd=nearDoor();if(nodeDoor){openNodes(null)}else if(!m.hidden)openCraft(false);else if(nd&&nd.factory)openNodes(nd);else if(nd)openCraft(true)}if(e.code==='Escape')openCraft(false)});
 cv.addEventListener('mousedown',e=>{if(document.pointerLockElement!==cv||!B.mode)return;if(e.button===0)buildClick();if(e.button===2)B.start=null},true);
 
-if(QP.has('dev'))Object.assign(window,{__openMap:openMap,__newWp:newWp,__closeWp:closeWp,__trees:trees,__caves:CAVES,__openNodes:openNodes,__wallSnap:wallSnap,__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
+if(QP.has('dev'))Object.assign(window,{__openMap:openMap,__newWp:newWp,__closeWp:closeWp,__trees:trees,__caves:CAVES,__openNodes:openNodes,__wallSnap:wallSnap,__ftick:factoryTick,__cookOne:cookOne,__boom:boom,__openRadial:openRadial,__openPause:openPause,__scene:scene,__R:renderer,__bend:BEND,__bould:boulders,__B:B,__marksRef:()=>window.__marksDbg,__act:act,__inv:inv,__craftDoor:craftDoor,__pos:pos,__push:pushOut});
 // ---------- loop ----------
 let started=false,fpsN=0,fpsT=0;
 const clock=new THREE.Clock();const _sR=new THREE.Vector3(),_sU=new THREE.Vector3(),_sY=new THREE.Vector3(0,1,0),_sP=new THREE.Vector3();let stepT=0,camPos=new THREE.Vector3(),camInit=false;
@@ -1887,7 +1913,9 @@ function W0SPAWN(){try{const id=QP.get('open');if(id){const d=JSON.parse(localSt
 const BGRID=new Map();let bgT=-9;
 function bIndex(){BGRID.clear();for(const b of boulders){if(b.hp<=0||!b.surf)continue;const r=b.surf.r+.6;for(let gx=Math.floor((b.x-r)/8);gx<=Math.floor((b.x+r)/8);gx++)for(let gz=Math.floor((b.z-r)/8);gz<=Math.floor((b.z+r)/8);gz++){const k=gx*100003+gz;let a=BGRID.get(k);if(!a)BGRID.set(k,a=[]);a.push(b)}}bgT=0}
 function bF(x,y,z){const a=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(!a)return -99;let m=-99;
- for(const b of a){if(b.hp<=0)continue;const sf=b.surf;const dx=wd(x,b.x),dz=wd(z,b.z);const cy=Math.min(Math.max(y,sf.base+.15),Math.max(sf.base+.15,sf.top-.25));const v=sf.r*.92-Math.hypot(dx,y-cy,dz);if(v>m)m=v}return m}
+ for(const b of a){if(b.hp<=0)continue;const sf=b.surf;const dx=wd(x,b.x),dz=wd(z,b.z);const dy=y-b.y;
+  if(b.sph){const k=b.hp<b.hp0?(.35+.65*b.hp/b.hp0):1;for(const q of b.sph){const v=q[3]*k-Math.hypot(dx-q[0]*k,dy-q[1]*k,dz-q[2]*k);if(v>m)m=v}continue}
+  const cy=Math.min(Math.max(y,sf.base+.15),Math.max(sf.base+.15,sf.top-.25));const v=sf.r*.92-Math.hypot(dx,y-cy,dz);if(v>m)m=v}return m}
 function SF(x,y,z){const a=CV.F(x,y,z),b=bF(x,y,z);return a>b?a:b}
 function SGrad(x,y,z){const e=.12,f=SF(x,y,z);return[(SF(x+e,y,z)-f)/e,(SF(x,y+e,z)-f)/e,(SF(x,y,z+e)-f)/e]}
 function solidPush(p){for(let it=0;it<3;it++){let hit=false;
