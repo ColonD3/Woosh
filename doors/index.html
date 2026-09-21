@@ -322,7 +322,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 const TOUCH = matchMedia('(pointer:coarse)').matches;
 const QP=new URLSearchParams(location.search);
 // test/tuning flags survive opening or joining a world (those reload the page with a new query)
-const KEEP=()=>{let o='';for(const n of['bench','dev','pom','look','camtilt','camthick','rays','gshadow','anim','post','bake','bloom','water','sky'])if(QP.has(n))o+='&'+n+(QP.get(n)?'='+encodeURIComponent(QP.get(n)):'');return o};
+const KEEP=()=>{let o='';for(const n of['q','cull','cullmul','bench','dev','pom','look','camtilt','camthick','rays','gshadow','anim','post','bake','bloom','water','sky'])if(QP.has(n))o+='&'+n+(QP.get(n)?'='+encodeURIComponent(QP.get(n)):'');return o};
 // ---------- noise ----------
 let seed=1337; const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
 const P=new Uint8Array(512);{const p=[...Array(256).keys()];for(let i=255;i>0;i--){const j=Math.floor(rnd()*(i+1));[p[i],p[j]]=[p[j],p[i]]}for(let i=0;i<512;i++)P[i]=p[i&255]}
@@ -485,7 +485,7 @@ function slopeAt(x,z){const e=.6;return Math.hypot(hAt(x+e,z)-hAt(x-e,z),hAt(x,z
 
 // ---------- renderer / scene ----------
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
-const PR_MAX=Math.min(devicePixelRatio,TOUCH?1.25:1.5),PR_MIN=TOUCH?.6:.7;let PR=PR_MAX;renderer.setPixelRatio(PR);renderer.setSize(innerWidth,innerHeight);
+let PR_MAX=Math.min(devicePixelRatio,TOUCH?1.25:1.5),PR_MIN=TOUCH?.6:.7;let PR=PR_MAX;renderer.setPixelRatio(PR);renderer.setSize(innerWidth,innerHeight);
 const LOOK=QP.get('look')!=='0';renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=LOOK?.92:.78;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.VSMShadowMap;
 document.body.prepend(renderer.domElement);
@@ -1652,7 +1652,7 @@ function cullWrap(im){const n=im.count;const src=new Float32Array(im.instanceMat
  const upd=i=>{const e=src,o=i*16;const s=Math.max(Math.hypot(e[o],e[o+1],e[o+2]),Math.hypot(e[o+4],e[o+5],e[o+6]),Math.hypot(e[o+8],e[o+9],e[o+10]));
   cx[i]=e[o]*c.x+e[o+4]*c.y+e[o+8]*c.z+e[o+12];cy[i]=e[o+1]*c.x+e[o+5]*c.y+e[o+9]*c.z+e[o+13];cz[i]=e[o+2]*c.x+e[o+6]*c.y+e[o+10]*c.z+e[o+14];rad[i]=gb.radius*s};
  let ar=0;for(let i=0;i<n;i++){upd(i);ar+=rad[i]}ar/=Math.max(1,n);
- const Rr={im,n,src,col,rad,cx,cy,cz,dist:(ar>3?230:ar>1.3?150:ar>.5?95:60)*CULL.mul};
+ const d0=ar>3?230:ar>1.3?150:ar>.5?95:60;const Rr={im,n,src,col,rad,cx,cy,cz,dist0:d0,dist:d0*CULL.mul};
  im.setMatrixAt=function(i,m){m.toArray(src,i*16);upd(i)};im.getMatrixAt=function(i,m){return m.fromArray(src,i*16)};
  if(col)im.setColorAt=function(i,cc){cc.toArray(col,i*3)};
  im.frustumCulled=false;im.userData.culled=Rr;CULL.list.push(Rr)}
@@ -2273,7 +2273,7 @@ addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||!started||e.repeat
 addEventListener('keydown',e=>{if(e.code==='Escape'&&mapOpen){openMap(false);e.stopPropagation()}},true);
 // settings wiring (saved per player)
 const OPT={music:.45,amb:.8,fall:true,mini:false,fps:false,hud:true,ao:true,taa:true,shadow:true,bloom:true,vol:1,fov:60};try{Object.assign(OPT,JSON.parse(localStorage.getItem('wd_opts')||'{}'))}catch(e){}
-function applyOpts(){if($('musV'))$('musV').textContent=Math.round(OPT.music*100)+'%';if($('ambV'))$('ambV').textContent=Math.round(OPT.amb*100)+'%';try{localStorage.setItem('wd_opts',JSON.stringify(OPT))}catch(e){}miniOn=OPT.mini;$('minimap').hidden=!OPT.mini;$('fps').hidden=!OPT.fps;$('hud').style.display=OPT.hud?'':'none';if(gtao)gtao.enabled=OPT.ao;if(taaPass)taaPass.enabled=OPT.taa;sun.castShadow=OPT.shadow;bloom.enabled=OPT.bloom&&QP.get('bloom')!=='0';if(sfx.gain)sfx.gain.gain.value=OPT.vol;sfx.muted=OPT.vol===0;camera.fov=OPT.fov;camera.updateProjectionMatrix();$('volV').textContent=Math.round(OPT.vol*100)+'%';$('fovV').textContent=OPT.fov+'°'}
+function applyOpts(){if($('musV'))$('musV').textContent=Math.round(OPT.music*100)+'%';if($('ambV'))$('ambV').textContent=Math.round(OPT.amb*100)+'%';try{localStorage.setItem('wd_opts',JSON.stringify(OPT))}catch(e){}miniOn=OPT.mini;$('minimap').hidden=!OPT.mini;$('fps').hidden=!OPT.fps;$('hud').style.display=OPT.hud?'':'none';if(gtao)gtao.enabled=OPT.ao;if(taaPass)taaPass.enabled=OPT.taa;sun.castShadow=OPT.shadow;bloom.enabled=OPT.bloom&&QP.get('bloom')!=='0';if(sfx.gain)sfx.gain.gain.value=OPT.vol;sfx.muted=OPT.vol===0;camera.fov=OPT.fov;camera.updateProjectionMatrix();$('volV').textContent=Math.round(OPT.vol*100)+'%';$('fovV').textContent=OPT.fov+'°';if(window.__qReady)applyQ(Q)}
 for(const[id,k]of[['optFall','fall'],['optMini','mini'],['optFps','fps'],['optHud','hud'],['optAO','ao'],['optTAA','taa'],['optShadow','shadow'],['optBloom','bloom']]){const el=$(id);el.checked=OPT[k];el.onchange=()=>{OPT[k]=el.checked;applyOpts()}}
 $('musR').value=OPT.music;$('musR').oninput=e=>{OPT.music=+e.target.value;applyOpts()};$('ambR').value=OPT.amb;$('ambR').oninput=e=>{OPT.amb=+e.target.value;applyOpts()};$('volR').value=OPT.vol;$('volR').oninput=e=>{OPT.vol=+e.target.value;applyOpts()};$('fovR').value=OPT.fov;$('fovR').oninput=e=>{OPT.fov=+e.target.value;applyOpts()};
 {let pdn=null;const dn=e=>{const el=e.target.closest&&e.target.closest('.card,.wl,.node');if(pdn&&pdn!==el)pdn.classList.remove('dn');if(el&&!e.target.closest('button,input,select')){el.classList.add('dn');pdn=el}};const up=()=>{if(pdn){pdn.classList.remove('dn');pdn=null}};addEventListener('mousedown',dn,true);addEventListener('touchstart',dn,{capture:true,passive:true});addEventListener('mouseup',up,true);addEventListener('touchend',up,true)}
@@ -2392,6 +2392,25 @@ W.render();if(QP.get('open'))setTimeout(()=>W.open(QP.get('open')),600);
 try{const tw=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'],{type:'text/javascript'})));tw.onmessage=tick}catch(e){setInterval(tick,50)}
 
 
+
+// ---------- auto graphics quality: find the best tier that holds 30+ fps on THIS machine ----------
+// resolution adapts first (the dynamic-res loop), features step down only if that is not enough.
+// ?q=0..3 pins a tier. picks start from the GPU name, then the saved result for this browser.
+const QT=[{n:'low',pr:.8,prMin:.55,ao:0,taa:0,bloom:0,pom:0,cull:.6},{n:'medium',pr:1,prMin:.65,ao:0,taa:1,bloom:1,pom:0,cull:.85},{n:'high',pr:1.35,prMin:.75,ao:1,taa:1,bloom:1,pom:1,cull:1},{n:'ultra',pr:2,prMin:1,ao:1,taa:1,bloom:1,pom:1,cull:1.6}];
+var Q=2;
+function applyQ(t,say){Q=Math.max(0,Math.min(3,t|0));const c=QT[Q];PR_MAX=Math.min(devicePixelRatio,c.pr);PR_MIN=Math.min(PR_MAX,c.prMin);PR=Math.max(PR_MIN,Math.min(PR,PR_MAX));
+ renderer.setPixelRatio(PR);composer.setPixelRatio(PR);composer.setSize(innerWidth,innerHeight);
+ if(gtao)gtao.enabled=!!c.ao&&OPT.ao;if(taaPass)taaPass.enabled=!!c.taa&&OPT.taa;bloom.enabled=!!c.bloom&&OPT.bloom&&QP.get('bloom')!=='0';
+ TU.uPom.value=QP.get('pom')==='0'?0:c.pom;CULL.mul=c.cull*(+(QP.get('cullmul')||1));for(const r of CULL.list)r.dist=r.dist0*CULL.mul;
+ try{localStorage.setItem('woosh_q',String(Q))}catch(e){}if(say)ui.toast('graphics · '+c.n);window.__q=c.n}
+{let g='';try{const gl=renderer.getContext(),e=gl.getExtension('WEBGL_debug_renderer_info');g=e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):''}catch(e){}
+ const guess=TOUCH?0:/RTX|GTX 1[0-9]{3}|RX ?[5-9][0-9]{3}|Radeon Pro|Arc A/i.test(g)?3:/Apple M[1-9] (Pro|Max|Ultra)/i.test(g)?2:/Apple|Intel|Iris|UHD/i.test(g)?1:2;
+ let saved=null;try{saved=localStorage.getItem('woosh_q')}catch(e){}const pin=QP.get('q');
+ window.__qReady=1;applyQ(pin!=null?+pin:saved!=null?+saved:guess,false);
+ let n=0,t0=0,up=0,ceil=3;
+ (function loop(){requestAnimationFrame(loop);if(pin!=null||!started||document.hidden){t0=0;return}const now=performance.now();if(!t0){t0=now;n=0;return}n++;if(now-t0<4000)return;
+  const fps=n*1000/(now-t0);t0=now;n=0;window.__qfps=Math.round(fps);
+  if(fps<30&&Q>0){ceil=Q-1;applyQ(Q-1,true);up=0}else if(fps>57&&Q<ceil){if(++up>=2){applyQ(Q+1,true);up=0}}else up=0})()}
 // ---------- ?bench: measures what's eating the frames on THIS computer ----------
 if(QP.has('bench')){const box=document.createElement('pre');box.style.cssText='position:fixed;left:12px;top:60px;z-index:9;background:rgba(255,248,235,.95);color:#23321f;font:13px ui-monospace,monospace;padding:10px 14px;border-radius:12px;margin:0';document.body.appendChild(box);
  const leafy=()=>{const a=[];scene.traverse(o=>{if(o.isInstancedMesh&&o.material&&o.material.userData&&o.material.userData.leafy)a.push(o)});return a};
