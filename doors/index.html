@@ -1571,7 +1571,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0,noStick=0,fallV=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const CAMTHICK=(parseFloat(QP.get('camthick'))||1.8);const _ut=new THREE.Vector3();const steerN=new THREE.Vector3(0,1,0);const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0,noStick=0,fallV=0;const safeP=new THREE.Vector3();let safeOK=false;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const CAMTHICK=(parseFloat(QP.get('camthick'))||1.8);const _ut=new THREE.Vector3();const steerN=new THREE.Vector3(0,1,0);const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 const PT={};let PFon=true;window.__pt=PT;
 function bc(n){try{localStorage.setItem('woosh_bc',n+'|'+Date.now())}catch(e){}}
 function bcd(n){try{localStorage.setItem('woosh_bc','done:'+n+'|'+Date.now())}catch(e){}}
@@ -1625,10 +1625,15 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
  {const nx2=pos.x+vel.x*dt,nz2=pos.z+vel.z*dt;if(!fenceBlocks(nx2,nz2)){pos.x=nx2;pos.z=nz2}else{vel.x*=-.1;vel.z*=-.1}}
  pos.y+=vel.y*dt;
  // one contact solve for terrain + rock + cave wall
- {const hit=solveContacts(pos,3);
+ {const hit=solveContacts(pos,8);
   if(!hit&&wasG&&noStick<=0){const sx=pos.x,sy=pos.y,sz=pos.z;let ok=false;
-   for(let d=.08;d<=.36;d+=.09){pos.set(sx-stickyN.x*d,sy-stickyN.y*d,sz-stickyN.z*d);if(solveContacts(pos,3)){ok=true;break}}
+   for(let d=.08;d<=.36;d+=.09){pos.set(sx-stickyN.x*d,sy-stickyN.y*d,sz-stickyN.z*d);if(solveContacts(pos,8)){ok=true;break}}
    if(!ok)pos.set(sx,sy,sz)}}
+ // hard guarantee: if the solve could not get us out (wedged between two rocks, a bad frame),
+ // fall back to the last position we know was outside every mesh. you never end a frame inside one.
+ if(SF(pos.x,pos.y+.55,pos.z)>-.2||SF(pos.x,pos.y+1.05,pos.z)>-.16){
+  if(safeOK){pos.copy(safeP);vel.multiplyScalar(.2);solveContacts(pos,8)}}
+ else{safeP.copy(pos);safeOK=true}
  if(!ug)pushOut(pos);
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
  if(!onGround&&pos.y<-115&&!creative&&!dead){pos.y=hAt(pos.x,pos.z)+2;vel.set(0,0,0)}
@@ -1955,12 +1960,16 @@ function solveContacts(p,iters){let any=false,sy=2;_cn.set(0,0,0);
  for(let it=0;it<iters;it++){let hit=false;
   // ground / rock tops
   const h=caveM?cvFloor(p.x,p.y,p.z):surfAt(p.x,p.z,p.y);
-  if(h!=null&&h>-1e8&&p.y<h){if(caveM){_tn[0]=0;_tn[1]=1;_tn[2]=0}else terrN(p.x,p.z,p.y,_tn);const dep=Math.min(h-p.y,1.2);
-   p.y+=dep;_cn.x+=_tn[0];_cn.y+=_tn[1];_cn.z+=_tn[2];if(_tn[1]<sy){sy=_tn[1];steerN.set(_tn[0],_tn[1],_tn[2])}hit=true}
+  if(h!=null&&h>-1e8&&p.y<h){if(caveM){_tn[0]=0;_tn[1]=1;_tn[2]=0}else terrN(p.x,p.z,p.y,_tn);
+   // push along the ground normal, not straight up, and only a little per step - a big vertical
+   // yank is what used to read as the game auto-jumping you onto ledges instead of rolling up them
+   const dep=Math.min(h-p.y,.22)/Math.max(.3,_tn[1]);
+   p.x+=_tn[0]*dep;p.y+=_tn[1]*dep;p.z+=_tn[2]*dep;
+   _cn.x+=_tn[0];_cn.y+=_tn[1];_cn.z+=_tn[2];if(_tn[1]<sy){sy=_tn[1];steerN.set(_tn[0],_tn[1],_tn[2])}hit=true}
   // solid bodies (boulders, cave rock)
   for(const[hy,r]of[[.55,.45],[1.05,.4]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;
    const gg=SGrad(p.x,y,p.z);const gl=Math.hypot(gg[0],gg[1],gg[2])||1;
-   const nx=-gg[0]/gl,ny=-gg[1]/gl,nz=-gg[2]/gl;const push=Math.min(.45,(f+r)/Math.max(.45,gl));
+   const nx=-gg[0]/gl,ny=-gg[1]/gl,nz=-gg[2]/gl;const push=Math.min(.3,(f+r)/Math.max(.45,gl))*.8;
    p.x+=nx*push;p.y+=ny*push;p.z+=nz*push;_cn.x+=nx;_cn.y+=ny;_cn.z+=nz;if(ny<sy){sy=ny;steerN.set(nx,ny,nz)}hit=true}
   if(hit)any=true;else break}
  if(any){if(_cn.lengthSq()<1e-6)_cn.set(0,1,0);_cn.normalize();stickyN.copy(_cn);
