@@ -846,8 +846,8 @@ addEventListener('keydown',e=>{if(e.target.tagName!=='INPUT'&&!e.repeat&&started
 const cv=renderer.domElement;
 cv.addEventListener('click',()=>{if(!document.getElementById('menu').hidden)return;if(!TOUCH&&cv.requestPointerLock){const r=cv.requestPointerLock({unadjustedMovement:true});if(r&&r.catch)r.catch(()=>cv.requestPointerLock())}});
 let drag=null;
-addEventListener('mousemove',e=>{if(document.pointerLockElement===cv){yaw-=e.movementX*.0025*SENS;pitch=Math.min(1.53,Math.max(-1.53,pitch+e.movementY*.0025*SENS))}
- else if(drag&&!TOUCH){yaw-=(e.clientX-drag.x)*.005;pitch=Math.min(1.53,Math.max(-1.53,pitch+(e.clientY-drag.y)*.005));drag={x:e.clientX,y:e.clientY}}});
+addEventListener('mousemove',e=>{if(document.pointerLockElement===cv){yaw-=e.movementX*.0025*SENS;pitch=Math.min(1.45,Math.max(-1.45,pitch+e.movementY*.0025*SENS))}
+ else if(drag&&!TOUCH){yaw-=(e.clientX-drag.x)*.005;pitch=Math.min(1.45,Math.max(-1.45,pitch+(e.clientY-drag.y)*.005));drag={x:e.clientX,y:e.clientY}}});
 cv.addEventListener('mousedown',e=>{if(document.pointerLockElement===cv){if(e.button===0){if(fenceMode)confirmFences();else if(!B.mode){if(!tryAttack()&&!tryPunch())mouseHeld=true}}return}if(!TOUCH)drag={x:e.clientX,y:e.clientY}});cv.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('mouseup',e=>{drag=null;if(e.button===0)mouseHeld=false});addEventListener('wheel',e=>{if(document.pointerLockElement===cv&&started)selectSlot(sel+(e.deltaY>0?1:-1))},{passive:true});
 // touch
 const stick=document.getElementById('stick'),knob=document.getElementById('knob'),jb=document.getElementById('jump');
@@ -857,7 +857,7 @@ if(TOUCH){jb.hidden=false;document.getElementById('hud').innerHTML='left thumb m
  cv.addEventListener('touchstart',e=>{e.preventDefault();for(const t of e.changedTouches){if(t.clientX<innerWidth/2&&joy.id===null){joy={id:t.identifier,cx:t.clientX,cy:t.clientY,x:0,y:0};
    stick.hidden=false;stick.style.left=t.clientX-55+'px';stick.style.top=t.clientY-55+'px'}else if(look.id===null)look={id:t.identifier,x:t.clientX,y:t.clientY}}},{passive:false});
  cv.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){if(t.identifier===joy.id){let dx=t.clientX-joy.cx,dy=t.clientY-joy.cy;const L=Math.hypot(dx,dy),m=50;if(L>m){dx*=m/L;dy*=m/L}
-   joy.x=dx/m;joy.y=dy/m;knob.style.left=35+dx+'px';knob.style.top=35+dy+'px'}else if(t.identifier===look.id){yaw-=(t.clientX-look.x)*.006;pitch=Math.min(1.53,Math.max(-1.53,pitch+(t.clientY-look.y)*.006));look.x=t.clientX;look.y=t.clientY}}},{passive:false});
+   joy.x=dx/m;joy.y=dy/m;knob.style.left=35+dx+'px';knob.style.top=35+dy+'px'}else if(t.identifier===look.id){yaw-=(t.clientX-look.x)*.006;pitch=Math.min(1.45,Math.max(-1.45,pitch+(t.clientY-look.y)*.006));look.x=t.clientX;look.y=t.clientY}}},{passive:false});
  const end=e=>{for(const t of e.changedTouches){if(t.identifier===joy.id){joy={id:null,x:0,y:0};stick.hidden=true;knob.style.left=knob.style.top='35px'}if(t.identifier===look.id)look.id=null}};
  cv.addEventListener('touchend',end);cv.addEventListener('touchcancel',end);}
 
@@ -1571,7 +1571,7 @@ const bendLocs=new WeakMap();let bendLast=-1,bendProgs=-1;const WCU={value:new T
 function hookMat(m){if(hooked.has(m)||m.isShaderMaterial||m.isSpriteMaterial||m.isPointsMaterial)return;hooked.add(m);const prev=m.onBeforeCompile,key=m.customProgramCacheKey();
  m.onBeforeCompile=function(sh,r){if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(this,sh,r);sh.uniforms.uBend=BEND;sh.uniforms.uWC=WCU};m.customProgramCacheKey=()=>'bw|'+key;m.needsUpdate=true}
 function syncBend(){WCU.value.set(pos.x,pos.z);const hn=performance.now();if(hn>hookN){hookN=hn+400;scene.traverse(o=>{if(o.material){if(Array.isArray(o.material))o.material.forEach(hookMat);else hookMat(o.material)}})}}
-const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0,noStick=0,fallV=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const _ut=new THREE.Vector3();const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
+const _dark=new THREE.Color('#07070b');let sticky=false,stuckT=0,blockT=0,stickLost=0;const CAMTILT=Math.max(0,Math.min(1,parseFloat(QP.get('camtilt')??'0')||0));const _ut=new THREE.Vector3();const stickyN=new THREE.Vector3(0,1,0),camUpV=new THREE.Vector3(0,1,0),camQ=new THREE.Quaternion(),_dv=new THREE.Vector3(),_cd=new THREE.Vector3(),_Y=new THREE.Vector3(0,1,0),_pu=new THREE.Vector3(),_dq=new THREE.Quaternion(),_fw=new THREE.Vector3();const visPos=new THREE.Vector3();let camRoll=0,camBob=0,camDrift=0;let camWant=7,camT=7;const _tgt=new THREE.Vector3();
 const PT={};let PFon=true;window.__pt=PT;
 function bc(n){try{localStorage.setItem('woosh_bc',n+'|'+Date.now())}catch(e){}}
 function bcd(n){try{localStorage.setItem('woosh_bc','done:'+n+'|'+Date.now())}catch(e){}}
@@ -1596,44 +1596,40 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
  if(ST.stam<12)sprint=false;const speed=(sprint?7.4:5.2)*(ST.stam<12?.72:1)*(sprint&&!onGround?1.28:1);updSurvival(dt,il>0,sprint&&il>0);const k=onGround?12:2.6;
  vel.x+=(dirX*speed-vel.x)*Math.min(1,dt*k);vel.z+=(dirZ*speed-vel.z)*Math.min(1,dt*k);
  let g=0;if(creative&&!dead){const fl=(keys.ControlLeft?30:14);const cp2=Math.cos(pitch);const up=(keys.Space?1:0)-(keys.ShiftLeft||keys.ShiftRight?1:0);vel.set(dirX*fl,up*fl,dirZ*fl);pos.addScaledVector(vel,dt);onGround=false;g=pos.y-5;caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2}else{
- // ---- unified movement: gravity is always down, you stick to whatever you touch, space lets go ----
- const ox0=pos.x,oz0=pos.z,oy0=pos.y;const wasG=onGround;
- {bgT-=dt;if(bgT<0){bIndex();bgT=1.5}}
- caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;
- if(noStick>0)noStick-=dt;
- if((keys.Space||jumpTouch)&&onGround&&!dead){const bn=Math.max(0,Math.min(1,(stickyN.y-.2)/.6));
-  vel.x+=stickyN.x*7*(1-bn);vel.z+=stickyN.z*7*(1-bn);vel.y=Math.max(vel.y,0)+8.6*bn+6.4*(1-bn);
-  if(sprint&&il>0){vel.x*=1.18;vel.z*=1.18}
-  noStick=.3;onGround=false;sfx.play('jump',.2,1.8);puff(pos.x,pos.y,pos.z,8,2,[.9,.88,.78]);squash=-.25}
- // steer: input bends onto the surface we're touching, and pushing into a wall becomes climbing it
- {const n=(onGround&&noStick<=0)?stickyN:_Y;const dm=Math.hypot(dirX,dirZ);
-  let tx=dirX,ty=0,tz=dirZ;const dn=tx*n.x+tz*n.z;tx-=n.x*dn;ty-=n.y*dn;tz-=n.z*dn;
-  if(n.y<.985){const ux=-n.x*n.y,uy=1-n.y*n.y,uz=-n.z*n.y,ul=Math.hypot(ux,uy,uz)||1;const into=Math.max(0,-dn)*1.25;
-   tx+=ux/ul*into;ty+=uy/ul*into;tz+=uz/ul*into}
-  const tl=Math.hypot(tx,ty,tz);const sp=speed*dm;
-  const Tx=tl>1e-4?tx/tl*sp:0,Ty=tl>1e-4?ty/tl*sp:0,Tz=tl>1e-4?tz/tl*sp:0;
-  const vn=vel.x*n.x+vel.y*n.y+vel.z*n.z;let vx=vel.x-n.x*vn,vy=vel.y-n.y*vn,vz=vel.z-n.z*vn;
-  const a=Math.min(1,dt*(onGround?13:2.6));vx+=(Tx-vx)*a;vy+=(Ty-vy)*a;vz+=(Tz-vz)*a;
-  vel.set(vx+n.x*vn,vy+n.y*vn,vz+n.z*vn)}
+ if((keys.Space||jumpTouch)&&onGround&&!dead){vel.y=8.6;if(sprint&&il>0){vel.x*=1.18;vel.z*=1.18}sfx.play('jump',.2,1.8);onGround=false;puff(pos.x,pos.y,pos.z,8,2,[.9,.88,.78]);squash=-.25}
  vel.y-=28*dt;vel.y=Math.max(vel.y,-40);
- if(onGround&&noStick<=0)vel.addScaledVector(stickyN,-14*dt);
- {const nx2=pos.x+vel.x*dt,nz2=pos.z+vel.z*dt;if(!fenceBlocks(nx2,nz2)){pos.x=nx2;pos.z=nz2}else{vel.x*=-.1;vel.z*=-.1}}
- pos.y+=vel.y*dt;
- // one contact solve for terrain + rock + cave wall
- {const hit=solveContacts(pos,3);
-  if(!hit&&wasG&&noStick<=0){const sx=pos.x,sy=pos.y,sz=pos.z;let ok=false;
-   for(let d=.08;d<=.55;d+=.09){pos.set(sx-stickyN.x*d,sy-stickyN.y*d,sz-stickyN.z*d);if(solveContacts(pos,3)){ok=true;break}}
-   if(!ok)pos.set(sx,sy,sz)}}
- if(!ug)pushOut(pos);
+ const ox0=pos.x,oz0=pos.z,oy0=pos.y;{const ox=pos.x,oz=pos.z;const stepOK=(x,z)=>{if(!blockedBy(x,pos.y,z))return true;
+   let top=-99;const L=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(L)for(const b of L){if(b.hp<=0||!b.surf)continue;if(Math.hypot(wd(x,b.x),wd(z,b.z))<b.surf.r*.95&&b.surf.top>top)top=b.surf.top}
+   return top>-98&&top-pos.y<.55};
+  pos.x+=vel.x*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.x=ox;vel.x*=-.15}
+  pos.z+=vel.z*dt;if(fenceBlocks(pos.x,pos.z)||!stepOK(pos.x,pos.z)){pos.z=oz;vel.z*=-.15}}{bgT-=dt;if(bgT<0){bIndex();bgT=1.5}caveM=CV.C(pos.x,pos.y+.9,pos.z)<3.5;ug=caveM&&pos.y<hAt(pos.x,pos.z)-1.2;solidPush(pos);unTrap(pos);if(caveM){cvPush(pos);for(const o of boulders){if(!o.ug||o.hp<=0)continue;const dx=wd(pos.x,o.x),dz=wd(pos.z,o.z),d=Math.hypot(dx,dz),r=o.surf.r+.35;if(d<r&&d>.01&&Math.abs(o.y-pos.y)<2){pos.x=o.x+dx/d*r;pos.z=o.z+dz/d*r}}}}
+ if(!ug){pushOut(pos)}pos.y+=vel.y*dt;
  if(!ug)for(const tr of trees){if(tr.down)continue;const dx=pos.x-tr.x,dz=pos.z-tr.z,d=Math.hypot(dx,dz),r=(tr.r||.4)+.35;if(d<r&&d>0&&pos.y<tr.h+3){pos.x=tr.x+dx/d*r;pos.z=tr.z+dz/d*r}}
- if(!onGround&&pos.y<-115&&!creative&&!dead){pos.y=hAt(pos.x,pos.z)+2;vel.set(0,0,0)}
- if(onGround&&!wasG){const fv=-fallV;
-  if(fv>15&&OPT.fall)hurt(Math.round((fv-15)*.55),'you fell too far');
-  if(fv>6){camBob=Math.max(-.22,-fv*.012);sfx.play('land',.35,1.7);puff(pos.x,pos.y,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,fv*.025)}}
- fallV=onGround?0:vel.y;
- sticky=onGround&&stickyN.y<.9;
- if(sticky&&Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55]);
- g=pos.y;
+
+ g=caveM?cvFloor(pos.x,pos.y,pos.z):surfAt(pos.x,pos.z);if(g===null){const g0=cvFloor(ox0,pos.y,oz0);if(g0!==null){pos.x=ox0;pos.z=oz0;vel.x*=.5;vel.z*=.5;g=g0}else{pos.y+=.3;vel.y=Math.max(vel.y,0);g=cvFloor(pos.x,pos.y,pos.z)??pos.y}}
+ if(pos.y<=g){if(!onGround&&vel.y<-15&&OPT.fall)hurt(Math.round((-vel.y-15)*.55),'you fell too far');if(!onGround&&vel.y<-6){camBob=Math.max(-.22,vel.y*.012);sfx.play('land',.35,1.7);puff(pos.x,g,pos.z,14,3,[.92,.9,.8]);squash=Math.min(.35,-vel.y*.025)}
+  if(onGround&&g-pos.y>.4){pos.y+=Math.min(g-pos.y,9*dt);if(!caveM){vel.x*=.9;vel.z*=.9}}else pos.y=g;vel.y=0;onGround=true}
+ else if(pos.y>g+.05)onGround=false;
+
+ // sticky legs: in caves, holding a direction against rock lets wooshi roll along it (walls, overhangs, ceilings)
+ if((keys.Space||jumpTouch)&&sticky&&!dead){vel.set(stickyN.x,stickyN.y,stickyN.z).multiplyScalar(8.2);vel.y+=2.2;sticky=false;onGround=false;sfx.play('jump',.25,1.7)}
+ if(il>0&&!dead&&!keys.Space&&!creative){const cx=ox0,cy=oy0+.55,cz=oz0;const f=SF(cx,cy,cz);
+  if(f>-1.7){const g=SGrad(cx,cy,cz);const gl=Math.hypot(g[0],g[1],g[2])||1;const nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;
+   const dl0=Math.hypot(dirX,dirZ)||1,ax=dirX/dl0,az=dirZ/dl0;
+   let wallAhead=false,wn=1;
+   for(const dd of[.45,.8])for(const hh of[.2,.6,1.0]){const wx=ox0+ax*dd,wz=oz0+az*dd;if(SF(wx,oy0+hh,wz)>-.15){wallAhead=true;const gg=SGrad(wx,oy0+hh,wz);const l3=Math.hypot(gg[0],gg[1],gg[2])||1;const q=-gg[1]/l3;if(q<wn)wn=q}}
+   if(!sticky){if(wallAhead&&wn<.78){sticky=true;stickLost=0}}
+   else{if(wallAhead||ny<.9)stickLost=0;else stickLost+=dt;if(stickLost>.22&&onGround&&!ug&&ny>.96)sticky=false}
+   if(sticky){stickyN.set(nx,ny,nz);_dv.set(dirX,0,dirZ).normalize().applyQuaternion(camQ);
+    const sp=(sprint?5.9:4.4);let done=false;
+    for(const bias of[(ny<.94?1.05:0),.45,0]){
+     let tx=_dv.x,ty=_dv.y+bias,tz=_dv.z;const d=tx*nx+ty*ny+tz*nz;if(d<0){tx-=nx*d;ty-=ny*d;tz-=nz*d}
+     const tl=Math.hypot(tx,ty,tz)||1;
+     let px=ox0+tx/tl*sp*dt,py=cy+ty/tl*sp*dt,pz=oz0+tz/tl*sp*dt;
+     for(let k=0;k<6;k++){const f2=SF(px,py,pz);const g2=SGrad(px,py,pz);const l2=Math.hypot(g2[0],g2[1],g2[2])||1;let mv=(f2+.5)/l2;if(mv>.4)mv=.4;else if(mv<-.4)mv=-.4;px-=g2[0]/l2*mv;py-=g2[1]/l2*mv;pz-=g2[2]/l2*mv;if(Math.abs(mv)<.01)break}
+     if(SF(px,py,pz)<-.42&&SF(px,py+.5,pz)<-.38&&SF(px,py+.95,pz)<-.3){pos.set(px,py-.55,pz);vel.set(0,0,0);onGround=true;done=true;if(Math.random()<dt*6)puff(pos.x,pos.y+.3,pos.z,1,.8,[.6,.58,.55]);break}}
+    if(!done)sticky=false}}else{sticky=false;stickLost=0}}else{sticky=false;stickLost=0}
+ if(sticky)unTrap(pos);
  if(caveM&&il>0&&!dead){if(Math.hypot(pos.x-ox0,pos.y-oy0,pos.z-oz0)<speed*dt*.12)stuckT+=dt;else stuckT=0;
   if(stuckT>.3){stuckT=0;const c=[pos.x,pos.y+.55,pos.z];const g=cvGrad(...c);const gl=Math.hypot(...g)||1;const dl=Math.hypot(dirX,dirZ)||1;
    for(const [ax,ay,az] of [[-g[0]/gl*.3+dirX/dl*.2,.35,-g[2]/gl*.3+dirZ/dl*.2],[0,.6,0],[-g[0]/gl*.5,-g[1]/gl*.5,-g[2]/gl*.5],[dirX/dl*.4,.2,dirZ/dl*.4],[-dirX/dl*.4,.4,-dirZ/dl*.4]]){if(CV.F(c[0]+ax,c[1]+ay,c[2]+az)<-.3&&CV.F(c[0]+ax,c[1]+ay+.5,c[2]+az)<0){pos.x+=ax;pos.y+=ay;pos.z+=az;vel.set(0,0,0);break}}}}else stuckT=0}
@@ -1662,7 +1658,7 @@ let rafPending=false;function frame(){if(!rafPending){rafPending=true;requestAni
   if(t<camT){const k=camT+(t-camT)*(1-Math.exp(-dt*16));const px=tgt.x+dx/L*k,py=tgt.y+dy/L*k,pz=tgt.z+dz/L*k;camT=SF(px,py,pz)>-.25?t:k}else camT+=(t-camT)*(1-Math.exp(-dt*2.2));camT=Math.min(camT,L);want.set(tgt.x+dx/L*camT,tgt.y+dy/L*camT,tgt.z+dz/L*camT)}
  {const sideWant=(ix||0)*-.028*(sprint?1.5:1);camRoll+=(sideWant-camRoll)*(1-Math.exp(-dt*4));camBob*=Math.exp(-dt*6);camDrift+=dt*.35;}
  {const idle=il<.01&&onGround?1:0;const dz=Math.sin(camDrift)*.05*idle,dy=Math.cos(camDrift*.77)*.04*idle;want.x+=dz*camUpV.z;want.y+=dy+camBob;want.z+=dz*camUpV.x;}
- {const gh=surfAt(want.x,want.z)+.35;if(want.y<gh)want.y=gh}camera.position.copy(want);camera.up.copy(camUpV);camera.lookAt(tgt);if(camRoll)camera.rotateZ(camRoll);if(camT<1.1)player.visible=false;}
+ camera.position.copy(want);camera.up.copy(camUpV);camera.lookAt(tgt);if(camRoll)camera.rotateZ(camRoll);if(camT<1.1)player.visible=false;}
  {const R=_sR.crossVectors(sunDir,_sY).normalize(),U=_sU.crossVectors(R,sunDir).normalize(),tx=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;const a=Math.round(pos.dot(R)/tx)*tx,b=Math.round(pos.dot(U)/tx)*tx,c=pos.dot(sunDir);_sP.copy(R).multiplyScalar(a).addScaledVector(U,b).addScaledVector(sunDir,c);sun.target.position.copy(_sP);sun.position.copy(_sP).addScaledVector(sunDir,100)}
  for(const c of clouds)c.position.x+=dt*1.2,c.position.x>900&&(c.position.x-=1800);sky.position.copy(camera.position);water.position.x=Math.round(camera.position.x/2)*2;water.position.z=Math.round(camera.position.z/2)*2;grassU.time.value=t;terrFX.tTime.value=t;swayU.value=t;water.material.uniforms.time.value=t*.6;grassU.pPos.value.copy(pos);grassU.camPos.value.copy(camera.position);
  STAGE='systems';updParticles(dt,t);sfx.update(t);updItems(dt,t);updChop(dt);updProjs(dt,t);updFX(dt);updTrees(dt);updFenceMode(dt,t);updBuild(dt,t);updMine(dt,t);updCook(dt);updVines(dt);updDrills(dt);updMixers(dt);updMaps(dt);updShrooms(dt);updSaplings();factoryTick(dt);updBush(dt);hostWorldTick(dt);
@@ -1934,27 +1930,12 @@ function bF(x,y,z){const a=BGRID.get(Math.floor(x/8)*100003+Math.floor(z/8));if(
   const cy=Math.min(Math.max(y,sf.base+.15),Math.max(sf.base+.15,sf.top-.25));const v=sf.r*.92-Math.hypot(dx,y-cy,dz);if(v>m)m=v}return m}
 function SF(x,y,z){const a=CV.F(x,y,z),b=bF(x,y,z);return a>b?a:b}
 function SGrad(x,y,z){const e=.12,f=SF(x,y,z);return[(SF(x+e,y,z)-f)/e,(SF(x,y+e,z)-f)/e,(SF(x,y,z+e)-f)/e]}
-// ---- one contact solve: terrain heightfield + boulder/cave SDF, no modes ----
-const _cn=new THREE.Vector3();
-function terrN(x,z,y,o){const e=.4,a=surfAt(x+e,z,y),b=surfAt(x-e,z,y),c=surfAt(x,z+e,y),d=surfAt(x,z-e,y);
- let nx=-(a-b)/(2*e),nz=-(c-d)/(2*e);const l=Math.hypot(nx,1,nz)||1;o[0]=nx/l;o[1]=1/l;o[2]=nz/l}
-const _tn=[0,0,0];
-function solveContacts(p,iters){let any=false;_cn.set(0,0,0);
- for(let it=0;it<iters;it++){let hit=false;
-  // ground / rock tops
-  const h=caveM?cvFloor(p.x,p.y,p.z):surfAt(p.x,p.z,p.y);
-  if(h!=null&&h>-1e8&&p.y<h){if(caveM){_tn[0]=0;_tn[1]=1;_tn[2]=0}else terrN(p.x,p.z,p.y,_tn);const dep=Math.min(h-p.y,1.2);
-   p.y+=dep;_cn.x+=_tn[0];_cn.y+=_tn[1];_cn.z+=_tn[2];hit=true}
-  // solid bodies (boulders, cave rock)
-  for(const[hy,r]of[[.55,.45],[1.05,.4]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;
-   const gg=SGrad(p.x,y,p.z);const gl=Math.hypot(gg[0],gg[1],gg[2])||1;
-   const nx=-gg[0]/gl,ny=-gg[1]/gl,nz=-gg[2]/gl;const push=Math.min(.45,(f+r)/Math.max(.45,gl));
-   p.x+=nx*push;p.y+=ny*push;p.z+=nz*push;_cn.x+=nx;_cn.y+=ny;_cn.z+=nz;hit=true}
-  if(hit)any=true;else break}
- if(any){if(_cn.lengthSq()<1e-6)_cn.set(0,1,0);_cn.normalize();stickyN.copy(_cn);
-  const vn=vel.x*_cn.x+vel.y*_cn.y+vel.z*_cn.z;if(vn<0)vel.addScaledVector(_cn,-vn);
-  onGround=true}else onGround=false;
- return any}
+function unTrap(p){const emb=()=>Math.max(SF(p.x,p.y+.55,p.z)+.4,SF(p.x,p.y+1.05,p.z)+.36);if(emb()<=0)return false;
+ const g=SGrad(p.x,p.y+.8,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;
+ const cands=[[-g[0]/gl,-g[1]/gl,-g[2]/gl],[0,1,0],[0,-1,0]];
+ for(const d of cands)for(let st=.15;st<=3.2;st+=.15){const sx=p.x+d[0]*st,sy=p.y+d[1]*st,sz=p.z+d[2]*st;
+  if(SF(sx,sy+.55,sz)<-.45&&SF(sx,sy+1.05,sz)<-.4){p.set(sx,sy,sz);vel.set(0,0,0);return true}}
+ return false}
 function solidPush(p){for(let it=0;it<3;it++){let hit=false;
  for(const[hy,r]of[[.55,.4],[1.05,.36]]){const y=p.y+hy,f=SF(p.x,y,p.z);if(f<=-r)continue;
   const g=SGrad(p.x,y,p.z);const gl=Math.hypot(g[0],g[1],g[2])||1;let nx=-g[0]/gl,ny=-g[1]/gl,nz=-g[2]/gl;
