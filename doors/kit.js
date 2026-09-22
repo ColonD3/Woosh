@@ -65,7 +65,7 @@ function meshOf(geos,mat,opt={}){const g=merge(geos);if(opt.ao)ao(g,...opt.ao);c
 const rivet=(p,rad=.022,t='#5a5550')=>xf(sph(rad,{ws:6,hs:4,tint:t,s:[1,.6,1]}),p,[Math.PI/2,0,0]);
 
 // palette
-const P={oak:'#c49464',oakD:'#8e6038',oakDD:'#5e3d24',pine:'#d8b07a',iron:'#6c6f73',ironD:'#56595f',stone:'#a49c90',stoneD:'#857d72',rope:'#cdb27c',clay:'#a88f7c',ash:'#3a302a'};
+const P={oak:'#c49464',oakD:'#8e6038',oakDD:'#5e3d24',pine:'#d8b07a',iron:'#6c6f73',ironD:'#56595f',stone:'#8f877b',stoneD:'#766f65',rope:'#cdb27c',clay:'#a88f7c',ash:'#3a302a'};
 
 // =====================================================================
 // FENCE (one segment, x in [-.5,.5]) + team cap geometry
@@ -116,7 +116,7 @@ function wall(L,H,T,concrete,sd){reseed(sd||1);const woodP=[],stoneP=[],ironP=[]
  stoneP.push(rbox(L+T*.3,H-.1,T*.78,{r:.03,tint:'#6d665c',m:1,wear:0}));
  const top=H/2-.22,x0=-L/2+.05,x1=L/2-.05;let y=y0+.15,row=0;
  while(y<top-.12){const ch=Math.min(rr(.32,.42),top-y);let x=x0+(row%2?-rr(.1,.25):0);
-  while(x<x1-.05){let w=rr(.42,.78);const xa=Math.max(x,x0),xb=Math.min(x+w,x1);if(xb-xa>.12){const tint=[P.stone,'#968e82','#afa697','#8c8479'][Math.floor(R()*4)];
+  while(x<x1-.05){let w=rr(.42,.78);const xa=Math.max(x,x0),xb=Math.min(x+w,x1);if(xb-xa>.12){const tint=[P.stone,'#81796e','#9a9183','#7a7369'][Math.floor(R()*4)];
     stoneP.push(xf(rbox(xb-xa-.035,ch-.035,T*rr(.95,1.08),{r:.055,m:1,tint,vary:.07,ts:.9,wear:.6}),[(xa+xb)/2,y+ch/2,rr(-.018,.018)],[rr(-.02,.02),rr(-.02,.02),rr(-.015,.015)]))}x+=w}
   y+=ch;row++}
  for(const sx of[-1,1])woodP.push(xf(rbox(.3,H+.15,T*1.12,{r:.05,tint:P.oakD,vary:.06,grain:1}),[sx*(L/2+T*.15),.07,0]));

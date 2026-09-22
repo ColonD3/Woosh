@@ -559,7 +559,7 @@ water.rotation.x=-Math.PI/2;water.position.y=-.2;water.material.uniforms.size.va
 // ---------- grass ----------
 const hTex=new THREE.DataTexture((()=>{const d=new Float32Array(N*N*4);for(let k=0;k<N*N;k++)d[k*4]=H[k];return d})(),N,N,THREE.RGBAFormat,THREE.FloatType);
 hTex.magFilter=hTex.minFilter=THREE.NearestFilter;hTex.needsUpdate=true;
-const R=TOUCH?22:30,COUNT=+QP.get('g')||(TOUCH?36000:150000),GBASE=TOUCH?30000:110000;
+const R=TOUCH?22:30,COUNT=+QP.get('g')||(TOUCH?60000:250000),GBASE=TOUCH?50000:190000;
 const bg=new THREE.InstancedBufferGeometry();
 {const Ys=[0,.34,.61,.83,1],Ws=[1,.88,.64,.36,0];const pv=[],ix=[];for(let i=0;i<5;i++){if(i<4)pv.push(-.5*Ws[i],Ys[i],0,.5*Ws[i],Ys[i],0);else pv.push(0,1,0)}for(let i=0;i<3;i++){const a=i*2;ix.push(a,a+1,a+2,a+2,a+1,a+3)}ix.push(6,7,8);bg.setAttribute('position',new THREE.Float32BufferAttribute(pv,3));bg.setIndex(ix)}
 {const o=new Float32Array(COUNT*4);for(let i=0;i<COUNT;i++){o[i*4]=(Math.random()*2-1)*R;o[i*4+1]=(Math.random()*2-1)*R;o[i*4+2]=Math.random()*6.283;o[i*4+3]=Math.random()}
@@ -587,6 +587,7 @@ float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
 void main(){
  vec2 w=pPos.xz+mod(offset.xy-pPos.xz+R,2.*R)-R;
+ float keep=mix(1.,.3,smoothstep(6.,R*.95,length(w-pPos.xz)));if(fract(offset.w*7.13+offset.z*.311)>keep){gl_Position=vec4(0.,0.,-2.,1.);return;}
  float h=hgt(w);float e=.6;float sl=length(vec2(hgt(w+vec2(e,0))-hgt(w-vec2(e,0)),hgt(w+vec2(0,e))-hgt(w-vec2(0,e))))/(2.*e);
  float mask=smoothstep(.7,1.4,h)*(1.-smoothstep(9.,11.5,h))*(1.-smoothstep(.42,.62,sl));
  {vec4 wy=texture2D(wayT,(w+S*.5)/S);mask*=1.-smoothstep(.25,.7,max(wy.r*1.1,wy.g));mask*=1.-step(.4,texture2D(cvM,(w+S*.5)/S).r);}float pd=length(w-pPos.xz);mask*=1.-smoothstep(R*.72,R,pd);
@@ -594,7 +595,7 @@ void main(){
  vec3 bb0=texture2D(bioT,(w+S*.5)/S).rgb;float seed=step(.972,offset.w)*smoothstep(.5,.62,bb0.r);vSeed=seed;
  float tall=(.22+offset.w*.2)*mask*(.8+.4*vn(w*.07+3.))*(.78+.44*clump)*(1.+seed*.55);
  float c=cos(offset.z),s=sin(offset.z);
- vec3 p=position;float y=p.y;float wid=(.062+.04*hash(offset.xy))*mix(1.,2.3,smoothstep(7.,R*.9,pd))*(1.+seed*.3);
+ vec3 p=position;float y=p.y;float wid=(.07+.045*hash(offset.xy))/pow(keep,.85)*(1.+seed*.3);
  vec3 lp=vec3(p.x*wid*c,y*tall,p.x*wid*s);
  vec2 wdir=normalize(vec2(.85,.45));
  float gust=vn(w*.045-wdir*time*.55);gust=smoothstep(.35,.95,gust);vGust=gust;
@@ -773,13 +774,14 @@ const TMAX=240;
 // the critter: a rolling ball with floppy legs that plant themselves on the ground (claude-logo energy)
 const LEG_N=14,BR=.33,LL=.44;
 const legGeo=new THREE.LatheGeometry([[0,0],[.078,.015],[.088,.25],[.074,.7],[.052,.92],[.028,.985],[0,1]].map(p=>new THREE.Vector2(p[0],p[1])),10);
-const bodyGeo=new THREE.SphereGeometry(BR,28,18),eyeGeo=new THREE.SphereGeometry(.05,12,8),glintGeo=new THREE.SphereGeometry(.016,8,6);
+const bodyGeo=new THREE.SphereGeometry(BR,40,28),eyeGeo=new THREE.SphereGeometry(.05,12,8),glintGeo=new THREE.SphereGeometry(.016,8,6);
 const LEG_DIRS=[];for(let i=0;i<LEG_N;i++){const y=1-(i+.5)/LEG_N*2,r=Math.sqrt(1-y*y),a=i*2.39996;LEG_DIRS.push(new THREE.Vector3(Math.cos(a)*r,y,Math.sin(a)*r))}
 const _rv=new THREE.Vector3(),_v=new THREE.Vector3(),_w=new THREE.Vector3(),_q=new THREE.Quaternion(),UP=new THREE.Vector3(0,1,0);
 function makeAvatar(hex){const col=L(hex);const g=new THREE.Group();const core=new THREE.Group();core.position.y=BR+LL*.5;g.add(core);
- const bodyM=new THREE.MeshStandardMaterial({color:col,roughness:.45});const legM=new THREE.MeshStandardMaterial({color:col.clone().offsetHSL(0,.02,-.04),roughness:.5});
+ const bodyM=new THREE.MeshPhysicalMaterial({color:col,roughness:.5,sheen:1,sheenRoughness:.45,sheenColor:col.clone().offsetHSL(0,-.1,.18),clearcoat:.2,clearcoatRoughness:.35});const legM=new THREE.MeshPhysicalMaterial({color:col.clone().offsetHSL(0,.02,-.05),roughness:.55,sheen:.8,sheenRoughness:.5,sheenColor:col.clone().offsetHSL(0,-.1,.12)});
  const bm=new THREE.Mesh(bodyGeo,bodyM);bm.castShadow=true;core.add(bm);
  const face=new THREE.Group();face.position.y=BR+LL*.5;g.add(face);const eyeM=new THREE.MeshBasicMaterial({color:'#1d1612'}),glM=new THREE.MeshBasicMaterial({color:'#ffffff'});
+ {const chM=new THREE.MeshBasicMaterial({color:col.clone().lerp(new THREE.Color('#ff7f93'),.55),transparent:true,opacity:.75,depthWrite:false});[-1,1].forEach(sx=>{const x=sx*.19,y=-.035,z=Math.sqrt(Math.max(0,BR*BR-x*x-y*y))*.985;const ch=new THREE.Mesh(eyeGeo,chM);ch.position.set(x,y,z);ch.scale.set(1.25,.7,.25);ch.lookAt(x*2,y*2,z*2);ch.scale.set(1.25,.7,.25);face.add(ch)})}
  const eyes=[];[-.1,.1].forEach(x=>{const e=new THREE.Mesh(eyeGeo,eyeM);e.position.set(x,.07,BR*.9);e.scale.set(1,1.25,.6);face.add(e);eyes.push(e);const gl=new THREE.Mesh(glintGeo,glM);gl.position.set(x+.018,.1,BR*.9+.03);face.add(gl)});
  const legs=LEG_DIRS.map(d=>{const m=new THREE.Mesh(legGeo,legM);m.castShadow=true;g.add(m);return{d,m,tip:new THREE.Vector3(),tv:new THREE.Vector3(),foot:new THREE.Vector3(),planted:false,init:false}});
  scene.add(g);
