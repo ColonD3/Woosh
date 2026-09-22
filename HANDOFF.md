@@ -10,6 +10,7 @@
 - Grass: 9-vertex curved blades, rounded normals, wrap lighting + sun sheen, stronger root AO, rare seed heads in the golden biome. Distance LOD culls far blades early in the vertex shader and widens the survivors, so near grass is ~2x denser for about the same cost. Blade count follows the quality tier (`[.45,.7,1,1.35] * GBASE`); `?g=N` pins it.
 - Wooshi: physical material with sheen + light clearcoat, blush cheeks. Enemies: horns, claws, smoother limbs.
 - Rollback: `/test/v82/` is the exact pre-kit build.
+- Music is OFF by default (v84). A one-time `wd_musoff` flag also turned it off for anyone who had it saved on; the slider in settings turns it back on and that sticks. The track is only downloaded once music is above 0.
 
 ## How to work on it
 - Source: ~/Claude/paper-meadow on Toby's mac. The game is `doors/index.html` (the "doors" fork). Root `index.html` = old paper.io woosh, leave it alone.
