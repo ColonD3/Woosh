@@ -623,7 +623,7 @@ void main(){
  c=mix(c,vT.rgb*(.4+.55*vY),vT.a*.62);
  c=pow(c,vec3(2.2));
  float shd=vSh;if(sOn>.5&&vSc.x>0.&&vSc.x<1.&&vSc.y>0.&&vSc.y<1.&&vSc.z<1.){vec2 ds=unpackRGBATo2Half(texture2D(sMap,vSc.xy));float cmp=vSc.z-.0015;float lit=1.;if(step(cmp,ds.x)<1.){float dd=cmp-ds.x,vv=max(0.,ds.y*ds.y);lit=clamp((vv/(vv+dd*dd)-.3)/.65,0.,1.);}shd=min(shd,lit);}
- float sh=mix(.3,1.,shd);vec3 N=normalize(vN);if(!gl_FrontFacing)N.xz=-N.xz;float nl=clamp((dot(N,sunDir)+.55)/1.55,0.,1.);
+ float sh=mix(.36,1.,shd);vec3 N=normalize(vN);if(!gl_FrontFacing)N.xz=-N.xz;float nl=clamp((dot(N,sunDir)+.55)/1.55,0.,1.);
  c*=sh*mix(.5,1.,smoothstep(0.,.6,vY))*mix(.78,1.14,nl*shd);
  {vec3 V=normalize(camPos-vWP);vec3 Hh=normalize(sunDir+V);float sp=pow(max(dot(N,Hh),0.),36.)*vY*vY*shd;c+=vec3(.05,.055,.035)*sp;}
  c+=vec3(1.,.8,.35)*vGlow*pow(vY,2.)*.35*sh;
@@ -2309,13 +2309,14 @@ addEventListener('keydown',e=>{if(e.code!=='KeyZ'||e.repeat||!started||e.target.
  fadeDo(()=>{act({a:'sleep'});mySpawn=[+pos.x.toFixed(2),+pos.z.toFixed(2)];if(W.cur)W.cur.spawn=mySpawn;ST.hp=20;ST.stam=100;renderStats();sfx.play('capture',.4,.8);showBanner('good morning','you slept · spawn set')},700)});
 function showBanner(t,sub){const b=$('banner');b.innerHTML=(sub?`<small>${sub}</small>`:'')+t;b.hidden=false;b.style.animation='none';void b.offsetWidth;b.style.animation='';clearTimeout(showBanner._t);showBanner._t=setTimeout(()=>b.hidden=true,2400)}
 // ---- enemies: shades roam the surface at night, crawlers live in caves. click to hit them with whatever you hold
-const ENEM=[];const enGeo=new THREE.SphereGeometry(.42,16,12);const enEye=new THREE.SphereGeometry(.07,8,6);let enNid=1;
+const ENEM=[];const enGeo=new THREE.SphereGeometry(.42,26,18);const enHorn=(()=>{const g=new THREE.ConeGeometry(.055,.3,8,3);const p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i)+.15;p.setX(i,p.getX(i)+y*y*.5)}g.computeVertexNormals();return g})();const enClaw=new THREE.ConeGeometry(.028,.16,6);const enEye=new THREE.SphereGeometry(.07,8,6);let enNid=1;
 function makeEnemy(x,y,z,cave,id){const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color:cave?'#3b3552':'#26213a',roughness:.35,emissive:'#000',transparent:true,opacity:0});const b=new THREE.Mesh(enGeo,m);b.scale.set(1,.8,1);b.position.y=.34;b.castShadow=true;g.add(b);
  const em=new THREE.MeshBasicMaterial({color:cave?'#9dff7a':'#ff5a3c',transparent:true,opacity:0});for(const sx of[-.14,.14]){const e=new THREE.Mesh(enEye,em);e.position.set(sx,.44,.34);g.add(e)}
  b.position.y=.95;b.scale.set(.85,1,.8);for(const e of g.children)if(e!==b)e.position.y+=.62;
- const limb=(len,w)=>{const gg=new THREE.CylinderGeometry(w,w*.8,len,6);gg.translate(0,-len/2,0);return gg};const lg=limb(.62,.07),ag=limb(.55,.055);const L=[],A=[];
+ for(const sx of[-1,1]){const h=new THREE.Mesh(enHorn,m);h.position.set(sx*.17,1.3,.02);h.rotation.set(-.25,sx>0?0:Math.PI,-sx*.35);h.castShadow=true;g.add(h)}
+ const limb=(len,w)=>{const P=[[0,0],[w*.9,-.02],[w,-len*.15],[w*.72,-len*.45],[w*.95,-len*.52],[w*.7,-len*.62],[w*.62,-len*.95],[0,-len]].reverse().map(q=>new THREE.Vector2(q[0],q[1]));return new THREE.LatheGeometry(P,10)};const lg=limb(.62,.07),ag=limb(.55,.055);const L=[],A=[];
  for(const sx of[-.16,.16]){const l=new THREE.Group();l.position.set(sx,.62,0);const lm=new THREE.Mesh(lg,m);lm.castShadow=true;l.add(lm);g.add(l);L.push(l);
-  const a=new THREE.Group();a.position.set(sx*2.1,1.12,0);const am=new THREE.Mesh(ag,m);am.castShadow=true;a.add(am);const hand=new THREE.Mesh(enEye,m);hand.scale.setScalar(1.3);hand.position.y=-.57;a.add(hand);g.add(a);A.push(a)}
+  const a=new THREE.Group();a.position.set(sx*2.1,1.12,0);const am=new THREE.Mesh(ag,m);am.castShadow=true;a.add(am);const hand=new THREE.Mesh(enEye,m);hand.scale.setScalar(1.1);hand.position.y=-.57;a.add(hand);for(let k=-1;k<=1;k++){const cl=new THREE.Mesh(enClaw,m);cl.position.set(k*.045,-.66,.02);cl.rotation.set(Math.PI+.25,0,k*.3);a.add(cl)}g.add(a);A.push(a)}
  g.position.set(x,y,z);scene.add(g);const en={L,A,wp:Math.random()*6,chase:0,id:id||enNid++,g,b,m,em,hp:cave?5:4,cave,cd:0,fl:0,a:0,ph:Math.random()*6,vx:0,vz:0,die:0,tp:new THREE.Vector3(x,y,z),try:0};ENEM.push(en);return en}
 function enAnim(en,dt,t,spd,chasing){en.chase+=((chasing?1:0)-en.chase)*Math.min(1,dt*5);en.wp+=dt*(2+spd*3.2);const sw=Math.sin(en.wp)*Math.min(1,spd/2)*.75;
  en.L[0].rotation.x=sw;en.L[1].rotation.x=-sw;const up=Math.PI*.92,fw=Math.PI*.5;for(let k=0;k<2;k++){const a=en.A[k];const idle=up+Math.sin(t*3+en.ph+k*1.7)*.18;a.rotation.x=idle*(1-en.chase)+(fw+Math.sin(en.wp+k*Math.PI)*.12)*en.chase;a.rotation.x*=-1;a.rotation.z=(k?-1:1)*(.25*(1-en.chase)+.05)}

@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><title>woosh workshop</title>
+<style>html,body{margin:0;background:#9fb6c9;overflow:hidden}canvas{display:block}</style></head><body>
+<script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+import {makeKit} from './kit.js';
+const QP=new URLSearchParams(location.search);
+const W=+QP.get('w')||1400,H=+QP.get('h')||900;
+const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setSize(W,H);r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=.92;document.body.appendChild(r.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#a9bfd0');
+const TL=new THREE.TextureLoader();let pending=0;
+const tex=(f,srgb)=>{pending++;const t=TL.load('../assets/'+f,()=>{pending--},undefined,()=>{pending--;console.error('tex fail '+f)});t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t};
+const K=makeKit(THREE,BGU,tex);
+scene.add(new THREE.HemisphereLight('#d4dae2','#8a7462',.9));
+const sun=new THREE.DirectionalLight('#ffe2b4',4.2);sun.position.set(8,12,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-12,right:12,top:12,bottom:-12});sun.shadow.bias=-.0005;sun.shadow.normalBias=.03;scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:'#6f8a45',roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const vineMat=new THREE.MeshStandardMaterial({color:'#5f9a3a',roughness:.8});
+const fireMat=new THREE.MeshStandardMaterial({color:'#ff9a3c',emissive:'#ff5a10',emissiveIntensity:1.5});
+const items={};
+const place=(k,o,x,z,ry=0)=>{o.position.set(x,o.position.y,z);o.rotation.y=ry;scene.add(o);items[k]=o;return o};
+// door + walls (little house corner)
+{const d=K.door(false,1.5);place('door',d.g,-6,0);d.hinge.rotation.y=-.5;
+ const wl=K.wall(3.2,3.1,.42,false,3);wl.position.y=1.15;place('wall',wl,-3.6,0);
+ const d2=K.door(true,1.5);place('idoor',d2.g,2.5,0);const wc=K.wall(3.2,3.1,.42,true,4);wc.position.y=1.15;place('cwall',wc,4.9,0);}
+{const f=K.fence();const g=new THREE.Group();for(let i=0;i<4;i++){const m=new THREE.Mesh(f.geo,K.M.wood);m.position.x=i;m.castShadow=true;g.add(m);const rp=new THREE.Mesh(f.rope,K.M.cloth);rp.position.x=i;g.add(rp);const c=new THREE.Mesh(f.cap,new THREE.MeshStandardMaterial({color:'#e8553a',vertexColors:true,roughness:.5}));c.position.x=i;g.add(c)}place('fence',g,-6,4)}
+{const c=K.chest(new THREE.MeshStandardMaterial({color:'#3aa7ff',roughness:.5,emissive:'#0a3a66',emissiveIntensity:.4}));place('chest',c,-1.5,4,.3)}
+{const c=K.cooker(fireMat);place('cooker',c.g,1.2,4,-.3)}
+{const d=K.drill(vineMat);place('drill',d.g,4,4,-.2)}
+{const m=K.mixer(new THREE.MeshStandardMaterial({color:'#6b6552',roughness:1}));place('mixer',m.g,6.3,4,.4)}
+{const t=K.torch();const g=new THREE.Group();g.add(new THREE.Mesh(t.stick,K.M.wood));const f=new THREE.Mesh(t.flame,new THREE.MeshBasicMaterial({color:new THREE.Color(4,2.1,.7)}));f.position.y=.98;g.add(f);place('torch',g,-3,6.5)}
+{const g=new THREE.Group();const a=new THREE.Mesh(K.rockItem(),K.M.stone);a.position.set(0,.2,0);const b=new THREE.Mesh(K.sack('#3a3845'),K.M.cloth);b.position.set(.6,.16,0);const c=new THREE.Mesh(K.bomb(),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.4,metalness:.3}));c.position.set(1.2,.22,0);for(const m of[a,b,c]){m.castShadow=true;g.add(m)}place('items',g,-1.5,6.5)}
+// roof preview on a square
+{const E=[[-2,2.2,-2],[2,2.2,-2],[2,2.2,2],[-2,2.2,2]];const rm=new THREE.MeshStandardMaterial({map:tex('stylized/hay_roof_01/color.jpg',1),normalMap:tex('stylized/hay_roof_01/normal.jpg'),roughness:.95,side:THREE.DoubleSide,color:'#f4e3c0'});
+ const pos=[],uv=[];const ap=[0,4,0];for(let i=0;i<4;i++){const a=E[i],b=E[(i+1)%4];pos.push(...a,...b,...ap);uv.push(0,0,2,0,1,2)}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();
+ const grp=new THREE.Group();grp.add(new THREE.Mesh(g,rm));grp.add(K.roofTrim(E,ap,false,rm,null));place('roof',grp,-7,-8);
+ const mm=new THREE.MeshStandardMaterial({color:'#c9d2d8',roughness:.6,metalness:.5,side:THREE.DoubleSide});const grp2=new THREE.Group();grp2.add(new THREE.Mesh(g.clone(),mm));grp2.add(K.roofTrim(E,ap,true,null,mm));place('mroof',grp2,-1,-8)}
+const cam=new THREE.PerspectiveCamera(40,W/H,.1,200);
+const V=QP.get('view')||'all';const T0=items[V];
+if(T0){const b=new THREE.Box3().setFromObject(T0);const c=b.getCenter(new THREE.Vector3());const s=b.getSize(new THREE.Vector3()).length();const a=+QP.get('a')||0.6;cam.position.set(c.x+Math.sin(a)*s*1.2,c.y+s*.45,c.z+Math.cos(a)*s*1.2);cam.lookAt(c)}
+else{cam.position.set(0,9,16);cam.lookAt(0,1,2)}
+const go=()=>{if(pending>0)return setTimeout(go,100);r.render(scene,cam);r.render(scene,cam);document.title='ready'};setTimeout(go,300);
+window.onerror=(m)=>{document.title='ERR '+m};
+</script></body></html>

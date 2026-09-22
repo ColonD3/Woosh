@@ -1,4 +1,15 @@
-# woosh — where we left off (Sept 20, 2026 · v82)
+# woosh — where we left off (Sept 22, 2026 · v83)
+
+## v83 — model kit + grass (Sept 22, 2026)
+- **Every placeable model now comes from `doors/kit.js`** (`makeKit(THREE,BGU,tex)` → `KIT.door / wall / roofTrim / chest / cooker / drill / mixer / torch / fence / rockItem / sack / bomb`). Built from bevelled boxes (`rbox`), lathes, tubes; merged per material, so each object is a handful of draw calls.
+- One wood / stone / iron / cloth material serves everything. Tint, worn light edges and ground-contact AO are baked into **vertex colours** — change a colour in the `P` palette at the top of kit.js, not the materials.
+- Textures are generated (neutral, tintable): `assets/stylized/kit/*.webp`, script `assets/stylized/kit/gentex.py`. They live under assets/stylized so push.sh already ships them.
+- Animated parts keep the old names/pivots: door `hinge`, drill `gear/crank/shaft`, mixer `paddle/mix`, cooker `fire`. Walls seed their stone layout from the wall id, so they look the same for everyone.
+- `doors/workshop.html` renders every kit model on a turntable scene (`?view=door|chest|cooker|drill|mixer|roof|fence|items&a=angle`) — use it to iterate on models without loading the game.
+- `?dev` adds `__dev.showcase(iron)` (builds a full house/factory + chest, cooker, drill, mixer, torches 7m in front of you) and `__dev.build(msg)`.
+- Grass: 9-vertex curved blades, rounded normals, wrap lighting + sun sheen, stronger root AO, rare seed heads in the golden biome. Distance LOD culls far blades early in the vertex shader and widens the survivors, so near grass is ~2x denser for about the same cost. Blade count follows the quality tier (`[.45,.7,1,1.35] * GBASE`); `?g=N` pins it.
+- Wooshi: physical material with sheen + light clearcoat, blush cheeks. Enemies: horns, claws, smoother limbs.
+- Rollback: `/test/v82/` is the exact pre-kit build.
 
 ## How to work on it
 - Source: ~/Claude/paper-meadow on Toby's mac. The game is `doors/index.html` (the "doors" fork). Root `index.html` = old paper.io woosh, leave it alone.
