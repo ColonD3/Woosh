@@ -10,7 +10,9 @@ Open `index.html` in any modern browser.
 |---|---|
 | shapes | process, decision, start/end, data, note, text |
 | place | pick a tool and click, or drag to size. Double-click the canvas for a new process. |
-| connect | hover a shape and drag from a handle onto another shape. Drop on empty space to create a new connected shape. |
+| connect | drag from anywhere on a shape. The connector leaves from whichever side you grabbed closest to, and that side's handle lights up as you hover. Drop on another shape to connect, or on empty space to create a new connected shape. |
+| move | click a shape to select it, then drag. Or drag its grip (top left corner). Settings > canvas > drag from a shape switches body drags to move instead of wire. |
+| boards | the grid key in the top bar (or B) opens the boards page: thumbnails, search, sort, rename in place, duplicate and delete (press twice). Opening a file creates a new board instead of replacing the current one. Boards autosave in the browser. |
 | connectors | elbow, curve or line. Optional arrowhead and label. They re-route when shapes move. |
 | canvas | infinite. Scroll or pinch to zoom around the cursor. Drag the background, hold space, or right-drag to pan. |
 | edit | select, marquee (Shift-drag), resize handles, tints, duplicate, copy/paste, undo/redo, arrow-key nudge, snap-to-grid |
