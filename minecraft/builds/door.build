@@ -1,0 +1,44 @@
+# 2x2 flush piston door, hidden redstone behind the wall. 10 wide (x), 6 deep (z), 4 tall.
+# wall is row z=1, doorway is x=4..5. walk through north<->south.
+# lever ON = door closed (pistons extended), lever OFF = open.
+# power: lever -> trunk at z=4 -> each side has a block behind the top piston (fed from behind)
+# and a block behind the bottom piston (fed from the outside end), all pointing at the pistons.
+palette:
+S smooth_stone
+B stone_bricks
+E sticky_piston[facing=east]
+W sticky_piston[facing=west]
+D redstone_wire
+L lever[face=floor,facing=north,powered=false]
+
+layer 0
+SSSSSSSSSS
+SSSSSSSSSS
+SSSSSSSSSS
+SSSSSSSSSS
+SSSSSSSSSS
+SSSSSSSSSS
+
+layer 1
+..........
+..EB..BW..
+DDS....SDD
+D.S....S.D
+SSSSSSSSSS
+.....S....
+
+layer 2
+..........
+..EB..BW..
+..S....S..
+..D....D..
+DDDDDDDDDD
+.....L....
+
+layer 3
+..........
+..SSSSSS..
+..........
+..........
+..........
+..........
