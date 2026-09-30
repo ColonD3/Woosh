@@ -332,6 +332,7 @@ function fb(kind){
 /* ============ doc, history ============ */
 const SIZE={proc:[160,64],dec:[160,112],term:[140,52],data:[172,64],sticky:[160,120],text:[160,32]};
 const NAMES={proc:'process',dec:'decision',term:'start / end',data:'data',sticky:'note',text:'text'};
+const FRESH=!store.get('orchid.board',null);
 let doc=store.get('orchid.board',null)||{name:'',nodes:[],edges:[]};
 let hist=[],hix=-1;
 const S={n:new Set(),e:null};
@@ -822,7 +823,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.tool){fb('tap');setTool(b.dataset.tool);return}
   if(b.dataset.go){go(b.dataset.go);return}
-  if('back' in b.dataset){history.back();return}
+  if('back' in b.dataset){back();return}
   if(b.dataset.tb){tb(b);return}
   const a=b.dataset.act;if(!a)return;
   ({undo,redo,tidy,example,
@@ -855,7 +856,7 @@ addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea'))return;
   const m=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();
   if(k===' '&&cur==='board'){spaceDown=true;e.preventDefault();return}
-  if(k==='escape'){if(cur!=='board')history.back();else if(S.n.size||S.e){S.n.clear();S.e=null;requestRender()}else if(tool!=='select')setTool('select');return}
+  if(k==='escape'){if(cur!=='board')back();else if(S.n.size||S.e){S.n.clear();S.e=null;requestRender()}else if(tool!=='select')setTool('select');return}
   if(cur!=='board'){if(m&&k==='e'){e.preventDefault()}return}
   if(m&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
   if(m&&k==='y'){e.preventDefault();redo();return}
@@ -911,15 +912,17 @@ const pages={board:$('#pg-board'),settings:$('#pg-settings'),export:$('#pg-expor
 let cur='board';
 function go(name,pop){
   if(name===cur)return;const from=pages[cur],to=pages[name],prev=cur;cur=name;
-  if(!pop){history.pushState({p:name},'')}
+  if(!pop){stack.push(prev);try{history.pushState({p:name},'')}catch{pushOk=false}}
   commitEdit();fb('tap');
   from.classList.add('out');to.hidden=false;to.classList.add('out');void to.offsetWidth;to.classList.remove('out');
   const dur=motion()==='full'?360:motion()==='reduced'?130:0;
   setTimeout(()=>{if(cur!==prev)from.hidden=true},dur);
   if(name==='board'){setTimeout(()=>requestRender(),0)}
 }
-addEventListener('popstate',e=>go(e.state?.p||'board',true));
-history.replaceState({p:'board'},'');
+const stack=[];let pushOk=true;
+function back(){if(cur==='board')return;if(pushOk)history.back();else go(stack.pop()||'board',true)}
+addEventListener('popstate',e=>{stack.pop();go(e.state?.p||'board',true)});
+try{history.replaceState({p:'board'},'')}catch{pushOk=false}
 
 /* settings ui */
 function setSeg(el,v){
@@ -960,8 +963,17 @@ const FORMATS=[
   ['dot','graphviz','dot language. .gv','text/plain'],
   ['json','board file','native orchid file. reopen and keep editing. .json','application/json']
 ];
-$('#xlist').innerHTML=FORMATS.map(([id,name,desc])=>`<div class="row"><div class="t"><b>${name}</b><span class="hint">${desc}</span></div><button class="key" data-x="${id}"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span>save</span></button></div>`).join('');
-document.addEventListener('click',e=>{
+const TEXTF=['svg','drawio','mermaid','dot','json'];
+$('#xlist').innerHTML=FORMATS.map(([id,name,desc])=>`<div class="row"><div class="t"><b>${name}</b><span class="hint">${desc}</span></div><div class="group">${TEXTF.includes(id)?`<button class="key" data-copy="${id}" data-tip="copy as text"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg><span>copy</span></button>`:''}<button class="key" data-x="${id}"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span>save</span></button></div></div>`).join('');
+document.addEventListener('click',async e=>{
+  const c=e.target.closest('[data-copy]');
+  if(c){
+    try{
+      if(!doc.nodes.length&&c.dataset.copy!=='json'){toast('nothing to copy. add a shape',true);fb('error');return}
+      const r=await buildExport(c.dataset.copy);await navigator.clipboard.writeText(await r.blob.text());toast('copied '+c.dataset.copy);fb('success');
+    }catch{toast("couldn't copy. try save",true);fb('error')}
+    return;
+  }
   const b=e.target.closest('[data-x]');if(!b)return;
   doExport(b.dataset.x).then(ok=>{
     if(ok===false)return;const sp=$('span',b),old=sp.textContent;sp.textContent='saved';fb('success');
@@ -970,8 +982,15 @@ document.addEventListener('click',e=>{
   });
 });
 const fname=ext=>((doc.name||'orchid-flow').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'orchid-flow')+'.'+ext;
-function saveBlob(blob,name){
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+let DL=null;
+try{window.claude?.use?.('downloads').then(d=>{DL=d}).catch(()=>{})}catch{}
+const DL_OK=['gif','png','jpg','jpeg','webp','mp4','webm','txt','json','md','docx','pptx','epub','csv','ttf','html','svg','pdf','xlsx','zip'];
+async function saveBlob(blob,name){
+  if(DL){
+    if(!DL_OK.includes(name.split('.').pop()))name+='.txt';
+    await DL.save({filename:name,data:blob});return name;
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);return name;
 }
 function xcolors(){const dark=(P.xtheme||(C.dark?'dark':'light'))==='dark';return colorsFor(dark,P.accent)}
 async function svgToCanvas(svgStr,w,h,scale,bg){
@@ -997,8 +1016,10 @@ async function doExport(fmt){
   try{
     if(fmt!=='json'&&!doc.nodes.length){toast('nothing to export. add a shape',true);fb('error');return false}
     const r=await buildExport(fmt);if(!r)return false;
-    const name=fname(r.ext);saveBlob(r.blob,name);toast('saved '+name+' '+hhmm());return true;
-  }catch(err){console.error(err);toast('export failed. retry?',true);fb('error');return false}
+    const name=await saveBlob(r.blob,fname(r.ext));toast('saved '+name+' '+hhmm());return true;
+  }catch(err){
+    if(err&&err.code==='declined'){toast('cancelled');return false}
+    console.error(err);toast('export failed. retry?',true);fb('error');return false}
 }
 function makePdf(jpg,pxw,pxh,ptw,pth){
   const enc=new TextEncoder(),parts=[],offs=[];let len=0;
@@ -1120,7 +1141,7 @@ async function importText(name,text){
     else if(t.startsWith('<'))d=await parseDrawio(t);
     else d=parseMermaid(t);
     if(!d.name)d.name=name.replace(/\.[^.]+$/,'').replace(/\.orchid$/,'');
-    doc=d;S.n.clear();S.e=null;syncName();snap();if(cur!=='board')history.back();setTimeout(fit,60);fb('success');toast('opened '+name);
+    doc=d;S.n.clear();S.e=null;syncName();snap();if(cur!=='board')back();setTimeout(fit,60);fb('success');toast('opened '+name);
   }catch(err){console.error(err);toast("couldn't read file. retry?",true);fb('error')}
 }
 $('#file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(f)importText(f.name,await f.text())});
@@ -1132,6 +1153,7 @@ addEventListener('drop',async e=>{e.preventDefault();const f=e.dataTransfer?.fil
   const st=$('#splashticks');ticks(st,20);syncName();
   if(!doc.nodes)doc={name:'',nodes:[],edges:[]};
   snap();hist=[hist[hix]];hix=0;refreshUndo();refreshSettings();
+  if(FRESH){const s0=P.sound;P.sound=false;example();P.sound=s0}
   fit();Object.assign(V,TV);ready=true;requestAnimationFrame(loop);
   let i=0;const quick=motion()==='off';
   const step=()=>{i++;setTicks(st,i/20);if(i<20)setTimeout(step,quick?0:34);else setTimeout(()=>{$('#splash').classList.add('gone');setTimeout(()=>$('#splash').remove(),400)},quick?0:120)};
