@@ -1,4 +1,3 @@
-# runs as the ingot, at the ingot. origin = the block space right above the iron block.
 execute align xyz run function woosh:build
 playsound minecraft:entity.firework_rocket.blast block @a ~ ~ ~ 1 1
 particle minecraft:happy_villager ~ ~ ~ 0.5 0.5 0.5 0 20
