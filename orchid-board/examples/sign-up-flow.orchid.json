@@ -1,0 +1,129 @@
+{
+  "format": "orchid-board",
+  "version": 1,
+  "name": "sign up flow",
+  "nodes": [
+    {
+      "id": "0851hlt",
+      "type": "term",
+      "x": 10,
+      "y": 0,
+      "w": 140,
+      "h": 52,
+      "text": "sign up",
+      "tint": null
+    },
+    {
+      "id": "o8ziid3",
+      "type": "dec",
+      "x": 0,
+      "y": 120,
+      "w": 160,
+      "h": 112,
+      "text": "email valid?",
+      "tint": null
+    },
+    {
+      "id": "6uqre7j",
+      "type": "proc",
+      "x": -260,
+      "y": 300,
+      "w": 160,
+      "h": 64,
+      "text": "show error",
+      "tint": null
+    },
+    {
+      "id": "wnwzymh",
+      "type": "data",
+      "x": -6,
+      "y": 300,
+      "w": 172,
+      "h": 64,
+      "text": "create account",
+      "tint": null
+    },
+    {
+      "id": "hgrg0b1",
+      "type": "proc",
+      "x": 0,
+      "y": 440,
+      "w": 160,
+      "h": 64,
+      "text": "send welcome email",
+      "tint": null
+    },
+    {
+      "id": "gy4x8m6",
+      "type": "term",
+      "x": 10,
+      "y": 570,
+      "w": 140,
+      "h": 52,
+      "text": "done",
+      "tint": "#b08cf0"
+    }
+  ],
+  "edges": [
+    {
+      "id": "vf4rzas",
+      "from": "0851hlt",
+      "to": "o8ziid3",
+      "fs": null,
+      "ts": null,
+      "label": "",
+      "style": "ortho",
+      "arrow": true
+    },
+    {
+      "id": "e4wi8at",
+      "from": "o8ziid3",
+      "to": "6uqre7j",
+      "fs": 3,
+      "ts": 0,
+      "label": "no",
+      "style": "ortho",
+      "arrow": true
+    },
+    {
+      "id": "3adk63h",
+      "from": "o8ziid3",
+      "to": "wnwzymh",
+      "fs": null,
+      "ts": null,
+      "label": "yes",
+      "style": "ortho",
+      "arrow": true
+    },
+    {
+      "id": "9wou0x2",
+      "from": "wnwzymh",
+      "to": "hgrg0b1",
+      "fs": null,
+      "ts": null,
+      "label": "",
+      "style": "ortho",
+      "arrow": true
+    },
+    {
+      "id": "j1xasxf",
+      "from": "hgrg0b1",
+      "to": "gy4x8m6",
+      "fs": null,
+      "ts": null,
+      "label": "",
+      "style": "ortho",
+      "arrow": true
+    },
+    {
+      "id": "0wphkdm",
+      "from": "6uqre7j",
+      "to": "0851hlt",
+      "fs": 3,
+      "ts": 3,
+      "label": "retry",
+      "style": "ortho",
+      "arrow": true
+    }
+  ]
+}

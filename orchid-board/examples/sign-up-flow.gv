@@ -1,0 +1,17 @@
+digraph flow {
+  rankdir=TB;
+  node [fontname="IBM Plex Mono", fontsize=11, style=filled, fillcolor="#e0e5ec", color="#8496b0", fontcolor="#2a3344"];
+  edge [color="#465370", fontname="IBM Plex Mono", fontsize=10];
+  n1 [label="sign up", shape=box, style="rounded,filled", peripheries=1];
+  n2 [label="email valid?", shape=diamond];
+  n3 [label="show error", shape=box, style="rounded,filled"];
+  n4 [label="create account", shape=parallelogram];
+  n5 [label="send welcome email", shape=box, style="rounded,filled"];
+  n6 [label="done", shape=box, style="rounded,filled", peripheries=1, fillcolor="#d4ceed"];
+  n1 -> n2;
+  n2 -> n3 [label="no"];
+  n2 -> n4 [label="yes"];
+  n4 -> n5;
+  n5 -> n6;
+  n3 -> n1 [label="retry"];
+}

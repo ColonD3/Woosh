@@ -1,0 +1,13 @@
+flowchart TD
+  n1(["sign up"])
+  n2{"email valid?"}
+  n3["show error"]
+  n4[/"create account"/]
+  n5["send welcome email"]
+  n6(["done"])
+  n1 --> n2
+  n2 -->|"no"| n3
+  n2 -->|"yes"| n4
+  n4 --> n5
+  n5 --> n6
+  n3 -->|"retry"| n1
