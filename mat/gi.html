@@ -1,0 +1,137 @@
+<!DOCTYPE html><body style="margin:0;background:#000"><canvas style="display:block;width:100vw;height:100vh"></canvas><script>
+c=document.querySelector('canvas');g=c.getContext('webgl2');g.getExtension('EXT_color_buffer_float');
+[a,K]=(location.hash.slice(1)+',').split(',');T=+a||0;K=+K;
+W=c.width=innerWidth;H=c.height=innerHeight;
+function C(fs){p=g.createProgram();[[35633,'#version 300 es\nin vec2 a;void main(){gl_Position=vec4(a,0,1);}'],[35632,'#version 300 es\nprecision highp float;out vec4 o;'+fs]].map(([t,s])=>{x=g.createShader(t);g.shaderSource(x,s);g.compileShader(x);g.attachShader(p,x);console.log(g.getShaderInfoLog(x))});g.bindAttribLocation(p,0,'a');g.linkProgram(p);return p}
+PT=C(`uniform vec2 R;uniform float T,Z,O,Q;uniform sampler2D P;
+vec3 sd,S;
+const vec3 LA=vec3(-3.56,1.1,-2.6),LB=vec3(3.56,2.3,-4.6);
+float h(vec3 p){p=fract(p*.1031);p+=dot(p,p.zyx+31.32);return fract((p.x+p.y)*p.z);}
+float rn(){sd.z+=1.;return h(sd);}
+vec3 rv(){return vec3(rn(),rn(),rn())*2.-1.;}
+float n(vec3 p){vec3 i=floor(p),f=fract(p);f*=f*f*(f*(f*6.-15.)+10.);
+return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+1.),f.x),f.y),f.z);}
+float F(vec3 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n(p);p=mat3(0,.8,.6,-.8,.36,-.48,-.6,-.48,.64)*p*2.02+.7;a*=.5;}return s*1.07;}
+vec3 W(vec3 p){vec3 i=floor(p),r=vec3(9,9,0);
+for(int x=-1;x<2;x++)for(int y=-1;y<2;y++)for(int z=-1;z<2;z++){vec3 g=vec3(x,y,z)+i;float d=length(g+vec3(h(g),h(g+7.1),h(g+13.7))-p);
+if(d<r.x){r.yx=vec2(r.x,d);r.z=h(g+3.3);}else r.y=min(r.y,d);}return r;}
+float bx(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}
+float cy(vec3 q,float r,float l){vec2 d=vec2(length(q.yz)-r,abs(q.x)-l)+.04;return min(max(d.x,d.y),0.)+length(max(d,0.))-.04;}
+vec2 u(vec2 a,float d,float i,float k){float m=clamp(.5+.5*(d-a.x)/k,0.,1.),s=mix(d,a.x,m)-k*m*(1.-m);a.y=d<a.x?i:a.y;a.x=s;return a;}
+vec3 Lg(vec3 p){p-=vec3(-2.7,.46,1.9);p.xz=mat2(.73,-.68,.68,.73)*p.xz;return p;}
+vec3 St(vec3 p){return(p-vec3(2.9,.14,1.8)).yxz;}
+vec2 M(vec3 p){vec2 r=vec2(p.y,abs(p.x)<3.7&&p.z<-.3&&p.z>-5.7?6.:4.);
+float w=bx(p-vec3(0,1.75,-3),vec3(4,1.75,3))-.02;
+w=max(w,-bx(p-vec3(0,1.625,-3),vec3(3.7,1.625,2.7)));
+w=max(w,-bx(vec3(p.x-clamp(floor(p.x/2.2+.5),-1.,1.)*2.2,p.y-3.3,p.z+3.-sign(p.z+3.)*1.3),vec3(.95,.17,1.15)));
+w=max(w,-bx(p-vec3(0,1.2,0),vec3(.9,1.2,.5)));
+w=max(w,-bx(vec3(abs(p.x)-2.2,p.y-1.7,p.z),vec3(.1,1.1,.5)));
+r=u(r,w,1.,.01);
+r=u(r,bx(p-vec3(O*1.85,1.2,-.36),vec3(.95,1.15,.045)),9.,.005);
+vec3 q=Lg(p);
+r=u(r,cy(q,.5+.03*n(q*2.),1.3),2.,.08);
+r=u(r,cy(St(p),.38,.16),3.,.05);
+r=u(r,length((p-vec3(1.4,.08,3.))*vec3(1,2,1))-.4,5.,.1);
+r=u(r,bx(p-LA,vec3(.14))-.015,8.,.004);
+r=u(r,bx(p-LB,vec3(.14))-.015,8.,.004);
+return r;}
+float D(vec3 p){return M(p).x;}
+vec3 col;float rg,bs,cp,mt;
+float H(float k,vec3 p){float h;mt=0.;
+if(k<1.5){vec3 q=p+.6*vec3(F(p*.7),F(p*.7+9.),0);
+h=.45*abs(n(q*2.2)*2.-1.)+.4*F(p*16.)+.15*n(p*75.);
+vec3 w=W(p*.8);float cr=smoothstep(.012,0.,w.y-w.x)*smoothstep(.45,.65,F(p*.5));h-=.3*cr;
+col=mix(vec3(.6,.49,.36),vec3(.92,.82,.66),smoothstep(.15,.85,h))*(.7+.6*F(p*.9))*(1.-.5*cr);
+rg=.9;bs=.03;}
+else if(k<3.5){vec3 q=Lg(p);if(k>2.5)q=St(p)*1.3;
+if(cp<.5){float w=n(q*vec3(.5,3,3));
+vec3 v=W(vec3(q.x*.22,q.yz*7.)+w*.45);
+float gr=smoothstep(0.,.3,v.y-v.x),f=F(q*vec3(1,9,9));
+h=gr*.8+.2*f;
+col=mix(vec3(.025,.018,.014),mix(vec3(.13,.08,.05),vec3(.36,.25,.16),f)*(.6+.7*v.z),smoothstep(0.,.4,gr));
+col=mix(col,vec3(.18,.28,.07),smoothstep(.62,.8,F(q*1.2+3.))*.6*gr);
+rg=.9;bs=.06;}
+else{vec2 c=q.yz-vec2(.05,-.03);float d=length(c),v=F(vec3(c*2.,2));
+float a=.5+.5*sin((d+.05*v)*46.+7.*v);a*=a;
+float cr=smoothstep(.05,0.,abs(n(vec3(c/(d+.02)*2.5,d*2.))-.5))*smoothstep(.06,.4,d);
+h=.55*a+.25*n(vec3(c*45.,q.x))-cr*.7;
+col=mix(vec3(.55,.37,.2),vec3(.9,.72,.48),a)*mix(.72,1.,smoothstep(.05,.4,d))*(.6+.6*h);
+col=mix(col,vec3(.3,.22,.16),smoothstep(.38,.5,d))*(1.-cr*.75);
+rg=.75;bs=.02;}}
+else if(k<4.5){vec3 w=W(p*9.);float pb=step(.4,w.z)*smoothstep(.4,.05,w.x);
+h=.5*F(p*1.7)+.28*F(p*5.5+2.)+.16*F(p*17.)+.1*n(p*55.)+.7*pb;
+float dm=smoothstep(.45,.7,F(p*.45+1.));
+col=mix(vec3(.12,.08,.05),vec3(.42,.31,.2),smoothstep(.1,.9,h-.7*pb))*(.8+.4*F(p*.6));
+col=mix(col,vec3(.08+.2*fract(w.z*13.))*vec3(1,.85,.65),step(.01,pb));
+col*=1.-.5*dm;rg=.95-.5*dm;bs=.04;}
+else if(k<5.5){vec3 w=W(p*2.4);float m=smoothstep(0.,.12,w.y-w.x);h=m*.6+.4*F(p*14.);
+col=mix(vec3(.12,.1,.09),vec3(.55,.5,.44)*(.55+.7*fract(w.z*9.)),m)*(.65+.7*F(p*22.));rg=.85;bs=.03;}
+else if(k<6.5){vec2 g=abs(fract(p.xz*.7)-.5);float sm=smoothstep(.47,.5,max(g.x,g.y));
+h=.5*F(p*2.)+.1*n(p*30.)-.3*sm;
+col=mix(vec3(.16,.15,.14),vec3(.4,.37,.33),F(p*1.2))*(1.-.7*sm);rg=.22;bs=.02;}
+else{h=n(vec3(p.x*.7,p.y*220.,p.z*220.));col=vec3(.55,.57,.6)*(.75+.5*h);rg=.3;bs=.01;mt=1.;}
+return h;}
+vec3 Nm(vec3 N,vec3 p,float k,float t){
+vec3 a=normalize(cross(N,abs(N.y)<.9?vec3(0,1,0):vec3(1,0,0))),b=cross(N,a);
+float e=.003,x=H(k,p+a*e),y=H(k,p+b*e),z=H(k,p);
+return normalize(N-bs*exp(-.05*t)*((x-z)*a+(y-z)*b)/e);}
+vec3 Ab(float k,vec3 p){
+if(k<1.5)return vec3(.75,.68,.55)*(.8+.4*n(p*5.));
+if(k<3.5)return vec3(.3,.2,.12);
+if(k<4.5)return vec3(.3,.22,.15)*(.7+.6*n(p*3.));
+if(k<5.5)return vec3(.45,.42,.38);
+if(k<6.5)return vec3(.3,.29,.28);
+return vec3(.5,.52,.55);}
+vec3 tn(vec3 p){return abs(p.x)>3.55&&abs(p.x)<3.9&&p.z<-.3&&p.z>-5.75&&p.y<3.3?(p.x<0.?vec3(1,.16,.12):vec3(.2,.8,.25)):vec3(1);}
+vec3 sk(vec3 d,float f){return mix(vec3(.9,.8,.65),vec3(.25,.45,.85),pow(clamp(d.y,0.,1.),.45))*.9+vec3(1,.7,.4)*f*(pow(max(dot(d,S),0.),16.)*.3+step(.9995,dot(d,S))*40.);}
+float Sh(vec3 o,vec3 d,float m){float t=0.;for(int i=0;i<60;i++){float h=D(o+d*t);if(h<.002)return 0.;t+=h;if(t>m)return 1.;}return 1.;}
+vec3 cs(vec3 n){float a=rn()*6.2832,z=rn(),r=sqrt(z);vec3 t=normalize(cross(n,abs(n.y)<.9?vec3(0,1,0):vec3(1,0,0))),b=cross(n,t);return normalize(t*r*cos(a)+b*r*sin(a)+n*sqrt(1.-z));}
+vec3 PT(vec3 ro,vec3 rd){
+vec3 L=vec3(0),th=vec3(1);float sp=1.;
+for(int b=0;b<4;b++){
+float t=0.,k;vec2 r;bool pr=b<1;
+for(int i=0;i<100;i++){r=M(ro+rd*t);if(r.x<.0007*t+.0004||t>60.)break;t+=r.x*(pr?.85:.9);}
+if(t>60.){L+=th*sk(rd,sp);break;}
+vec3 p=ro+rd*t,Ng,N,C;k=r.y;
+vec2 e=vec2(1,-1)*.0005;
+Ng=N=normalize(e.xyy*D(p+e.xyy)+e.yyx*D(p+e.yyx)+e.yxy*D(p+e.yxy)+e.xxx*D(p+e.xxx));
+if(k>7.5&&k<8.5){L+=th*sp*(p.x<0.?vec3(1,.6,.28):vec3(.45,.65,1))*120.;break;}
+if(pr){cp=step(.6,abs(k<2.5?dot(N,vec3(.73,0,.68)):N.y));N=Nm(N,p,k,t);C=col;}
+else{C=Ab(k,p);rg=k==6.?.25:k>8.5?.3:1.;mt=k>8.5?1.:0.;}
+if(k<1.5)C*=tn(p);
+vec3 o=p+Ng*.004;
+if(mt<.5){
+vec3 sdr=normalize(S+.04*rv());float dl=dot(N,sdr);
+if(dl>0.&&Sh(o,sdr,50.)>.5)L+=th*C*vec3(1,.82,.62)*3.5*dl;
+bool a=rn()<.5;vec3 lp=a?LA:LB,lc=a?vec3(1,.6,.28):vec3(.45,.65,1),v=lp-o;float d=length(v);
+vec3 ld=normalize(v+.1*rv());dl=dot(N,ld);
+if(dl>0.&&Sh(o,ld,d-.2)>.5)L+=th*C*lc*120.*.0196*dl/(d*d)*2.;}
+float F=.04+.96*pow(1.-max(dot(-rd,N),0.),5.);
+if(mt>.5){rd=normalize(reflect(rd,N)+rg*rg*.6*rv());th*=C;sp=1.;}
+else if(rg<.8&&rn()<F){rd=normalize(reflect(rd,N)+rg*rg*rv());sp=1.;}
+else{rd=cs(N);th*=C;sp=0.;}
+if(dot(rd,Ng)<0.)break;
+ro=o;}
+return L;}
+void main(){
+sd=vec3(gl_FragCoord.xy,fract(Z*.618)*100.);
+S=normalize(vec3(.55,.5,.73));
+vec2 uv=(2.*(gl_FragCoord.xy+vec2(rn(),rn())-.5)-R)/R.y;
+vec3 ro=vec3(1.5*sin(T*.1),1.6,-5.3),ta=vec3(0,1.3,-.3),ww=normalize(ta-ro),uu=normalize(cross(ww,vec3(0,1,0))),rd=normalize(uv.x*uu+uv.y*cross(uu,ww)+1.5*ww);
+vec3 c=min(PT(ro,rd),vec3(20));
+vec4 q=texelFetch(P,ivec2(gl_FragCoord.xy),0);
+o=vec4(mix(q.rgb,c,max(1./(Z+1.),Q)),1);}`);
+PD=C(`uniform sampler2D P;void main(){vec3 c=texelFetch(P,ivec2(gl_FragCoord.xy),0).rgb*1.3;c=c*(2.51*c+.03)/(c*(2.43*c+.59)+.14);o=vec4(pow(clamp(c,0.,1.),vec3(.4545)),1);}`);
+g.bindBuffer(34962,g.createBuffer());g.bufferData(34962,new Float32Array([-1,-1,3,-1,-1,3]),35044);
+g.enableVertexAttribArray(0);g.vertexAttribPointer(0,2,5126,0,0,0);
+function Tx(){t=g.createTexture();g.bindTexture(3553,t);g.texImage2D(3553,0,34836,W,H,0,6408,5126,null);g.texParameteri(3553,10240,9728);g.texParameteri(3553,10241,9728);f=g.createFramebuffer();g.bindFramebuffer(36160,f);g.framebufferTexture2D(36160,36064,3553,t,0);return[t,f]}
+X=[Tx(),Tx()];z=0;
+L=(p,n,v)=>g.uniform1f(g.getUniformLocation(p,n),v);
+(fr=()=>{
+g.useProgram(PT);g.bindFramebuffer(36160,X[1][1]);g.bindTexture(3553,X[0][0]);
+g.uniform1i(g.getUniformLocation(PT,'P'),0);g.uniform2f(g.getUniformLocation(PT,'R'),W,H);
+L(PT,'T',T||performance.now()/1e3);L(PT,'Z',z++);L(PT,'O',.75);L(PT,'Q',T?.005:.2);
+g.viewport(0,0,W,H);g.drawArrays(4,0,3);X.reverse();
+g.useProgram(PD);g.bindFramebuffer(36160,null);g.bindTexture(3553,X[0][0]);g.uniform1i(g.getUniformLocation(PD,'P'),0);g.drawArrays(4,0,3);
+g.finish();if(!K||z<K)requestAnimationFrame(fr)})()
+</script>
