@@ -39,14 +39,14 @@ vec3 w=W(p*.8);float cr=smoothstep(.012,0.,w.y-w.x)*smoothstep(.45,.65,F(p*.5));
 col=mix(vec3(.6,.49,.36),vec3(.92,.82,.66),smoothstep(.15,.85,h))*(.7+.6*F(p*.9))*(1.-.5*cr)*(1.-.5*smoothstep(1.,0.,p.y)*F(p*3.));
 rg=.9;bs=.03;}
 else if(k<3.5){vec3 q=Lg(p);if(k>2.5)q=St(p)*1.3;
-if(cp<.5){float w=n(q*vec3(.4,2,2));
-h=.5*F(vec3(q.x*.3,q.yz*5.)+w*1.6)+.5*(1.-abs(2.*n(vec3(q.x*.5,q.yz*9.)+w*2.)-1.));
-float c=n(vec3(q.x*.35,q.yz*3.)+w*2.),k2=smoothstep(.09,0.,abs(c-.5));
-h=h*.9-k2*.9;
-col=mix(vec3(.05,.035,.025),vec3(.4,.27,.17),smoothstep(.1,1.,h));
-col=mix(col,vec3(.5,.47,.4),smoothstep(.6,.85,F(q*4.))*.35*smoothstep(0.,.4,h));
-col=mix(col,vec3(.18,.28,.07),smoothstep(.62,.8,F(q*1.2+3.))*.6*smoothstep(0.,.4,h));
-rg=.9;bs=.04;}
+if(cp<.5){float w=n(q*vec3(.5,3,3));
+vec3 v=W(vec3(q.x*.22,q.yz*7.)+w*.45);
+float gr=smoothstep(0.,.3,v.y-v.x),f=F(q*vec3(1,9,9));
+h=gr*.8+.2*f;
+col=mix(vec3(.025,.018,.014),mix(vec3(.13,.08,.05),vec3(.36,.25,.16),f)*(.6+.7*v.z),smoothstep(0.,.4,gr));
+col=mix(col,vec3(.5,.47,.4),smoothstep(.6,.85,F(q*4.))*.3*gr);
+col=mix(col,vec3(.18,.28,.07),smoothstep(.62,.8,F(q*1.2+3.))*.6*gr);
+rg=.9;bs=.06;}
 else{vec2 c=q.yz-vec2(.05,-.03);float d=length(c),v=F(vec3(c*2.,2));
 float a=.5+.5*sin((d+.05*v)*46.+7.*v);a*=a;
 float cr=smoothstep(.05,0.,abs(n(vec3(c/(d+.02)*2.5,d*2.))-.5))*smoothstep(.06,.4,d);
