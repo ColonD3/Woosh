@@ -15,6 +15,7 @@ PACK_FORMAT = 48  # 1.21.1
 # placed in a second pass so their support blocks / attached walls exist first
 FRAGILE = re.compile(r"(redstone_wire|torch|lever|button|repeater|comparator|rail|pressure_plate|"
                      r"carpet|sign|banner|door|trapdoor|tripwire|ladder|vine|flower|sapling|lantern|"
+                     r"bed(\[|$)|candle|petals|fern|azalea(\[|$)|tulip|allium|cornflower|bluet|lily_of|short_grass|"
                      r"^(minecraft:)?(sand|gravel))")
 
 def parse(path):
@@ -43,6 +44,10 @@ def commands(palette, layers):
                 if ch == ".": continue
                 if ch not in palette: sys.exit(f"unknown palette char {ch!r} (layer {y}, row {z})")
                 cells[(x, y, z)] = palette[ch]
+    return cells_to_commands(cells)
+
+def cells_to_commands(cells):
+    """cells: {(x,y,z): 'minecraft:block[states]'} -> ordered setblock/fill commands"""
     out = []
     for fragile in (False, True):
         sel = {k: v for k, v in cells.items() if bool(FRAGILE.search(v)) == fragile}
