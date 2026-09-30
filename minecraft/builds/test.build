@@ -1,4 +1,4 @@
-# lever -> dust -> lamp, plus a button on a sticky piston that pushes an iron block up
+# lever -> dust -> lamp, plus a button on a stone block next to a sticky piston (pushes an iron block up)
 palette:
 S smooth_stone
 D redstone_wire
@@ -7,6 +7,7 @@ P redstone_lamp
 K sticky_piston[facing=up]
 I iron_block
 B stone_button[face=wall,facing=east]
+N stone
 
 layer 0
 SSSSSSS
@@ -16,7 +17,7 @@ SSSSSSS
 layer 1
 LDDDDP.
 .......
-..KB...
+..KNB..
 
 layer 2
 .......
